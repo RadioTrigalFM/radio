@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  RADIO TRIGAL FM — Quiz musical Pokémon
+  ══════════════════════════════════════════════════════════════════════
+  Estructura del proyecto:
+    - index.html   → este archivo. Contiene solo la estructura (marcado
+                      HTML de todas las pantallas/overlays) y, al final
+                      del body, la carga de los cuatro ficheros de lógica.
+    - styles.css    → todos los estilos visuales (colores, tipografías,
+                      layout, animaciones). Enlazado desde el head.
+    - storage.js    → capa de persistencia: ajustes, perfil del jugador
+                      (nombre/avatar/XP) y logros/estadísticas, todo
+                      guardado y leído de localStorage.
+    - audio.js      → motor de audio: catálogo de SFX/sonidos ambiente,
+                      música de menú, audio de las rondas y Sonidex.
+    - pokemon.js    → catálogo y motor de los Eventos Pokémon (Modo
+                      Historia) y los Pokémon de las colinas del fondo.
+    - game.js       → el resto de la lógica del juego (estado, puntuación
+                      y niveles, perfil de jugador, logros, fondo animado,
+                      navegación, Modo Historia...). Usa funciones y datos
+                      de storage.js, audio.js y pokemon.js, así que esos
+                      tres ficheros deben cargarse antes (ver el orden de
+                      los <script> al final del body).
+  No hay más dependencias externas que las fuentes de Google Fonts.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Radio Trigal FM</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark">
+<div id="splash-screen">
+  <div class="splash-content">
+    <span class="splash-spark s1">✨</span>
+    <span class="splash-spark s2">⭐</span>
+    <span class="splash-spark s3">🎵</span>
+    <span class="splash-spark s4">✨</span>
+    <div class="splash-logo-wrap">
+      <span class="splash-logo-ring r1"></span>
+      <span class="splash-logo-ring r2"></span>
+      <span class="splash-logo-ring r3"></span>
+      <img class="splash-logo" src="images/logo-radio-trigal-fm.png" alt="Logo Radio Trigal FM" onerror="this.style.display='none'">
+    </div>
+    <div class="splash-brand-title">
+      <span class="splash-brand-text">Radio Trigal</span>
+      <span class="splash-brand-fm">FM</span>
+    </div>
+    <div class="splash-subtitle">🎵 PokéQuiz · Music Edition</div>
+    <div class="splash-waves" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="splash-tap" data-i18n="splash.tap">Toca la pantalla para empezar</div>
+  </div>
+</div>
+
+<!-- CONFIGURACIÓN INICIAL: nombre de entrenador y avatar (solo la primera vez) -->
+<div id="profile-setup-overlay">
+  <div class="result-card profile-setup-card">
+    <div class="profile-setup-icon">🎮</div>
+    <div class="result-title" data-i18n="profileSetup.title">¡Bienvenido, entrenador!</div>
+    <div class="profile-setup-desc" data-i18n="profileSetup.desc">Antes de empezar, elige tu nombre de entrenador y tu imagen de perfil.</div>
+    <input type="text" id="profile-setup-name" class="profile-setup-input" data-i18n-placeholder="profileSetup.namePlaceholder" placeholder="Tu nombre de entrenador" maxlength="16" autocomplete="off">
+    <div class="profile-setup-avatar-label" data-i18n="profileSetup.avatarLabel">Elige tu imagen de perfil</div>
+    <div class="profile-avatar-grid" id="profile-setup-avatar-grid"></div>
+    <button type="button" class="restart-btn profile-setup-confirm" id="profile-setup-confirm" disabled data-i18n="profileSetup.confirm">✔ ¡Empezar a jugar!</button>
+  </div>
+</div>
+
+<!-- MODO HISTORIA: pantalla previa de región / aviso de enemigo -->
+<div id="story-overlay">
+  <button type="button" class="story-info-btn" id="story-info-btn" aria-label="Información de los Eventos Pokémon">ⓘ</button>
+  <div class="story-splash-content">
+    <div class="story-badge">
+      <span class="story-badge-ring r1"></span>
+      <span class="story-badge-ring r2"></span>
+      <span class="story-badge-glow"></span>
+      <img class="story-badge-ball" id="story-overlay-ball"
+           src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+           alt="">
+    </div>
+    <div class="story-title" id="story-overlay-title">Kanto</div>
+    <div class="story-subtitle" id="story-overlay-subtitle" data-i18n="story.subtitleMain">MODO HISTORIA</div>
+    <div class="story-tap-row">
+      <span class="story-tap-dot" aria-hidden="true"></span>
+      <span class="story-tap" id="story-overlay-tap" data-i18n="story.tapStart">Toca la pantalla para comenzar</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: información de los Eventos Pokémon (qué hace cada uno), abierto
+     desde el botón "ⓘ" de la pantalla previa de región del Modo Historia -->
+<div id="poke-events-info-overlay">
+  <div class="poke-events-info-card">
+    <div class="poke-events-info-header">
+      <div class="title" style="font-size:1.1rem;">🎲 Eventos Pokémon</div>
+      <button type="button" class="poke-events-info-close" id="poke-events-info-close" data-i18n-aria="common.close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="poke-events-info-subtitle">Al azar, durante una ronda puede aparecer uno de estos Pokémon con un efecto especial:</div>
+    <div class="poke-events-info-list" id="poke-events-info-list"></div>
+  </div>
+</div>
+
+<!-- PERFIL DE JUGADOR: estadísticas y cambio de imagen de perfil -->
+<div id="profile-overlay">
+  <div class="profile-card">
+    <button type="button" class="profile-close-btn" id="profile-close-btn" data-i18n-aria="common.close" aria-label="Cerrar">✕</button>
+    <div class="profile-avatar-frame large" id="profile-modal-avatar-frame">
+      <img id="profile-modal-avatar-img" src="" alt="Avatar del jugador">
+      <span class="profile-level-badge large" id="profile-modal-level-badge">1</span>
+    </div>
+    <div class="profile-name-row">
+      <div class="result-title" id="profile-modal-name">Entrenador</div>
+      <button type="button" class="profile-edit-btn" id="profile-edit-name-btn" data-i18n-title="profile.editNameTitle" title="Cambiar nombre">✏️</button>
+    </div>
+    <input type="text" id="profile-modal-name-input" class="profile-setup-input" maxlength="16" autocomplete="off" style="display:none; margin-top:8px;">
+    <div class="profile-level-line" id="profile-level-line"><span data-i18n="profile.levelLabel">Nivel</span> <span id="profile-level-num">1</span></div>
+    <div class="profile-xp-bar-bg"><div class="profile-xp-bar-fill" id="profile-xp-bar-fill"></div></div>
+    <div class="profile-xp-label" id="profile-xp-label">0 / 150 XP para el siguiente nivel</div>
+    <div class="profile-stats-list" id="profile-stats-list"></div>
+    <button type="button" class="exit-btn profile-change-avatar-btn" id="profile-change-avatar-btn" data-i18n="profile.changeAvatarBtn">🖼️ Cambiar imagen de perfil</button>
+    <div class="profile-avatar-grid" id="profile-modal-avatar-grid" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- MODO HISTORIA: animación de región completada / historia completada / Game Over -->
+<div id="story-complete-overlay">
+  <div class="story-splash-content">
+    <div class="story-badge">
+      <span class="story-badge-ring r1"></span>
+      <span class="story-badge-ring r2"></span>
+      <span class="story-badge-glow"></span>
+      <img class="story-badge-ball" id="story-complete-ball"
+           src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+           alt="">
+    </div>
+    <div class="story-title" id="story-complete-title">Kanto Completado</div>
+    <div class="story-subtitle" id="story-complete-subtitle"></div>
+  </div>
+</div>
+
+<!-- Efecto de nervios: pulso rojo en pantalla cuando sólo queda 1 vida (Modo Historia) -->
+<div id="nervous-overlay"></div>
+
+<!-- Evento Pokémon Gengar: oscurece la pantalla durante la ronda -->
+<div id="gengar-dark-overlay"></div>
+
+<!-- Evento Pokémon Hypno: efecto de espiral hipnótica sobre la pantalla,
+     con una viñeta focal fija (no rota) que le da profundidad -->
+<div id="hypno-overlay"></div>
+<div id="hypno-vignette"></div>
+
+<!-- Evento Pokémon Shiny: baña la pantalla en colores vivos y cambiantes -->
+<div id="shiny-color-overlay"></div>
+
+<svg width="0" height="0" style="position:absolute; overflow:hidden;">
+  <!-- Evento Pokémon Hypno · Ondulación líquida: distorsiona TODO el
+       contenido de #app con un ruido orgánico que fluctúa lentamente en
+       frecuencia y en intensidad (scale), dando la sensación de que la
+       pantalla entera es una superficie líquida ondulándose sin parar,
+       en vez de un patrón de olas repetitivo y mecánico. */
+  <filter id="hypno-liquid-warp" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="2" seed="24" result="hypno-noise">
+      <animate attributeName="baseFrequency" dur="7s" values="0.006 0.011;0.010 0.007;0.005 0.013;0.006 0.011" repeatCount="indefinite" />
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="hypno-noise" xChannelSelector="R" yChannelSelector="G">
+      <animate attributeName="scale" dur="3.6s" values="6;22;9;26;6" repeatCount="indefinite" />
+    </feDisplacementMap>
+  </filter>
+</svg>
+
+<!-- Evento Pokémon Porygon: fallo digital con scanlines, ruido y barras de glitch -->
+<div id="porygon-glitch-overlay">
+  <div class="porygon-scanlines"></div>
+  <div class="porygon-noise"></div>
+  <div class="porygon-bar b1"></div>
+  <div class="porygon-bar b2"></div>
+  <div class="porygon-bar b3"></div>
+</div>
+
+<!-- Evento Pokémon Jigglypuff: sprite que desciende cantando desde arriba de
+     la pantalla mientras suena sounds/jigglypuff.mp3 (ver JIGGLYPUFF_SONG_MS) -->
+<div id="jigglypuff-sing-overlay">
+  <div class="jigglypuff-walk">
+    <div class="jigglypuff-notes">
+      <span class="jigglypuff-note n1">🎵</span>
+      <span class="jigglypuff-note n2">🎶</span>
+      <span class="jigglypuff-note n3">🎵</span>
+    </div>
+    <div class="jigglypuff-flip">
+      <div class="jigglypuff-sprite-wrap">
+        <img src="images/jigglypuff.png" alt="Jigglypuff cantando">
+      </div>
+    </div>
+  </div>
+</div>
+<div id="jigglypuff-drowsy-overlay">
+  <div class="jigglypuff-drowsy-lid top"></div>
+  <div class="jigglypuff-drowsy-lid bottom"></div>
+</div>
+
+<canvas id="bg-canvas"></canvas>
+<div id="bg-pokemon-layer" aria-hidden="true"></div>
+
+<!-- Evento Pokémon Blastoise: lluvia animada de fondo (solo visual, detrás del contenido) -->
+<div id="blastoise-rain-overlay">
+  <div class="storm-clouds">
+    <div class="storm-cloud c1"></div>
+    <div class="storm-cloud c2"></div>
+    <div class="storm-cloud c3"></div>
+    <div class="storm-cloud c4"></div>
+  </div>
+  <div class="rain-drops">
+    <div class="rain-layer mist"></div>
+    <div class="rain-layer far"></div>
+    <div class="rain-layer near"></div>
+  </div>
+</div>
+
+<div id="combo-badge">🔥 COMBO x<span id="combo-num">0</span></div>
+
+<!-- Evento Pokémon Electrode: temporizador en pantalla hasta que explota -->
+<div id="electrode-timer">
+  <span id="electrode-sprite-wrap">
+    <img id="electrode-sprite" src="images/electrode.png" alt="Electrode">
+  </span>
+  <span id="electrode-timer-val">10</span>s
+</div>
+
+<div id="achievement-toast">
+  <div class="ach-toast-icon" id="ach-toast-icon">🏆</div>
+  <div>
+    <div class="ach-toast-label" id="ach-toast-label">Logro desbloqueado</div>
+    <div class="ach-toast-title" id="ach-toast-title">—</div>
+  </div>
+</div>
+
+<!-- Contenedor que explica la función que desbloquea un logro marcado con estrella -->
+<div class="ach-feature-overlay" id="ach-feature-overlay">
+  <div class="ach-feature-box" id="ach-feature-box">
+    <div class="ach-feature-icon">⭐</div>
+    <div class="ach-feature-title" id="ach-feature-title">—</div>
+    <div class="ach-feature-list" id="ach-feature-list"></div>
+    <div class="ach-feature-hint">Toca fuera de este recuadro para cerrar</div>
+  </div>
+</div>
+
+<!-- Sistema de Eventos Pokémon (Modo Historia): carta animada de aparición -->
+<div id="poke-event-overlay">
+  <div class="poke-event-card">
+    <div class="poke-event-glow"></div>
+    <div class="poke-event-tag">✨ Evento Pokémon</div>
+    <img class="poke-event-sprite" id="poke-event-sprite" src="" alt="">
+    <div class="poke-event-name" id="poke-event-name">—</div>
+    <div class="poke-event-desc" id="poke-event-desc">—</div>
+  </div>
+</div>
+
+<!-- Evento Pokémon Mew: selector de transformación. Se muestra justo
+     después de la carta de aparición de Mew (arriba) y deja elegir al
+     jugador entre 3 eventos aleatorios en cuál se transforma; ese
+     elegido pasa a ser el evento activo de la ronda (ver
+     showMewChoiceOverlay() en pokemon.js). -->
+<div id="mew-choice-overlay">
+  <div class="mew-choice-card">
+    <div class="poke-event-glow"></div>
+    <div class="poke-event-tag">🎭 Mew se transforma</div>
+    <div class="mew-choice-title">¿En qué Pokémon quieres que se transforme?</div>
+    <div class="mew-choice-options" id="mew-choice-options"></div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="header" id="app-header">
+    <div class="header-actions">
+      <div class="stats" id="stats-wrap">
+        <div class="lives-wrap" id="lives-wrap">
+          <span class="heart" data-life="1">❤️</span>
+          <span class="heart" data-life="2">❤️</span>
+          <span class="heart" data-life="3">❤️</span>
+        </div>
+        <div class="stat-box">
+          <div class="val" id="score-val">0</div>
+          <div class="lbl" data-i18n="header.points">Puntos</div>
+        </div>
+        <div class="stat-box">
+          <div class="val" id="round-val">1</div>
+          <div class="lbl" data-i18n="header.round">Ronda</div>
+        </div>
+        <div class="stat-box">
+          <div class="val" id="streak-val">0</div>
+          <div class="lbl" data-i18n="header.streak">Racha</div>
+        </div>
+      </div>
+
+      <button class="icon-btn" id="back-btn" data-i18n-title="header.back" title="Atrás" style="display:none;">←</button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section class="screen show" id="screen-home">
+    <div class="home-hero">
+      <div class="profile-bar" id="profile-bar" title="Ver mi perfil">
+        <div class="profile-avatar-frame" id="profile-bar-avatar-frame">
+          <img id="profile-bar-avatar-img" src="" alt="Avatar del jugador">
+          <span class="profile-level-badge" id="profile-bar-level-badge">1</span>
+        </div>
+        <div class="profile-bar-name" id="profile-bar-name">Entrenador</div>
+      </div>
+      <div class="home-hero-brand">
+        <div class="home-hero-waves"><span></span><span></span><span></span><span></span></div>
+        <div class="home-hero-titlewrap">
+          <div class="home-hero-title"><span class="htxt">Radio Trigal</span><span class="hfm">FM</span></div>
+          <div class="home-hero-tagline" data-i18n="home.tagline">Tu emisora Pokémon</div>
+        </div>
+        <!-- Espacio reservado para el logo: sustituye la ruta de abajo por tu imagen -->
+        <div class="home-hero-logo" id="home-hero-logo">
+          <span class="home-hero-logo-glow"></span>
+          <img src="images/logo-radio-trigal-fm.png" alt="Logo Radio Trigal FM" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn" id="go-main">
+        <span class="menu-btn-icon">▶️</span>
+        <span class="menu-btn-title" data-i18n="home.play.title">Jugar</span>
+        <small data-i18n="home.play.desc">5 modos y Minijuegos</small>
+      </button>
+
+      <button class="menu-btn" id="go-story">
+        <span class="menu-btn-icon">📖</span>
+        <span class="menu-btn-title" data-i18n="home.story.title">Modo Historia</span>
+        <small data-i18n="home.story.desc">Recorre todas las regiones, de Kanto a Alola</small>
+      </button>
+
+      <button class="menu-btn" id="go-achievements">
+        <span class="menu-btn-icon">🏅</span>
+        <span class="menu-btn-title" data-i18n="home.achievements.title">Logros</span>
+        <small id="home-ach-summary">Consulta tus logros desbloqueados</small>
+      </button>
+
+      <button class="menu-btn" id="go-sonidex">
+        <span class="menu-btn-icon">🎼</span>
+        <span class="menu-btn-title" data-i18n="home.sonidex.title">Sonidex</span>
+        <small id="home-sonidex-summary">Desbloquea canciones acertándolas 10 veces</small>
+      </button>
+
+      <div class="menu-row-compact">
+        <button class="menu-btn menu-btn-compact" id="go-leaderboard" data-i18n-title="home.leaderboard.title" data-i18n-aria="home.leaderboard.title" title="Clasificaciones" aria-label="Clasificaciones">
+          <span class="menu-btn-icon">🏆</span>
+        </button>
+
+        <button class="menu-btn menu-btn-compact" id="go-options" data-i18n-title="home.options.title" data-i18n-aria="home.options.title" title="Opciones" aria-label="Opciones">
+          <span class="menu-btn-icon">⚙️</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN MODES -->
+  <section class="screen" id="screen-main-modes">
+    <div class="menu-grid">
+      <button class="menu-btn" id="mode-easy">
+        <span class="menu-btn-icon">🟢</span>
+        <span class="menu-btn-title" data-i18n="modes.easy.title">Modo Fácil</span>
+        <small data-i18n="modes.easy.desc">Solo adivina la región (Kanto, Johto, …)</small>
+      </button>
+
+      <button class="menu-btn" id="mode-normal">
+        <span class="menu-btn-icon">🔵</span>
+        <span class="menu-btn-title" data-i18n="modes.normal.title">Modo Normal</span>
+        <small data-i18n="modes.normal.desc">Primero elige región, luego adivina la canción</small>
+      </button>
+
+      <button class="menu-btn" id="mode-hard">
+        <span class="menu-btn-icon">🔴</span>
+        <span class="menu-btn-title" data-i18n="modes.hard.title">Modo Difícil</span>
+        <small data-i18n="modes.hard.desc">6 opciones · canciones de cualquier juego · 10s por ronda</small>
+      </button>
+
+      <button class="menu-btn" id="mode-combat">
+        <span class="menu-btn-icon">⚔️</span>
+        <span class="menu-btn-title" data-i18n="modes.combat.title">Modo Combate</span>
+        <small data-i18n="modes.combat.desc">6 opciones · Adivina las canciones de combate</small>
+      </button>
+
+      <button class="menu-btn" id="mode-infinite">
+        <span class="menu-btn-icon">♾️</span>
+        <span class="menu-btn-title" data-i18n="modes.infinite.title">Modo Desafío Infinito</span>
+        <small data-i18n="modes.infinite.desc">6 opciones · Rondas sin límite · un fallo termina la partida</small>
+      </button>
+
+      <button class="menu-btn" id="go-other">
+        <span class="menu-btn-icon">🕹️</span>
+        <span class="menu-btn-title" data-i18n="modes.other.title">Minijuegos</span>
+        <small data-i18n="modes.other.desc">Laboratorios · Bicicleta · Otras Sagas</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- REGION SELECT (for Normal) -->
+  <section class="screen" id="screen-region-select">
+    <div class="card">
+      <div class="title" data-i18n="region.title">Modo Normal</div>
+      <div class="subtitle" data-i18n="region.subtitle">Elige una región. Las canciones y respuestas serán solo de esa región.</div>
+    </div>
+
+    <div class="region-grid" id="region-pills"></div>
+  </section>
+
+  <!-- MINIJUEGOS -->
+  <section class="screen" id="screen-other-games">
+    <div class="card">
+      <div class="title" data-i18n="other.title">Minijuegos</div>
+      <div class="subtitle" data-i18n="other.subtitle">Selecciona una categoría. Solo sonarán canciones de esa opción.</div>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn" data-other="centro-pokemon">
+        <span class="menu-btn-icon">🏥</span>
+        <span class="menu-btn-title" data-i18n="other.centro.title">Centro Pokémon</span>
+        <small data-i18n="other.centro.desc">Solo canciones y opciones de Centro Pokémon</small>
+      </button>
+      <button class="menu-btn" data-other="laboratorios">
+        <span class="menu-btn-icon">🧪</span>
+        <span class="menu-btn-title" data-i18n="other.lab.title">Laboratorios</span>
+        <small data-i18n="other.lab.desc">Solo canciones y opciones de Laboratorios</small>
+      </button>
+      <button class="menu-btn" data-other="bicicletas">
+        <span class="menu-btn-icon">🚲</span>
+        <span class="menu-btn-title" data-i18n="other.bike.title">Bicicletas</span>
+        <small data-i18n="other.bike.desc">Solo canciones y opciones de Bicicletas</small>
+      </button>
+      <button class="menu-btn" data-other="surf">
+        <span class="menu-btn-icon">🌊</span>
+        <span class="menu-btn-title" data-i18n="other.surf.title">Surf</span>
+        <small data-i18n="other.surf.desc">Solo canciones y opciones de Surf</small>
+      </button>
+      <button class="menu-btn" data-other="title-screens">
+        <span class="menu-btn-icon">🖼️</span>
+        <span class="menu-btn-title" data-i18n="other.titlescreens.title">Pantallas de Título</span>
+        <small data-i18n="other.titlescreens.desc">Solo canciones y opciones de Pantallas de Título</small>
+      </button>
+      <button class="menu-btn" data-other="openings-anime">
+        <span class="menu-btn-icon">📺</span>
+        <span class="menu-btn-title" data-i18n="other.openinganime.title">Openings del Anime</span>
+        <small data-i18n="other.openinganime.desc">Solo canciones y opciones de Openings del Anime</small>
+      </button>
+      <button class="menu-btn" data-other="mystery-dungeon">
+        <span class="menu-btn-icon">🌀</span>
+        <span class="menu-btn-title" data-i18n="other.mysterydungeon.title">Pokémon Mundo Misterioso</span>
+        <small data-i18n="other.mysterydungeon.desc">Solo canciones y opciones de Mundo Misterioso</small>
+      </button>
+      <button class="menu-btn" data-other="colosseum-xd">
+        <span class="menu-btn-icon">🏟️</span>
+        <span class="menu-btn-title" data-i18n="other.colosseum.title">Pokémon Colosseum / XD</span>
+        <small data-i18n="other.colosseum.desc">Solo canciones y opciones de Colosseum/XD</small>
+      </button>
+      <button class="menu-btn" data-other="ranger">
+        <span class="menu-btn-icon">🧭</span>
+        <span class="menu-btn-title" data-i18n="other.ranger.title">Pokémon Ranger</span>
+        <small data-i18n="other.ranger.desc">Solo canciones y opciones de Ranger</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- OPENINGS DEL ANIME: selección de doblaje (solo se muestra jugando en español) -->
+  <section class="screen" id="screen-openings-lang-select">
+    <div class="card">
+      <div class="title" data-i18n="openingsLang.title">Openings del Anime</div>
+      <div class="subtitle" data-i18n="openingsLang.subtitle">¿Con qué doblaje quieres las canciones?</div>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn" id="openings-lang-spain">
+        <span class="menu-btn-icon">🇪🇸</span>
+        <span class="menu-btn-title" data-i18n="openingsLang.spain.title">Español de España</span>
+        <small data-i18n="openingsLang.spain.desc">Los openings tal y como se emitieron en España</small>
+      </button>
+      <button class="menu-btn" id="openings-lang-latino">
+        <span class="menu-btn-icon">🌎</span>
+        <span class="menu-btn-title" data-i18n="openingsLang.latino.title">Español Latino</span>
+        <small data-i18n="openingsLang.latino.desc">Los openings con el doblaje latinoamericano</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- OPTIONS -->
+  <section class="screen" id="screen-options">
+    <div class="card">
+      <div class="title" data-i18n="options.title">Opciones</div>
+      <div class="subtitle" data-i18n="options.subtitle">Ajusta el audio y la apariencia.</div>
+    </div>
+
+    <div class="card">
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.music.label">Música</div>
+          <div class="opt-desc" data-i18n="options.music.desc">Volumen de la canción</div>
+        </div>
+        <input id="music-vol" type="range" min="0" max="100" value="100">
+      </div>
+
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.sfx.label">Efectos de sonido</div>
+          <div class="opt-desc" data-i18n="options.sfx.desc">Volumen de acierto/error</div>
+        </div>
+        <input id="sfx-vol" type="range" min="0" max="100" value="60">
+      </div>
+
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.dark.label">Modo Oscuro</div>
+          <div class="opt-desc" data-i18n="options.dark.desc">Interfaz más oscura para poca luz</div>
+        </div>
+        <label class="toggle">
+          <input id="dark-toggle" type="checkbox" checked>
+          <span style="font-weight:900;" data-i18n="options.toggleOn">Activado</span>
+        </label>
+      </div>
+
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.language.title">🌐 Idioma</div>
+          <div class="opt-desc" data-i18n="options.language.desc">Idioma de los menús (los logros, eventos y la guía siguen en español)</div>
+        </div>
+        <div class="language-switch" id="language-switch">
+          <button type="button" class="language-switch-btn" id="lang-es-btn" data-lang="es" data-i18n="options.language.es">Español</button>
+          <button type="button" class="language-switch-btn" id="lang-en-btn" data-lang="en" data-i18n="options.language.en">English</button>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:10px;" data-i18n="options.saveNote">
+        💾 Estas opciones se guardan automáticamente.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:1.1rem;" data-i18n="options.graphics.title">🖼️ Opciones gráficas</div>
+
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.bg.label">Fondo animado</div>
+          <div class="opt-desc" data-i18n="options.bg.desc">Cielo, nubes y Pokémon caminando de fondo</div>
+        </div>
+        <label class="toggle">
+          <input id="bg-toggle" type="checkbox" checked>
+          <span style="font-weight:900;" data-i18n="options.toggleOn">Activado</span>
+        </label>
+      </div>
+
+      <div class="opt-row">
+        <div>
+          <div class="opt-label" data-i18n="options.particles.label">Efectos de partículas</div>
+          <div class="opt-desc" data-i18n="options.particles.desc">Estrellas y chispas al acertar o desbloquear logros</div>
+        </div>
+        <label class="toggle">
+          <input id="particles-toggle" type="checkbox" checked>
+          <span style="font-weight:900;" data-i18n="options.toggleOn">Activado</span>
+        </label>
+      </div>
+
+      <div class="small" style="margin-top:10px;" data-i18n="options.saveNote">
+        💾 Estas opciones se guardan automáticamente.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="opt-row" style="cursor:pointer;" id="go-guide">
+        <div>
+          <div class="opt-label" data-i18n="options.guide.label">📘 Guía de Juego</div>
+          <div class="opt-desc" data-i18n="options.guide.desc">Modos, puntuación, logros y Sonidex explicados</div>
+        </div>
+        <span class="icon-btn" aria-hidden="true">→</span>
+      </div>
+
+      <div class="small" style="margin-top:18px; text-align:center; opacity:.7;">
+        Creado por @waizwidou
+      </div>
+    </div>
+  </section>
+
+  <!-- GUÍA DE JUEGO -->
+  <section class="screen" id="screen-guide">
+    <div class="card">
+      <div class="title" data-i18n="guide.header.title">📘 Guía de Juego</div>
+      <div class="subtitle" data-i18n="guide.header.subtitle">Todo lo que necesitas saber para dominar Radio Trigal FM.</div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.modes.title">🎮 Modos de juego</div>
+
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.easy.title">🟢 Modo Fácil</div>
+        <div class="guide-item-desc" data-i18n-html="guide.modes.easy.desc">Suena una canción y solo tienes que acertar de qué <b>región</b> es (Kanto, Johto, Hoenn…). Es el modo más sencillo: ideal para empezar. Las partidas duran 10 rondas; fallar no te elimina, solo corta tu racha, así que siempre juegas las 10 rondas completas.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.normal.title">🔵 Modo Normal</div>
+        <div class="guide-item-desc" data-i18n-html="guide.modes.normal.desc">Primero eliges una región y después tienes que adivinar el <b>título exacto</b> de la canción entre varias opciones de esa misma región. 10 rondas; como en Fácil, fallar no termina la partida, solo corta tu racha.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.hard.title">🔴 Modo Difícil</div>
+        <div class="guide-item-desc" data-i18n-html="guide.modes.hard.desc">Las canciones pueden ser de <b>cualquier región</b>, se eligen entre 6 opciones y solo dispones de 10 segundos por ronda para responder. 10 rondas, sin eliminación por fallo. Se desbloquea al alcanzar el <b>nivel 5 de perfil</b>.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.battle.title">⚔️ Modo Combate</div>
+        <div class="guide-item-desc" data-i18n-html="guide.modes.battle.desc">Igual que el Difícil pero solo con música de combate (entrenadores, líderes, rivales…), también con 6 opciones. Se desbloquea al alcanzar el <b>nivel 8 de perfil</b>.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.infinite.title">♾️ Modo Desafío Infinito</div>
+        <div class="guide-item-desc" data-i18n="guide.modes.infinite.desc">Rondas sin límite con 6 opciones: la partida sigue mientras vayas acertando y termina en el primer fallo (normalmente no hay vidas de refuerzo). Cuanto más avances, más difícil y emocionante se vuelve. Se desbloquea con el logro «Viajero regional». Al completar el Modo Historia, además, pueden aparecer los Eventos Pokémon especiales también en este modo.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.story.title">📖 Modo Historia</div>
+        <div class="guide-item-desc" data-i18n="guide.modes.story.desc">Recorre todas las regiones en orden, de Kanto a Alola. En cada región juegas una fase de 10 rondas normales y, después, una fase de combate de 3 rondas contra un "enemigo poderoso". Aquí sí hay vidas ❤️: se recargan a 3 al empezar cada región y, al perderlas todas, termina la partida. La puntuación y la racha se acumulan durante todo el recorrido.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.modes.minigames.title">🕹️ Minijuegos</div>
+        <div class="guide-item-desc" data-i18n="guide.modes.minigames.desc">Partidas cortas centradas en una categoría concreta: Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Pokémon Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger. La mayoría dura 5 rondas, salvo Pokémon Mundo Misterioso, que dura 10. Al igual que Fácil/Normal/Difícil/Combate, fallar no te elimina. Cada categoría se desbloquea al conseguir un logro concreto o al alcanzar un nivel de perfil determinado, según la categoría (puedes ver cuál en la propia pantalla de Minijuegos).</div>
+      </div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.scoring.title">🏆 Sistema de puntuación</div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.scoring.speed.title">⏱️ Velocidad de respuesta</div>
+        <div class="guide-item-desc" data-i18n="guide.scoring.speed.desc">Cada acierto da entre 20 y 100 puntos base según lo rápido que respondas: cuanto antes contestes, más puntos consigues. A partir de 15 segundos, el acierto ya solo otorga el mínimo garantizado (20 pts).</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.scoring.streak.title">🔥 Multiplicador de racha</div>
+        <div class="guide-item-desc" data-i18n="guide.scoring.streak.desc">Encadenar aciertos aumenta tus puntos: desde la 2ª respuesta correcta seguida el multiplicador sube un x0.1 por cada racha (racha 2 = x1.1, racha 3 = x1.2…) hasta un tope de x2 a partir de una racha de 11.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.scoring.lives.title">❤️ Vidas</div>
+        <div class="guide-item-desc" data-i18n="guide.scoring.lives.desc">Solo el Modo Historia tiene corazones desde el principio (3, y se recargan al pasar de región): cada fallo resta uno y, al perderlos todos, termina la partida. En Fácil, Normal, Difícil, Combate y Minijuegos no hay vidas: fallar solo corta la racha y siempre juegas la partida completa. El Desafío Infinito tampoco tiene vidas por defecto —cualquier fallo la acaba al instante—, salvo que el evento Venusaur te conceda alguna durante la partida.</div>
+      </div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.achievements.title">🏅 Logros y contenido desbloqueable</div>
+      <div class="guide-item-desc" style="margin-bottom:8px;" data-i18n="guide.achievements.intro">
+        Puedes consultar todos tus logros en la pantalla de Logros, agrupados en 5 bloques: Progreso y rachas, Maestría y partidas perfectas, Sonidex, Modo Historia y Eventos Pokémon. Los logros marcados con una ⭐ desbloquean, además de la insignia, alguna función nueva:
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.achievements.modes.title">🎮 Modos de juego</div>
+        <div class="guide-item-desc" data-i18n="guide.achievements.modes.desc">El Modo Difícil se desbloquea al alcanzar el nivel 5 de perfil y el Modo Combate al alcanzar el nivel 8; el Desafío Infinito se desbloquea con el logro «Viajero regional» (jugar en todas las regiones).</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.achievements.minigames.title">🕹️ Categorías de Minijuegos</div>
+        <div class="guide-item-desc" data-i18n="guide.achievements.minigames.desc">Cada categoría de Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Mundo Misterioso, Colosseum/XD, Ranger) se desbloquea al alcanzar un nivel de perfil concreto o al conseguir un logro concreto, según la categoría, indicado con un 🔒 en el botón mientras siga bloqueada.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.achievements.events.title">✨ Eventos Pokémon</div>
+        <div class="guide-item-desc" data-i18n="guide.achievements.events.desc">Al completar el Modo Historia («Maestro de la Historia») se desbloquean los Eventos Pokémon sorpresa (Gengar, Hypno, Shiny, Porygon, Electrode, Blastoise, Venusaur…) también en el Desafío Infinito. Los logros de "encuentro" (por ejemplo, hacer aparecer 5 veces a un Pokémon) desbloquean, uno a uno, que ese Pokémon pueda pasear por el fondo del menú, y también el avatar de perfil de ese Pokémon. Si sigues haciéndolo aparecer hasta 20 veces, su Pokémon de las colinas pasa a lucir su sprite shiny (el propio Caterpie Shiny evoluciona ahí a un Metapod Shiny).</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.achievements.sonidex.title">🎼 Fichas de la Sonidex</div>
+        <div class="guide-item-desc" data-i18n="guide.achievements.sonidex.desc">Además de logros individuales por número de fichas desbloqueadas (5, 10, 20, 50, 100, 200) y por completar la Sonidex de cada región, cada acierto que suma para desbloquear una ficha también cuenta para tus logros de aciertos totales (como «Melómano»), y algunos de esos logros abren categorías de Minijuegos.</div>
+      </div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.sonidex.title">🎼 Sonidex</div>
+      <div class="guide-item-desc" data-i18n-html="guide.sonidex.intro">
+        La Sonidex es tu colección de canciones. Cada canción tiene una ficha bloqueada 🔒 hasta que la aciertas <b>10 veces</b> en cualquier modo excepto el Fácil (en el que solo se adivina la región, no la canción). Al desbloquear una ficha podrás reproducir esa canción libremente desde la propia Sonidex.
+      </div>
+      <div class="guide-item-desc" style="margin-top:8px;" data-i18n="guide.sonidex.organization">
+        Las fichas están organizadas por región (Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos y Alola), Música de Combate y todas las categorías de Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Openings del Anime, Pokémon Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger). La barra de progreso y el contador «X / Y canciones desbloqueadas» tienen en cuenta absolutamente todas las canciones del juego.
+      </div>
+      <div class="guide-item" style="margin-top:4px;">
+        <div class="guide-item-title" data-i18n="guide.sonidex.cities.title">🏙️ ¿Por qué no aparecen todas las ciudades?</div>
+        <div class="guide-item-desc" data-i18n="guide.sonidex.cities.desc">Algunas ciudades comparten exactamente la misma melodía dentro del juego original, así que en la Sonidex solo aparece una ficha para representarlas y no una por cada ciudad. Por ejemplo, Ciudad Azulona y Ciudad Fucsia suenan con la misma canción, por lo que comparten una única ficha en lugar de tener una cada una.</div>
+      </div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.profile.title">🧑‍🎤 Perfil, experiencia y avatares</div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.profile.xp.title">📈 Experiencia y nivel</div>
+        <div class="guide-item-desc" data-i18n="guide.profile.xp.desc">Todos los puntos que ganas jugando (aciertos, rachas, eventos especiales…) se suman también como experiencia de tu perfil. Al acumular suficiente experiencia subes de nivel, y cada nivel necesita algo más que el anterior. Subir de nivel es lo que va desbloqueando, poco a poco, el Modo Difícil, el Modo Combate, varias categorías de Minijuegos y algunos avatares (mira los requisitos exactos en cada pantalla de desbloqueo).</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-item-title" data-i18n="guide.profile.avatars.title">🖼️ Avatares</div>
+        <div class="guide-item-desc" data-i18n="guide.profile.avatars.desc">Puedes personalizar tu perfil eligiendo un avatar entre un catálogo muy amplio de Pokémon. Muchos están disponibles desde el principio; el resto se va desbloqueando al subir de nivel, al conseguir logros de "encuentro" con un Pokémon de un Evento Pokémon (5 apariciones), o al completar una partida perfecta en ciertos modos y minijuegos. Toca tu avatar en la barra de perfil para cambiarlo o para cambiar tu nombre de jugador.</div>
+      </div>
+    </div>
+
+    <div class="card guide-section">
+      <div class="title" style="font-size:1.1rem;" data-i18n="guide.leaderboard.title">🏆 Clasificación Global</div>
+      <div class="guide-item-desc" data-i18n="guide.leaderboard.intro">
+        Desde el botón 🏆 de la pantalla principal puedes consultar tres tablas de clasificación online, con los mejores jugadores del mundo: nivel de perfil, mejor puntuación en Desafío Infinito y mejor puntuación en Modo Historia.
+      </div>
+      <div class="guide-item-desc" style="margin-top:8px;" data-i18n="guide.leaderboard.update">
+        Tu puesto se actualiza en automático cada vez que superas tu propio récord anterior en alguna de esas tres categorías; no hace falta enviarlo a mano. Apareces con el nombre y el avatar de tu perfil, así que si quieres identificarte en la clasificación, personalízalos desde la barra de perfil.
+      </div>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS -->
+  <section class="screen" id="screen-achievements">
+    <div class="card">
+      <div class="title" data-i18n="achievements.title">🏅 Logros</div>
+      <div class="subtitle" id="ach-progress-subtitle">0 / 0 desbloqueados</div>
+      <div id="ach-progress-bar-bg"><div id="ach-progress-bar-fill"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:1.1rem;" data-i18n="achievements.streaksTitle">🔥 Rachas máximas</div>
+      <div id="streaks-list"></div>
+    </div>
+
+    <div id="achievements-list" class="ach-sections"></div>
+  </section>
+
+  <!-- SONIDEX -->
+  <section class="screen" id="screen-sonidex">
+    <div class="card">
+      <div class="title" data-i18n="sonidex.title">🎼 Sonidex</div>
+      <div class="subtitle" id="sonidex-progress-subtitle">0 / 0 canciones desbloqueadas</div>
+      <div id="sonidex-progress-bar-bg"><div id="sonidex-progress-bar-fill"></div></div>
+      <div class="small" style="margin-top:10px;" data-i18n="sonidex.note">
+        🔓 Acierta una misma canción 10 veces (en cualquier modo excepto el Fácil) para desbloquear su ficha.
+      </div>
+    </div>
+
+    <div id="sonidex-groups"></div>
+  </section>
+
+  <!-- CLASIFICACIONES -->
+  <section class="screen" id="screen-leaderboard">
+    <div class="card">
+      <div class="title" data-i18n="leaderboard.title">🏆 Clasificaciones</div>
+      <div class="subtitle" data-i18n="leaderboard.subtitle">Los 50 mejores de cada categoría</div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:1.1rem;" data-i18n="leaderboard.yourRecords">🙋 Tus récords</div>
+      <div class="streak-row">
+        <div class="streak-name" data-i18n="leaderboard.level">🧑 Nivel de Jugador</div>
+        <div class="streak-value">Nv. <span id="leaderboard-personal-level">1</span></div>
+      </div>
+      <div class="streak-row">
+        <div class="streak-name" data-i18n="leaderboard.infinite">♾️ Desafío Infinito</div>
+        <div class="streak-value">💰 <span id="leaderboard-personal-infinite">0</span> pts</div>
+      </div>
+      <div class="streak-row">
+        <div class="streak-name" data-i18n="leaderboard.story">📖 Modo Historia</div>
+        <div class="streak-value">💰 <span id="leaderboard-personal-story">0</span> pts</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:1.1rem;" data-i18n="leaderboard.top50">🌍 Top 50 global</div>
+      <div class="leaderboard-tabs" id="leaderboard-tabs">
+        <button class="leaderboard-tab active" data-category="level" data-i18n="leaderboard.tab.level">🧑 Nivel</button>
+        <button class="leaderboard-tab" data-category="infinite" data-i18n="leaderboard.tab.infinite">♾️ Infinito</button>
+        <button class="leaderboard-tab" data-category="story" data-i18n="leaderboard.tab.story">📖 Historia</button>
+      </div>
+      <div class="small" id="leaderboard-status" style="margin-bottom:8px;"></div>
+      <div class="leaderboard-list" id="leaderboard-list"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="screen-quiz">
+    <div class="song-card">
+      <div class="song-image-wrap">
+        <div class="song-image-glow"></div>
+        <div class="song-image-placeholder" id="song-image">🎵</div>
+      </div>
+
+      <div class="song-question" id="song-question" data-i18n="quiz.loading">Cargando…</div>
+      <div class="small" id="mode-label" style="text-align:center;"></div>
+
+      <button class="hint-btn" id="hint-btn" style="display:none;"><span data-i18n="quiz.hint">👁️ Pista visual</span> <span class="hint-btn-cost" data-i18n="quiz.hintCost">-50% puntos</span></button>
+
+      <div class="small" id="audio-status" style="text-align:center;" data-i18n="quiz.loading">Cargando…</div>
+      <div class="small" id="song-city-reveal" style="text-align:center; display:none; font-weight:900; color:var(--yellow);"></div>
+      <div id="hard-timer-wrap" style="display:none; text-align:center; margin-top:4px;">
+        <span class="hard-timer-badge" id="hard-timer-badge">⏱️ <span id="hard-timer-val">10</span>s</span>
+      </div>
+
+      <div class="waveform-wrap">
+        <canvas id="waveform-canvas"></canvas>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="answers-grid" id="answers-grid"></div>
+
+    <button class="next-btn" id="next-btn" data-i18n="quiz.next">▶ Siguiente Ronda</button>
+  </section>
+
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result-overlay">
+  <div class="result-card">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-title" id="result-title" data-i18n="result.title">¡Fin del juego!</div>
+    <div class="result-score">
+      <span data-i18n="result.scoreLabel">Puntuación:</span> <span id="result-score-num">0</span>
+    </div>
+    <div class="result-actions">
+      <button class="restart-btn" id="restart-btn" data-i18n="result.restart">🔄 Jugar de nuevo</button>
+      <button class="exit-btn" id="exit-btn" data-i18n="result.exit">🚪 Salir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso de confirmación al pulsar "Atrás" (←) durante una ronda del Modo
+     Historia: la partida de Modo Historia no guarda progreso a mitad de
+     región/combate, así que si el jugador sale ahora, la próxima vez que
+     entre a Modo Historia tendrá que empezar de nuevo desde Kanto. -->
+<div id="leave-story-confirm-overlay">
+  <div class="result-card">
+    <div class="result-emoji">⚠️</div>
+    <div class="result-title" data-i18n="confirm.leaveStoryTitle">¿Salir del Modo Historia?</div>
+    <div class="result-score" style="margin-bottom:24px;" data-i18n-html="confirm.leaveStoryBody">
+      Si sales ahora perderás el progreso de esta partida.<br>
+      La próxima vez tendrás que empezar de nuevo desde Kanto.
+    </div>
+    <div class="result-actions">
+      <button class="restart-btn" id="leave-story-keep-btn" data-i18n="confirm.keepPlaying">🎮 Seguir jugando</button>
+      <button class="exit-btn" id="leave-story-exit-btn" data-i18n="confirm.leaveAnyway">🚪 Salir igualmente</button>
+    </div>
+  </div>
+</div>
+
+<audio id="main-audio"></audio>
+<audio id="menu-audio"></audio>
+<audio id="blastoise-rain-audio" loop></audio>
+<audio id="snorlax-snore-audio" loop></audio>
+<audio id="jigglypuff-audio"></audio>
+
+<script src="storage.js"></script>
+<script src="i18n.js"></script>
+<script type="module" src="leaderboard.js"></script>
+<script src="audio.js"></script>
+<script src="pokemon.js"></script>
+<script src="ui.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
