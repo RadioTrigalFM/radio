@@ -1278,6 +1278,22 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
   Olivo`); `"Faro Ciudad Olivo"` apuntaba a "Glitter Lighthouse" y
   ahora apunta a **Olivine Lighthouse**.
 
+### Cambiado
+- **Crédito de la pantalla de Ajustes**: pasa de "Creado por @waizwidou"
+  a "Creado por @RadioTrigalFM".
+  - `index.html`: cambio de texto en la tarjeta de Ajustes.
+
+### Añadido
+- **Openings del Anime** se añade a la lista de categorías de Minijuegos
+  que aparece en la Guía de Juego (faltaba, aunque la categoría ya
+  existía y era jugable desde el menú de Minijuegos).
+  - `index.html`/`i18n.js`: se añade "Openings del Anime" ("Anime
+    Openings" en la traducción al inglés) a la enumeración de
+    `guide.modes.minigames.desc` (sección "🕹️ Minijuegos") y de
+    `guide.achievements.minigames.desc` (sección "🕹️ Categorías de
+    Minijuegos"), en el mismo punto en que ya aparecía en
+    `guide.sonidex.organization`.
+
 ## [0.1.0] — 2026-08-03 — Línea base documentada
 
 Primera fotografía del proyecto en el momento de crear su
