@@ -888,6 +888,9 @@ let stars = [];
 let clouds = [];
 let shootingStars = [];
 let hillLayers = [];
+let mountainLayer = [];
+let fireflies = [];
+let birdFlocks = [];
 
 /** Número aleatorio en el rango [min, max). */
 function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -908,6 +911,65 @@ function generateHills() {
     }
     hillLayers.push({ ...def, pts, idx });
   });
+}
+
+/** Genera una cordillera lejana (una única capa, más alta y con picos más
+ * angulosos que las colinas) que se dibuja DETRÁS de `hillLayers`, entre
+ * el cielo y las colinas, para dar sensación de profundidad/perspectiva
+ * atmosférica — sobre todo se nota en pantallas grandes, donde queda
+ * mucho cielo visible a los lados de #app (ver drawMountains). */
+function generateMountains() {
+  const bumps = 7;
+  const pts = [];
+  for (let i = 0; i <= bumps; i++) {
+    pts.push({ xRatio: i / bumps, bump: rand(0.3, 1) });
+  }
+  mountainLayer = { heightRatio: 0.34, pts };
+}
+
+/** Genera las luciérnagas que flotan delante de la línea de colinas en
+ * modo oscuro: puro detalle ambiental, sin ningún efecto sobre el juego.
+ * `driftRX`/`driftRY` y `speedX`/`speedY` van por separado (en vez de un
+ * único radio/velocidad de deriva) para que cada una describa una
+ * pequeña elipse propia en vez de un círculo uniforme. */
+function generateFireflies() {
+  fireflies = [];
+  for (let i = 0; i < 16; i++) {
+    fireflies.push({
+      xRatio: rand(0, 1),
+      yRatio: rand(0.75, 0.97),
+      r: rand(0.6, 1.3),
+      driftRX: rand(14, 34),
+      driftRY: rand(6, 16),
+      speedX: rand(0.5, 1.1),
+      speedY: rand(0.5, 1.1),
+      phase: rand(0, Math.PI * 2),
+      phaseY: rand(0, Math.PI * 2),
+      blinkSpeed: rand(0.6, 1.4),
+      blinkPhase: rand(0, Math.PI * 2),
+    });
+  }
+}
+
+/** Genera un par de bandadas de aves (grupos de "M" simplificadas) que
+ * cruzan muy lentamente el cielo diurno, como detalle ambiental. */
+function generateBirds() {
+  birdFlocks = [];
+  for (let i = 0; i < 2; i++) {
+    const count = Math.round(rand(3, 6));
+    const members = [];
+    for (let j = 0; j < count; j++) {
+      members.push({ dx: (j - (count - 1) / 2) * 15, dy: rand(-6, 6) });
+    }
+    birdFlocks.push({
+      x: rand(-0.2, 1.2),
+      yRatio: rand(0.08, 0.24),
+      scale: rand(0.8, 1.3),
+      speed: rand(0.0012, 0.0024) * (Math.random() < 0.5 ? 1 : -1),
+      wingPhase: rand(0, Math.PI * 2),
+      members,
+    });
+  }
 }
 
 /** Genera la forma aleatoria de una nube del fondo como una lista de
@@ -964,6 +1026,9 @@ function initBG() {
 
   shootingStars = [];
   generateHills();
+  generateMountains();
+  generateFireflies();
+  generateBirds();
 }
 
 /** Dibuja una nube del fondo en el canvas a partir de sus "puffs"
@@ -1017,8 +1082,9 @@ function drawCloud(cloud) {
   bgCtx.restore();
 }
 
-/** Dibuja el degradado de cielo nocturno, la luna con resplandor y las
- * estrellas parpadeantes (modo oscuro). */
+/** Dibuja el degradado de cielo nocturno, un par de manchas de "nebulosa"
+ * muy tenues (solo color, sin detalle) para dar riqueza al cielo, la luna
+ * con resplandor, y las estrellas parpadeantes (modo oscuro). */
 function drawSkyNight(w, h, t) {
   const g = bgCtx.createLinearGradient(0, 0, 0, h);
   g.addColorStop(0, '#050a17');
@@ -1026,6 +1092,23 @@ function drawSkyNight(w, h, t) {
   g.addColorStop(1, '#182a4d');
   bgCtx.fillStyle = g;
   bgCtx.fillRect(0, 0, w, h);
+
+  // manchas de nebulosa: un par de resplandores de color muy difuminados
+  // y translúcidos, fijos, que rompen la monotonía del degradado liso en
+  // pantallas grandes sin distraer de la interfaz.
+  bgCtx.save();
+  bgCtx.globalCompositeOperation = 'lighter';
+  const neb1 = bgCtx.createRadialGradient(w*0.18, h*0.22, 0, w*0.18, h*0.22, Math.min(w,h)*0.4);
+  neb1.addColorStop(0, 'rgba(90,60,150,0.10)');
+  neb1.addColorStop(1, 'rgba(90,60,150,0)');
+  bgCtx.fillStyle = neb1;
+  bgCtx.fillRect(0, 0, w, h);
+  const neb2 = bgCtx.createRadialGradient(w*0.55, h*0.4, 0, w*0.55, h*0.4, Math.min(w,h)*0.35);
+  neb2.addColorStop(0, 'rgba(30,90,140,0.09)');
+  neb2.addColorStop(1, 'rgba(30,90,140,0)');
+  bgCtx.fillStyle = neb2;
+  bgCtx.fillRect(0, 0, w, h);
+  bgCtx.restore();
 
   // luna con resplandor
   const moonX = w * 0.8, moonY = h * 0.15, moonR = Math.min(w, h) * 0.045;
@@ -1040,13 +1123,24 @@ function drawSkyNight(w, h, t) {
   bgCtx.beginPath(); bgCtx.arc(moonX - moonR*0.3, moonY - moonR*0.2, moonR*0.18, 0, Math.PI*2); bgCtx.fill();
   bgCtx.beginPath(); bgCtx.arc(moonX + moonR*0.25, moonY + moonR*0.32, moonR*0.12, 0, Math.PI*2); bgCtx.fill();
 
-  // estrellas titilantes
+  // estrellas titilantes (las más grandes llevan un ligero destello en
+  // cruz, para que el cielo no se vea como puntos uniformes)
   stars.forEach(s => {
     const op = s.baseOp * (0.45 + 0.55 * Math.sin(t * 0.0011 * s.speed + s.phase));
+    const finalOp = Math.max(0, op);
     bgCtx.beginPath();
     bgCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-    bgCtx.fillStyle = `rgba(255,255,255,${Math.max(0, op).toFixed(2)})`;
+    bgCtx.fillStyle = `rgba(255,255,255,${finalOp.toFixed(2)})`;
     bgCtx.fill();
+    if (s.r > 1.4) {
+      bgCtx.strokeStyle = `rgba(255,255,255,${(finalOp * 0.5).toFixed(2)})`;
+      bgCtx.lineWidth = 0.6;
+      const sp = s.r * 3.2;
+      bgCtx.beginPath();
+      bgCtx.moveTo(s.x - sp, s.y); bgCtx.lineTo(s.x + sp, s.y);
+      bgCtx.moveTo(s.x, s.y - sp); bgCtx.lineTo(s.x, s.y + sp);
+      bgCtx.stroke();
+    }
   });
 
   // estrellas fugaces ocasionales
@@ -1075,17 +1169,55 @@ function drawSkyNight(w, h, t) {
   shootingStars = shootingStars.filter(s => s.life > 0 && s.y < h);
 }
 
-/** Dibuja el degradado de cielo diurno y el sol con resplandor (modo
- * claro). */
-function drawSkyDay(w, h) {
+/** Dibuja las luciérnagas: puntitos de luz amarilla, muy pequeños, que
+ * flotan delante de las colinas describiendo una pequeña deriva elíptica
+ * (una frecuencia distinta en X y en Y, así el recorrido no es un
+ * círculo perfecto) con un halo suave que les da volumen. El parpadeo no
+ * sigue una onda seno "en crudo" (encendido/apagado a ritmo uniforme):
+ * se eleva al cuadrado para que la luciérnaga pase más tiempo apagada o
+ * muy tenue y el encendido llegue como un destello progresivo, más
+ * parecido al parpadeo real del insecto que a un simple parpadeo de luz.
+ * Se llama DESPUÉS de `drawHills` (ver `drawBG`) para que las luciérnagas
+ * floten visiblemente por delante del terreno en vez de quedar tapadas
+ * por él; es puro detalle ambiental del modo oscuro, sin ningún efecto
+ * sobre el juego. */
+function drawFireflies(w, h, t) {
+  fireflies.forEach(f => {
+    const cx = f.xRatio * w + Math.cos(t * 0.00055 * f.speedX + f.phase) * f.driftRX;
+    const cy = f.yRatio * h + Math.sin(t * 0.0008 * f.speedY + f.phaseY) * f.driftRY;
+
+    const raw = Math.max(0, Math.sin(t * 0.0011 * f.blinkSpeed + f.blinkPhase));
+    const blink = raw * raw;
+    if (blink < 0.05) return;
+
+    // halo cálido difuminado, para dar volumen sin que deje de leerse
+    // como un punto diminuto
+    const glowR = f.r * 6;
+    const glow = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+    glow.addColorStop(0, `rgba(255,214,90,${(blink * 0.5).toFixed(2)})`);
+    glow.addColorStop(0.55, `rgba(255,193,60,${(blink * 0.18).toFixed(2)})`);
+    glow.addColorStop(1, 'rgba(255,193,60,0)');
+    bgCtx.fillStyle = glow;
+    bgCtx.beginPath(); bgCtx.arc(cx, cy, glowR, 0, Math.PI * 2); bgCtx.fill();
+
+    // núcleo: amarillo cálido, muy pequeño
+    bgCtx.fillStyle = `rgba(255,241,180,${blink.toFixed(2)})`;
+    bgCtx.beginPath(); bgCtx.arc(cx, cy, f.r, 0, Math.PI * 2); bgCtx.fill();
+  });
+}
+
+/** Dibuja el degradado de cielo diurno, el sol con resplandor, las nubes
+ * animadas y un par de bandadas de aves lejanas (modo claro). */
+function drawSkyDay(w, h, t) {
   const g = bgCtx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, '#5fb6ea');
-  g.addColorStop(0.6, '#8fd3f4');
-  g.addColorStop(1, '#cdeeff');
+  g.addColorStop(0, '#4fa8e6');
+  g.addColorStop(0.35, '#6fc0ee');
+  g.addColorStop(0.68, '#a6ddf6');
+  g.addColorStop(1, '#e4f6ff');
   bgCtx.fillStyle = g;
   bgCtx.fillRect(0, 0, w, h);
 
-  // sol con resplandor
+  // sol: resplandor y disco
   const sunX = w * 0.82, sunY = h * 0.13, sunR = Math.min(w, h) * 0.05;
   const glow = bgCtx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 4);
   glow.addColorStop(0, 'rgba(255,244,180,0.55)');
@@ -1095,6 +1227,27 @@ function drawSkyDay(w, h) {
   bgCtx.fillStyle = '#fff6d0';
   bgCtx.beginPath(); bgCtx.arc(sunX, sunY, sunR, 0, Math.PI*2); bgCtx.fill();
 
+  // aves lejanas: siluetas simples en "M" que cruzan el cielo muy despacio
+  birdFlocks.forEach(flock => {
+    flock.x += flock.speed;
+    if (flock.speed > 0 && flock.x > 1.3) flock.x = -0.3;
+    if (flock.speed < 0 && flock.x < -0.3) flock.x = 1.3;
+    const cx = flock.x * w, cy = flock.yRatio * h;
+    const wing = 4 * Math.sin(t * 0.004 + flock.wingPhase);
+    bgCtx.strokeStyle = 'rgba(60,70,90,0.4)';
+    bgCtx.lineWidth = 1.6 * flock.scale;
+    bgCtx.lineCap = 'round';
+    flock.members.forEach(m => {
+      const bx = cx + m.dx * flock.scale, by = cy + m.dy * flock.scale;
+      const wspan = 6 * flock.scale;
+      bgCtx.beginPath();
+      bgCtx.moveTo(bx - wspan, by + wing * 0.3);
+      bgCtx.quadraticCurveTo(bx, by - wing, bx, by);
+      bgCtx.quadraticCurveTo(bx, by - wing, bx + wspan, by + wing * 0.3);
+      bgCtx.stroke();
+    });
+  });
+
   // nubes animadas
   clouds.forEach(c => {
     drawCloud(c);
@@ -1103,11 +1256,69 @@ function drawSkyDay(w, h) {
   });
 }
 
+// ── Cordillera lejana, entre el cielo y las colinas ──
+/** Dibuja la silueta de montañas lejanas generada por `generateMountains`,
+ * teñida casi del mismo tono que el cielo en su base (perspectiva
+ * atmosférica: cuanto más lejos, más se "disuelve" un elemento en el
+ * color del cielo) para dar profundidad sin competir con las colinas,
+ * que son las que de verdad enmarcan el juego. */
+function drawMountains(w, h, isDark) {
+  if (!mountainLayer.pts) return;
+  const { heightRatio, pts } = mountainLayer;
+  const topY = h * (1 - heightRatio);
+
+  bgCtx.beginPath();
+  bgCtx.moveTo(0, h + 2);
+  bgCtx.lineTo(0, topY + pts[0].bump * h * 0.05);
+  for (let j = 0; j < pts.length; j++) {
+    const p = pts[j];
+    const x = p.xRatio * w;
+    const y = topY - p.bump * h * 0.09;
+    const prevX = j === 0 ? 0 : pts[j-1].xRatio * w;
+    const midX = (prevX + x) / 2;
+    bgCtx.lineTo(midX, y + h * 0.015);
+    bgCtx.lineTo(x, y);
+  }
+  bgCtx.lineTo(w, h + 2);
+  bgCtx.closePath();
+
+  const grad = bgCtx.createLinearGradient(0, topY - h * 0.09, 0, h * (1 - heightRatio * 0.35));
+  if (isDark) {
+    grad.addColorStop(0, '#26365c');
+    grad.addColorStop(1, '#182a4d');
+  } else {
+    grad.addColorStop(0, '#7fa9cf');
+    grad.addColorStop(1, '#a6ddf6');
+  }
+  bgCtx.fillStyle = grad;
+  bgCtx.fill();
+
+  // nieve/bruma en las cumbres más altas, muy sutil (solo en modo día;
+  // en modo noche no se dibuja ningún brillo sobre los picos)
+  if (!isDark) {
+    bgCtx.save();
+    bgCtx.clip();
+    pts.forEach(p => {
+      if (p.bump < 0.72) return;
+      const x = p.xRatio * w, y = topY - p.bump * h * 0.09;
+      const capGrad = bgCtx.createRadialGradient(x, y, 0, x, y, h * 0.05);
+      capGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
+      capGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      bgCtx.fillStyle = capGrad;
+      bgCtx.beginPath(); bgCtx.arc(x, y, h * 0.05, 0, Math.PI*2); bgCtx.fill();
+    });
+    bgCtx.restore();
+  }
+}
+
 // ── Colinas redondeadas tipo Pokémon, en capas con perspectiva ──
 function drawHills(w, h, isDark) {
   const palette = isDark
     ? ['#15301d', '#1c4026', '#234d2c']
     : ['#6cc464', '#54ab4e', '#3f9640'];
+  const rimPalette = isDark
+    ? ['#26502f', '#2d5a35', '#356840']
+    : ['#8fdb84', '#79c96f', '#63b95e'];
 
   hillLayers.forEach((layer, i) => {
     const topY = h * (1 - layer.heightRatio);
@@ -1124,21 +1335,49 @@ function drawHills(w, h, isDark) {
     }
     bgCtx.lineTo(w, h + 2);
     bgCtx.closePath();
-    bgCtx.fillStyle = palette[i % palette.length];
+    // relleno con un ligero degradado (en vez de color plano) para dar
+    // algo de volumen: más claro arriba (recibe más luz), más oscuro
+    // hacia la base donde se funde con la capa de delante.
+    const grad = bgCtx.createLinearGradient(0, topY - h * 0.08, 0, h);
+    grad.addColorStop(0, rimPalette[i % rimPalette.length]);
+    grad.addColorStop(0.35, palette[i % palette.length]);
+    grad.addColorStop(1, palette[i % palette.length]);
+    bgCtx.fillStyle = grad;
     bgCtx.fill();
   });
 }
 
+/** Viñeta final: oscurece muy levemente las esquinas del lienzo para que
+ * la mirada se centre en la tarjeta de la app en pantallas grandes, donde
+ * queda mucho fondo visible a los lados. Se aplica igual en ambos temas,
+ * con más intensidad en modo oscuro (donde aporta más profundidad) que en
+ * modo claro (donde solo debe insinuarse, para no ensuciar el cielo). */
+function drawVignette(w, h, isDark) {
+  const g = bgCtx.createRadialGradient(
+    w/2, h*0.42, Math.min(w,h)*0.35,
+    w/2, h*0.42, Math.max(w,h)*0.75
+  );
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, isDark ? 'rgba(0,0,0,0.45)' : 'rgba(10,20,40,0.16)');
+  bgCtx.fillStyle = g;
+  bgCtx.fillRect(0, 0, w, h);
+}
+
 /** Bucle principal de animación del fondo: limpia el canvas, dibuja el
- * cielo (noche o día según el tema) y las colinas, y se reprograma a
- * sí mismo en el siguiente frame con requestAnimationFrame. */
+ * cielo (noche o día según el tema), la cordillera lejana, las colinas,
+ * las luciérnagas por delante de ellas (solo en modo oscuro) y, por
+ * último, la viñeta que enmarca la app, y se reprograma a sí mismo en el
+ * siguiente frame con requestAnimationFrame. */
 function drawBG(now) {
   const w = bgCanvas.width, h = bgCanvas.height;
   const isDark = !document.body.classList.contains('light');
   bgCtx.clearRect(0, 0, w, h);
   if (isDark) drawSkyNight(w, h, now || 0);
-  else drawSkyDay(w, h);
+  else drawSkyDay(w, h, now || 0);
+  drawMountains(w, h, isDark);
   drawHills(w, h, isDark);
+  if (isDark) drawFireflies(w, h, now || 0);
+  drawVignette(w, h, isDark);
   requestAnimationFrame(drawBG);
 }
 

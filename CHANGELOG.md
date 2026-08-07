@@ -16,6 +16,19 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Cambiado
+- **Luciérnagas del fondo nocturno**: ahora se dibujan por delante de las
+  colinas (antes quedaban tapadas por ellas al pintarse antes de
+  `drawHills`), su luz es amarilla cálida en vez de verdosa, son más
+  pequeñas y su deriva y parpadeo son más orgánicos (elipse propia por
+  luciérnaga y un parpadeo que se eleva al cuadrado en vez de una onda
+  seno lineal).
+  - `ui.js`: el dibujo se extrae de `drawSkyNight()` a una función nueva
+    `drawFireflies()`, invocada desde `drawBG()` después de `drawHills()`
+    y solo en modo oscuro. `generateFireflies()` ahora genera radio de
+    deriva y velocidad por separado en X/Y (antes un único valor
+    compartido) para que cada una describa una elipse distinta.
+
 ### Añadido
 - **63 avatares de perfil nuevos** (legendarios, singulares y algunos
   populares que faltaban): Abomasnow, Arceus, Articuno, Azelf, Bidoof,
@@ -71,6 +84,25 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
   - `i18n.js`: `"otherUnlock.ranger.reqTitle"` en inglés actualizada de
     "Dedicated trainer" a "Enthusiast" (traducción ya usada para el
     logro `games_10` en `"achv.games_10.title"`).
+
+- **Las bandadas de aves del fondo animado cruzan el cielo mucho más
+  despacio.**
+  - `ui.js`: en `generateBirds()`, el rango de `speed` de cada bandada
+    pasa de `rand(0.006, 0.012)` a `rand(0.0012, 0.0024)` (una quinta
+    parte de la velocidad anterior).
+
+### Eliminado
+- **Los rayos (líneas rectas) que giraban alrededor del sol y de la
+  luna en el fondo animado.** Ambos astros conservan su resplandor y su
+  disco; solo desaparecen las líneas giratorias.
+  - `ui.js`: eliminado el bloque de dibujo de rayos dentro de
+    `drawSkyDay()` (sol) y de `drawSkyNight()` (luna).
+
+- **El brillo/nieve en los picos de la cordillera lejana en modo
+  noche.** En modo día se mantiene igual que antes.
+  - `ui.js`: en `drawMountains()`, el bloque que dibuja la "nieve/bruma"
+    sobre las cumbres más altas ahora solo se ejecuta cuando
+    `!isDark`.
 
 ### Corregido
 - **Los textos del Evento Pokémon Snorlax (etiqueta "Snorlax se ha
