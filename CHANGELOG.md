@@ -16,6 +16,14 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Eliminado
+- **El logro "Campeón Pokémon"** (`games_100`, jugar 100 partidas).
+  - `game.js`: se quita su entrada de la lista de logros y su condición
+    de desbloqueo (`s => s.gamesPlayed >= 100`). El resto de logros que
+    también usan la estadística `gamesPlayed` (`games_10`/`20`/`30`/`50`)
+    no se ven afectados, así que `storage.js` no necesita ningún cambio.
+  - `i18n.js`: se quita la traducción al inglés (`achv.games_100.*`).
+
 ### Cambiado
 - **Luciérnagas del fondo nocturno**: ahora se dibujan por delante de las
   colinas (antes quedaban tapadas por ellas al pintarse antes de

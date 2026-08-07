@@ -675,8 +675,6 @@ const I18N = {
     "achv.games_30.desc": "Play 30 games.",
     "achv.games_50.title": "Veteran",
     "achv.games_50.desc": "Play 50 games.",
-    "achv.games_100.title": "Pokémon champion",
-    "achv.games_100.desc": "Play 100 games.",
     "achv.all_modes.title": "Explorer",
     "achv.all_modes.desc": "Complete at least one game in Easy, Normal and Hard modes.",
     "achv.all_regions.title": "Regional traveler",
