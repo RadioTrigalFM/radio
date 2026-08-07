@@ -62,7 +62,69 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `leaderboard.tab.hard`; `guide.leaderboard.intro`/`.update`
     actualizadas para mencionar las cuatro categorías.
 
+- **El minijuego Pokémon Ranger ahora se desbloquea con el logro
+  "Aficionado"** (jugar 10 partidas), en vez de con "Entrenador
+  dedicado" (jugar 30 partidas).
+  - `game.js`: en `OTHER_UNLOCKS`, la entrada `ranger` cambia su
+    `achId` de `"games_30"` a `"games_10"` y su `reqTitle` de
+    "Entrenador dedicado" a "Aficionado".
+  - `i18n.js`: `"otherUnlock.ranger.reqTitle"` en inglés actualizada de
+    "Dedicated trainer" a "Enthusiast" (traducción ya usada para el
+    logro `games_10` en `"achv.games_10.title"`).
+
 ### Corregido
+- **Los textos del Evento Pokémon Snorlax (etiqueta "Snorlax se ha
+  quedado dormido", el aviso "Tócalo N veces para despertarlo" y su
+  actualización en cada clic "¡Sigue tocando!"/"¡Se ha despertado!")
+  se veían en español aunque el idioma de la interfaz estuviera en
+  inglés.** Igual que le pasaba al aviso de búsqueda de Gengar (ver
+  entrada siguiente), este overlay se generaba con `innerHTML`
+  directamente en español dentro de `onAnswers()`, sin pasar por el
+  sistema de traducción, a diferencia del nombre/descripción de
+  Snorlax que se muestran al aparecer la carta del evento (ya
+  traducidos vía `tData()`).
+  - `pokemon.js`: la etiqueta, el hint inicial y la actualización en
+    cada clic ahora se resuelven con `tData("pokeEvent.snorlax.label",
+    ...)`, `tData("pokeEvent.snorlax.hint", ..., { n: CLICKS_NEEDED })`,
+    `tData("pokeEvent.snorlax.progress", ..., { clicks, n:
+    CLICKS_NEEDED })` y `tData("pokeEvent.snorlax.awake", ...)`, mismo
+    patrón que `pokeEvent.gengar.searchHint`.
+  - `i18n.js`: nuevas claves `"pokeEvent.snorlax.label"`,
+    `"pokeEvent.snorlax.hint"`, `"pokeEvent.snorlax.progress"` y
+    `"pokeEvent.snorlax.awake"` en inglés (no hace falta en español:
+    `tData()` ya usa el texto español original como valor por defecto
+    si no hay traducción, siguiendo la Regla nº2 de `CLAUDE.md`).
+
+- **El aviso "Gengar se esconde en la oscuridad... Ilumina la pantalla
+  con el cursor para encontrarlo" (cuadro que tapa las respuestas
+  durante el Evento Pokémon Gengar) se veía en español aunque el idioma
+  de la interfaz estuviera en inglés.** A diferencia del nombre/
+  descripción de Gengar que se muestran al aparecer la carta del evento
+  (ya traducidos vía `tData()`), este texto del `.gengar-search-hint` se
+  generaba con `innerHTML` directamente en español dentro de
+  `onAnswers()`, sin pasar por el sistema de traducción.
+  - `pokemon.js`: el texto ahora se resuelve con
+    `tData("pokeEvent.gengar.searchHint", ...)`, mismo patrón que
+    `pokeEvent.gengar.name`/`.desc`.
+  - `i18n.js`: nueva clave `"pokeEvent.gengar.searchHint"` en inglés
+    (no hace falta en español: `tData()` ya usa el texto español
+    original como valor por defecto si no hay traducción, siguiendo la
+    Regla nº2 de `CLAUDE.md`).
+
+- **La etiqueta "✨ Evento Pokémon" de la carta de aparición se veía en
+  español aunque el idioma de la interfaz estuviera en inglés.** El
+  `<div class="poke-event-tag">` de `index.html` tenía el texto escrito
+  a mano, sin atributo `data-i18n`, así que `applyTranslations()` nunca
+  lo tocaba (a diferencia del resto de la carta, cuyo nombre/descripción
+  del Pokémon sí se resuelven aparte vía `tData()`).
+  - `index.html`: añadido `data-i18n="pokeEvent.tag"` a ese `<div>`.
+  - `i18n.js`: nueva clave `"pokeEvent.tag"` en español ("✨ Evento
+    Pokémon") e inglés ("✨ Pokémon Event").
+- Aprovechando el cambio anterior, se elimina de
+  `"options.language.desc"` (pantalla de Ajustes) el inciso "(los
+  títulos de las canciones siguen en español)" / "(song titles stay in
+  Spanish)", que ya no aportaba nada relevante en ese contexto.
+
 - **Los títulos de "Openings del Anime" no cambiaban según el doblaje/idioma
   con el que sonaba la canción.** Las tres entradas de cada opening real
   (España/Latino/Inglés en `game.js`, distinguidas por `variant`) compartían

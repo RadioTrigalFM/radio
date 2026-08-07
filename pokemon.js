@@ -421,7 +421,7 @@ PokeEvents.register({
     hint.style.height = gridRect.height + "px";
     hint.innerHTML = `
       <div class="gengar-search-icon">👻</div>
-      <div class="gengar-search-text">Gengar se esconde en la oscuridad...<br>Ilumina la pantalla con el cursor para encontrarlo.</div>
+      <div class="gengar-search-text">${tData("pokeEvent.gengar.searchHint", "Gengar se esconde en la oscuridad...<br>Ilumina la pantalla con el cursor para encontrarlo.")}</div>
     `;
     document.body.appendChild(hint);
 
@@ -624,8 +624,8 @@ PokeEvents.register({
       </div>
       <img class="snorlax-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png" alt="Snorlax">
       <div class="snorlax-text">
-        <div class="snorlax-label">Snorlax se ha quedado dormido</div>
-        <div class="snorlax-hint">Tócalo ${CLICKS_NEEDED} veces para despertarlo (0/${CLICKS_NEEDED})</div>
+        <div class="snorlax-label">${tData("pokeEvent.snorlax.label", "Snorlax se ha quedado dormido")}</div>
+        <div class="snorlax-hint">${tData("pokeEvent.snorlax.hint", `Tócalo ${CLICKS_NEEDED} veces para despertarlo (0/${CLICKS_NEEDED})`, { n: CLICKS_NEEDED })}</div>
         <div class="snorlax-progress-track"><div class="snorlax-progress-fill"></div></div>
       </div>
     `;
@@ -640,8 +640,8 @@ PokeEvents.register({
       if (fillEl) fillEl.style.width = Math.min(100, (clicks / CLICKS_NEEDED) * 100) + "%";
       if (hintEl) {
         hintEl.textContent = (clicks < CLICKS_NEEDED)
-          ? `¡Sigue tocando! (${clicks}/${CLICKS_NEEDED})`
-          : "¡Se ha despertado!";
+          ? tData("pokeEvent.snorlax.progress", `¡Sigue tocando! (${clicks}/${CLICKS_NEEDED})`, { clicks, n: CLICKS_NEEDED })
+          : tData("pokeEvent.snorlax.awake", "¡Se ha despertado!");
       }
       if (clicks >= CLICKS_NEEDED) {
         overlay.classList.add("waking");
