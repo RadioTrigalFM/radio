@@ -681,9 +681,9 @@ PokeEvents.register({
     const existingLabels = new Set(
       Array.from(gridEl.querySelectorAll(".answer-btn")).map(b => b.textContent)
     );
-    const candidates = session.pool.filter(s => !existingLabels.has(s.title));
+    const candidates = session.pool.filter(s => !existingLabels.has(songDisplayName(s)));
     shuffle(candidates).slice(0, 2).forEach(song => {
-      const btn = addAnswerButton(gridEl, song.title, false);
+      const btn = addAnswerButton(gridEl, songDisplayName(song), false);
       // addAnswerButton() la deja al final; la recolocamos en un hueco
       // aleatorio de la rejilla (incluido, de nuevo, el final).
       const others = Array.from(gridEl.querySelectorAll(".answer-btn")).filter(b => b !== btn);

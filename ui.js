@@ -682,12 +682,22 @@ const SONIDEX_GROUPS = [
   { title: "Pokémon Ranger",       filter: s => s.group === "other" && s.other === "ranger" },
 ];
 
+// Emoji corto para el botón de cambiar idioma de una ficha con varias
+// variantes en la Sonidex (ver sonidexVariantsFor() en game.js). Usa los
+// mismos emojis que la pantalla previa de selección de doblaje de Openings
+// del Anime (screen-openings-lang-select, España/Latino en index.html), más
+// uno para Inglés.
+const SONIDEX_VARIANT_FLAGS = { spain: "🇪🇸", latino: "🌎", english: "🇬🇧" };
+function sonidexVariantFlag(song) {
+  return SONIDEX_VARIANT_FLAGS[song.variant || "spain"] || "🌐";
+}
+
 /** Construye la tarjeta (carátula + botón reproducir/detener) de una
  * canción dentro de la pantalla Sonidex, en estado bloqueado o
  * desbloqueado según isSongUnlocked. */
 function sonidexSongCard(song) {
   const s = achievementsData.stats;
-  const count = (s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0;
+  const count = (s.songCorrectCounts && s.songCorrectCounts[sonidexKey(song)]) || 0;
   const unlocked = count >= SONIDEX_UNLOCK_COUNT;
 
   const div = document.createElement("div");
@@ -722,6 +732,17 @@ function sonidexSongCard(song) {
     const controls = document.createElement("div");
     controls.className = "sonidex-controls";
 
+    // Variantes de idioma/doblaje disponibles para esta ficha (ver
+    // sonidexVariantsFor() en game.js): más de una solo en fichas como los
+    // openings del anime (España/Latino/Inglés). `currentVariantSong` es la
+    // que se reproduce ahora mismo con playBtn; empieza siendo `song` (el
+    // representante que ya eligió sonidexGroupSongs() según el idioma actual
+    // del juego) y cambia al pulsar el botón de idioma, sin afectar en nada
+    // al contador de aciertos de la ficha (sonidexKey() no depende de qué
+    // variante se escuche).
+    const variants = sonidexVariantsFor(song);
+    let currentVariantSong = song;
+
     const playBtn = document.createElement("button");
     playBtn.type = "button";
     playBtn.className = "sonidex-play-btn";
@@ -737,7 +758,7 @@ function sonidexSongCard(song) {
 
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      playSonidexSong(song, div, playBtn, stopBtn);
+      playSonidexSong(currentVariantSong, div, playBtn, stopBtn);
     });
     stopBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -746,11 +767,40 @@ function sonidexSongCard(song) {
 
     controls.appendChild(playBtn);
     controls.appendChild(stopBtn);
+
+    // Botón de cambiar idioma: solo si esta ficha tiene más de una variante.
+    let langBtn = null;
+    if (variants.length > 1) {
+      langBtn = document.createElement("button");
+      langBtn.type = "button";
+      langBtn.className = "sonidex-lang-btn";
+      langBtn.textContent = sonidexVariantFlag(currentVariantSong);
+      langBtn.setAttribute("aria-label", t("sonidex.changeLanguage"));
+      langBtn.title = t("sonidex.changeLanguage");
+      langBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const idx = variants.indexOf(currentVariantSong);
+        currentVariantSong = variants[(idx + 1) % variants.length];
+        langBtn.textContent = sonidexVariantFlag(currentVariantSong);
+        // Si esta ficha se está reproduciendo ahora mismo, la reiniciamos ya
+        // en el idioma recién elegido; si no, el cambio se aplicará la
+        // próxima vez que se pulse "reproducir".
+        if (div.classList.contains("playing")) {
+          playSonidexSong(currentVariantSong, div, playBtn, stopBtn);
+        }
+      });
+      controls.appendChild(langBtn);
+    }
+
     div.appendChild(controls);
 
-    // Si esta misma canción ya se estaba reproduciendo (p. ej. tras volver a
-    // renderizar la Sonidex), mostramos la ficha con el estado "sonando".
-    if (sonidexCurrentFile === song.file) {
+    // Si esta misma ficha (en cualquiera de sus variantes de idioma) ya se
+    // estaba reproduciendo (p. ej. tras volver a renderizar la Sonidex),
+    // restauramos el estado "sonando" con la variante correcta seleccionada.
+    const playingVariant = variants.find(v => v.file === sonidexCurrentFile);
+    if (playingVariant) {
+      currentVariantSong = playingVariant;
+      if (langBtn) langBtn.textContent = sonidexVariantFlag(currentVariantSong);
       div.classList.add("playing");
       playBtn.style.display = "none";
       stopBtn.style.display = "";
@@ -771,7 +821,11 @@ function renderSonidexScreen() {
   let totalSongs = 0, totalUnlocked = 0;
 
   SONIDEX_GROUPS.forEach(group => {
-    const groupSongs = songs.filter(group.filter);
+    // sonidexGroupSongs() colapsa a una sola ficha las canciones que son la
+    // misma canción en varios idiomas/doblajes (p. ej. los tres `variant` de
+    // un mismo opening — ver su comentario en game.js), para no mostrar (ni
+    // contar) una ficha duplicada por cada versión de idioma.
+    const groupSongs = sonidexGroupSongs(songs.filter(group.filter));
     if (!groupSongs.length) return;
 
     const unlockedInGroup = groupSongs.filter(isSongUnlocked).length;
@@ -811,8 +865,12 @@ function updateHomeSonidexSummary(unlockedArg, totalArg) {
     // y TODOS los Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf,
     // Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger), para que la
     // cifra mostrada en el Inicio coincida siempre con la de la pantalla Sonidex.
-    totalCount = songs.length;
-    unlockedCount = songs.filter(isSongUnlocked).length;
+    // sonidexGroupSongs() deduplica antes de contar (ver su comentario en
+    // game.js), para que canciones con varias variantes de idioma (los
+    // openings) cuenten como una sola ficha aquí también.
+    const allSonidexSongs = sonidexGroupSongs(songs);
+    totalCount = allSonidexSongs.length;
+    unlockedCount = allSonidexSongs.filter(isSongUnlocked).length;
   }
   el.textContent = t("sonidex.progressShort", { n: unlockedCount, total: totalCount });
 }
@@ -1731,8 +1789,10 @@ splashScreen.addEventListener('touchend', (e) => { e.preventDefault(); dismissSp
 // ═══════════════════════════════════════════════
 const profileSetupOverlay = document.getElementById('profile-setup-overlay');
 const profileSetupNameInput = document.getElementById('profile-setup-name');
+const profileSetupNameError = document.getElementById('profile-setup-name-error');
 const profileSetupAvatarGrid = document.getElementById('profile-setup-avatar-grid');
 const profileSetupConfirmBtn = document.getElementById('profile-setup-confirm');
+const profileSetupConfirmBtnDefaultHTML = profileSetupConfirmBtn.innerHTML;
 
 let pendingSetupAvatarId = DEFAULT_AVATAR_ID;
 
@@ -1743,28 +1803,75 @@ function updateSetupConfirmState() {
   profileSetupConfirmBtn.disabled = !nameOk;
 }
 
+/** Oculta el aviso de "nombre ya en uso" (p. ej. al reabrir la pantalla
+ * o al retomar la edición tras un intento fallido). */
+function clearSetupNameError() {
+  profileSetupNameInput.classList.remove('has-error');
+  profileSetupNameError.style.display = 'none';
+  profileSetupNameError.textContent = '';
+}
+
 /** Muestra la pantalla de creación de perfil (nombre + avatar) si el
  * jugador todavía no tiene uno guardado; no hace nada si ya existe. */
 function showProfileSetupIfNeeded() {
   if (hasProfile()) return;
   pendingSetupAvatarId = DEFAULT_AVATAR_ID;
   profileSetupNameInput.value = "";
+  clearSetupNameError();
   renderAvatarGrid(profileSetupAvatarGrid, pendingSetupAvatarId, (id) => { pendingSetupAvatarId = id; });
   updateSetupConfirmState();
   profileSetupOverlay.classList.add('show');
   setTimeout(() => profileSetupNameInput.focus(), 300);
 }
-profileSetupNameInput.addEventListener('input', updateSetupConfirmState);
+profileSetupNameInput.addEventListener('input', () => {
+  clearSetupNameError();
+  updateSetupConfirmState();
+});
 profileSetupNameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !profileSetupConfirmBtn.disabled) profileSetupConfirmBtn.click();
 });
-profileSetupConfirmBtn.addEventListener('click', () => {
+/** Confirma la pantalla de configuración inicial: intenta reservar el
+ * nombre de entrenador elegido en el registro global de nicknames
+ * (Leaderboard.claimUsername(), leaderboard.js) antes de crear el
+ * perfil, para que dos jugadores no puedan quedarse con el mismo
+ * nombre. Si el nombre ya está cogido por otro jugador, no se crea el
+ * perfil y se muestra el aviso en `profile-setup-name-error`; si no se
+ * ha podido comprobar (sin Firestore, sin conexión...) se deja crear
+ * el perfil igualmente, para que el juego siga siendo jugable sin
+ * backend (mismo criterio que el resto de `Leaderboard`, ver su
+ * cabecera en leaderboard.js). */
+profileSetupConfirmBtn.addEventListener('click', async () => {
   const name = profileSetupNameInput.value.trim().slice(0, 16);
   if (!name) return;
+
+  clearSetupNameError();
+  profileSetupConfirmBtn.disabled = true;
+  profileSetupNameInput.disabled = true;
+  profileSetupConfirmBtn.textContent = t("profileSetup.checking");
+
+  const result = await Leaderboard.claimUsername(name, ensurePlayerId());
+
+  if (!result.ok && result.reason === "taken") {
+    profileSetupNameInput.disabled = false;
+    profileSetupNameInput.classList.add('has-error');
+    profileSetupNameError.textContent = t("profileSetup.nameTaken");
+    profileSetupNameError.style.display = '';
+    profileSetupConfirmBtn.innerHTML = profileSetupConfirmBtnDefaultHTML;
+    updateSetupConfirmState();
+    profileSetupNameInput.focus();
+    return;
+  }
+
+  // result.ok === true (reservado, o ya reservado por este mismo
+  // playerId), o no se pudo comprobar (reason: "unverified"/"invalid"):
+  // en ambos casos se deja continuar, el juego no debe bloquearse por
+  // un fallo de red/permisos de Firestore.
   profile.username = name;
   profile.avatarId = pendingSetupAvatarId;
   saveProfile();
   renderProfileBar();
+  profileSetupNameInput.disabled = false;
+  profileSetupConfirmBtn.innerHTML = profileSetupConfirmBtnDefaultHTML;
   profileSetupOverlay.classList.remove('show');
 });
 
@@ -1774,8 +1881,6 @@ const profileBar = document.getElementById('profile-bar');
 const profileCloseBtn = document.getElementById('profile-close-btn');
 const profileModalAvatarImg = document.getElementById('profile-modal-avatar-img');
 const profileModalName = document.getElementById('profile-modal-name');
-const profileEditNameBtn = document.getElementById('profile-edit-name-btn');
-const profileModalNameInput = document.getElementById('profile-modal-name-input');
 const profileStatsList = document.getElementById('profile-stats-list');
 const profileChangeAvatarBtn = document.getElementById('profile-change-avatar-btn');
 const profileModalAvatarGrid = document.getElementById('profile-modal-avatar-grid');
@@ -1821,9 +1926,6 @@ function renderProfileStats() {
 function openProfileModal() {
   profileModalAvatarImg.src = getAvatarUrl(profile.avatarId);
   profileModalName.textContent = profile.username || t("common.trainerDefault");
-  profileModalNameInput.style.display = 'none';
-  profileModalNameInput.value = profile.username || "";
-  profileModalName.style.display = '';
   profileModalAvatarGrid.style.display = 'none';
   renderProfileStats();
   profileOverlay.classList.add('show');
@@ -1836,30 +1938,12 @@ profileBar.addEventListener('click', openProfileModal);
 profileCloseBtn.addEventListener('click', closeProfileModal);
 profileOverlay.addEventListener('click', (e) => { if (e.target === profileOverlay) closeProfileModal(); });
 
-// Cambiar nombre desde el modal de perfil
-profileEditNameBtn.addEventListener('click', () => {
-  profileModalName.style.display = 'none';
-  profileModalNameInput.style.display = '';
-  profileModalNameInput.focus();
-  profileModalNameInput.select();
-});
-/** Guarda el nuevo nombre introducido en el modal de perfil (si no está
- * vacío) y vuelve a mostrarlo como texto en lugar de campo editable. */
-function commitProfileNameEdit() {
-  const name = profileModalNameInput.value.trim().slice(0, 16);
-  if (name) {
-    profile.username = name;
-    saveProfile();
-    renderProfileBar();
-  }
-  profileModalName.textContent = profile.username || t("common.trainerDefault");
-  profileModalNameInput.style.display = 'none';
-  profileModalName.style.display = '';
-}
-profileModalNameInput.addEventListener('blur', commitProfileNameEdit);
-profileModalNameInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') profileModalNameInput.blur();
-});
+// Nota: el nombre de entrenador ya NO se puede editar desde este modal
+// (solo se elige una vez, en la pantalla de configuración inicial —
+// ver profileSetupConfirmBtn más abajo) porque queda reservado en
+// Firestore vía Leaderboard.claimUsername(): permitir cambiarlo aquí
+// sin liberar ni volver a reservar el nombre anterior/nuevo dejaría el
+// registro de nicknames desincronizado con lo que ve cada jugador.
 
 // Cambiar imagen de perfil desde el modal
 profileChangeAvatarBtn.addEventListener('click', () => {

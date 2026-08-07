@@ -74,7 +74,10 @@
 //     colosseum-xd/ ...
 //     ranger/ ...
 //     title/ ...
-//     openings-anime/ ...
+//     openings/españa/ ...   (doblaje España, ver más abajo)
+//   openings/
+//     latino/ ...            (doblaje Latino, fuera de other/, ¡ojo!)
+//     english/ ...           (versión inglesa, fuera de other/, ¡ojo!)
 // images/
 // sounds/
 //
@@ -293,7 +296,7 @@ const songs = [
   { title: "Ho-Oh", file: "songs/main/combate/ho-oh.mp3", image: "images/ho-oh.png", group: "combat", region: "Combate" },
   { title: "Entei", file: "songs/main/combate/entei.mp3", image: "images/entei.png", group: "combat", region: "Combate" },
   { title: "Raikou", file: "songs/main/combate/raikou.mp3", image: "images/raikou.png", group: "combat", region: "Combate" },
-  { title: "Los Regis", file: "songs/main/combate/regis.mp3", image: "images/regis.png", group: "combat", region: "Combate" },
+  { title: "Regis", file: "songs/main/combate/regis.mp3", image: "images/regis.png", group: "combat", region: "Combate" },
   { title: "Suicune", file: "songs/main/combate/suicune.mp3", image: "images/suicune.png", group: "combat", region: "Combate" },
 
   // ── Other — Minijuegos ──
@@ -306,7 +309,13 @@ const songs = [
   //   "colosseum-xd"    → songs/other/colosseum-xd/<pista>.mp3
   //   "ranger"          → songs/other/ranger/<pista>.mp3
   //   "title-screens"   → songs/other/title/<region-en-minusculas>.mp3
-  //   "openings-anime"  → songs/other/openings-anime/opening-<region-en-minusculas>.mp3
+  //   "openings-anime"  → tres rutas distintas según el doblaje/idioma (ver el
+  //                        bloque "Openings del Anime" más abajo, con `variant`):
+  //                          España (sin `variant`): songs/other/openings/españa/<archivo>.mp3
+  //                          Latino (`variant: "latino"`): songs/openings/latino/<archivo>.mp3
+  //                          Inglés (`variant: "english"`): songs/openings/english/<archivo>.mp3
+  //                        Las tres comparten el mismo nombre de archivo y la misma
+  //                        imagen (images/<archivo>.png), solo cambia la carpeta.
   // Sustituye/completa file e image con tus rutas reales; puedes añadir tantas
   // canciones por categoría como quieras (no hace falta que sea 1 por región).
 
@@ -413,20 +422,81 @@ const songs = [
   { title: "Pantalla de Título Alola",    file: "songs/other/title/alola.mp3",    image: "images/titulo-alola.png",    group: "other", other: "title-screens" },
 
   // Openings del Anime
-  // EJEMPLOS (sustituye/añade los tuyos, uno por opening real del anime).
-  { title: "Opening Kanto",   file: "songs/other/openings-anime/opening-kanto.mp3",   image: "images/opening-kanto.png",   group: "other", other: "openings-anime" },
-  { title: "Opening Johto",   file: "songs/other/openings-anime/opening-johto.mp3",   image: "images/opening-johto.png",   group: "other", other: "openings-anime" },
-  { title: "Opening Hoenn",   file: "songs/other/openings-anime/opening-hoenn.mp3",   image: "images/opening-hoenn.png",   group: "other", other: "openings-anime" },
-  { title: "Opening Sinnoh",  file: "songs/other/openings-anime/opening-sinnoh.mp3",  image: "images/opening-sinnoh.png",  group: "other", other: "openings-anime" },
-  { title: "Opening Teselia", file: "songs/other/openings-anime/opening-teselia.mp3", image: "images/opening-teselia.png", group: "other", other: "openings-anime" },
-  { title: "Opening Kalos",   file: "songs/other/openings-anime/opening-kalos.mp3",   image: "images/opening-kalos.png",   group: "other", other: "openings-anime" },
-  { title: "Opening Alola",   file: "songs/other/openings-anime/opening-alola.mp3",   image: "images/opening-alola.png",   group: "other", other: "openings-anime" },
-  // Openings del Anime — doblaje latinoamericano (`variant: "latino"`). Solo entran en el
-  // pool de partida cuando el jugador elige "Español Latino" en la pantalla previa
-  // (screen-openings-lang-select, ver session.openingsVariant y buildPool()); las de arriba
-  // (sin `variant`) son las que se usan con "Español de España" o con idioma "en".
-  // EJEMPLO (sustituye/añade los tuyos, uno por opening real del anime en latino).
-  { title: "Opening Latino Temporada 1", file: "songs/other/openings-latino/temporada1.mp3", image: "images/opening-kanto.png", group: "other", other: "openings-anime", variant: "latino" },
+  // Cada opening real tiene hasta tres entradas (misma canción, distinto doblaje/
+  // idioma), reconocibles porque comparten `title` (y por tanto la misma imagen,
+  // images/<archivo>.png — ver la nota "Las diferentes versiones de la misma
+  // canción deben estar asociadas a la misma imagen"):
+  //   - Doblaje España (sin `variant`): songs/other/openings/españa/<archivo>.mp3.
+  //     Es la que se usa jugando en español y eligiendo "Español de España" en la
+  //     pantalla previa (screen-openings-lang-select), y también la que se usaría
+  //     si algún día hay un idioma que no sea "es" ni "en" sin variante propia.
+  //   - Doblaje Latino (`variant: "latino"`): songs/openings/latino/<archivo>.mp3.
+  //     Solo entra en el pool si el jugador elige "Español Latino" en esa misma
+  //     pantalla previa (ver session.openingsVariant y buildPool()).
+  //   - Versión inglesa (`variant: "english"`): songs/openings/english/<archivo>.mp3.
+  //     Es la única que se usa jugando con settings.language === "en" (sin pantalla
+  //     previa: buildPool() la fuerza directamente, ver el comentario de ahí).
+  { title: "Hazte con Todos",                     file: "songs/other/openings/españa/hazte-con-todos.mp3",                     image: "images/hazte-con-todos.png",                     group: "other", other: "openings-anime", sonidexId: "hazte-con-todos" },
+  { title: "Aventuras en las Islas Naranja",      file: "songs/other/openings/españa/aventuras-en-las-islas-naranja.mp3",      image: "images/aventuras-en-las-islas-naranja.png",      group: "other", other: "openings-anime", sonidexId: "aventuras-en-las-islas-naranja" },
+  { title: "Los Viajes de Johto",                 file: "songs/other/openings/españa/los-viajes-johto.mp3",                    image: "images/los-viajes-johto.png",                    group: "other", other: "openings-anime", sonidexId: "los-viajes-johto" },
+  { title: "Los Campeones de la Liga de Johto",   file: "songs/other/openings/españa/los-campeones-de-la-liga-de-johto.mp3",   image: "images/los-campeones-de-la-liga-de-johto.png",   group: "other", other: "openings-anime", sonidexId: "los-campeones-de-la-liga-de-johto" },
+  { title: "Master Quest",                        file: "songs/other/openings/españa/master-quest.mp3",                        image: "images/master-quest.png",                        group: "other", other: "openings-anime", sonidexId: "master-quest" },
+  { title: "Advanced",                            file: "songs/other/openings/españa/advanced.mp3",                            image: "images/advanced.png",                            group: "other", other: "openings-anime", sonidexId: "advanced" },
+  { title: "Advanced Challenge",                  file: "songs/other/openings/españa/advanced-challenge.mp3",                  image: "images/advanced-challenge.png",                  group: "other", other: "openings-anime", sonidexId: "advanced-challenge" },
+  { title: "Advanced Battle",                     file: "songs/other/openings/españa/advanced-battle.mp3",                     image: "images/advanced-battle.png",                     group: "other", other: "openings-anime", sonidexId: "advanced-battle" },
+  { title: "Battle Frontier",                     file: "songs/other/openings/españa/battle-frontier.mp3",                     image: "images/battle-frontier.png",                     group: "other", other: "openings-anime", sonidexId: "battle-frontier" },
+  { title: "Diamante y Perla",                    file: "songs/other/openings/españa/diamante-perla.mp3",                      image: "images/diamante-perla.png",                      group: "other", other: "openings-anime", sonidexId: "diamante-perla" },
+  { title: "Battle Dimension",                    file: "songs/other/openings/españa/battle-dimension.mp3",                    image: "images/battle-dimension.png",                    group: "other", other: "openings-anime", sonidexId: "battle-dimension" },
+  { title: "Combates Galácticos",                 file: "songs/other/openings/españa/combates-galacticos.mp3",                 image: "images/combates-galacticos.png",                 group: "other", other: "openings-anime", sonidexId: "combates-galacticos" },
+  { title: "Los Vencedores de la Liga de Sinnoh",  file: "songs/other/openings/españa/los-vencedores-de-la-liga-de-sinnoh.mp3", image: "images/los-vencedores-de-la-liga-de-sinnoh.png", group: "other", other: "openings-anime", sonidexId: "los-vencedores-de-la-liga-de-sinnoh" },
+  { title: "Blanco y Negro",                      file: "songs/other/openings/españa/negro-y-blanco.mp3",                      image: "images/negro-y-blanco.png",                      group: "other", other: "openings-anime", sonidexId: "negro-y-blanco" },
+  { title: "Destinos Rivales",                    file: "songs/other/openings/españa/destinos-rivales.mp3",                    image: "images/destinos-rivales.png",                    group: "other", other: "openings-anime", sonidexId: "destinos-rivales" },
+  { title: "Aventuras en Unova",                  file: "songs/other/openings/españa/aventuras-en-teselia.mp3",                image: "images/aventuras-en-teselia.png",                group: "other", other: "openings-anime", sonidexId: "aventuras-en-teselia" },
+  { title: "Expediciones en Kalos",               file: "songs/other/openings/españa/expediciones-en-kalos.mp3",               image: "images/expediciones-en-kalos.png",               group: "other", other: "openings-anime", sonidexId: "expediciones-en-kalos" },
+
+  // Openings del Anime — doblaje latinoamericano (mismas imágenes que arriba,
+  // pero cada uno con el título tal y como se emitió en el doblaje latino —
+  // p. ej. con el signo de exclamación de apertura "¡...!" característico de
+  // esa localización; solo cambia `file`, `title` y se añade `variant: "latino"`).
+  { title: "¡Atrápalos Ya!",                      file: "songs/openings/latino/hazte-con-todos.mp3",                     image: "images/hazte-con-todos.png",                     group: "other", other: "openings-anime", sonidexId: "hazte-con-todos", variant: "latino" },
+  { title: "¡Liga Naranja!",                      file: "songs/openings/latino/aventuras-en-las-islas-naranja.mp3",      image: "images/aventuras-en-las-islas-naranja.png",      group: "other", other: "openings-anime", sonidexId: "aventuras-en-las-islas-naranja", variant: "latino" },
+  { title: "¡Los Viajes Johto!",                  file: "songs/openings/latino/los-viajes-johto.mp3",                    image: "images/los-viajes-johto.png",                    group: "other", other: "openings-anime", sonidexId: "los-viajes-johto", variant: "latino" },
+  { title: "¡Los Campeones de la Liga Johto!",    file: "songs/openings/latino/los-campeones-de-la-liga-de-johto.mp3",   image: "images/los-campeones-de-la-liga-de-johto.png",   group: "other", other: "openings-anime", sonidexId: "los-campeones-de-la-liga-de-johto", variant: "latino" },
+  { title: "¡La Búsqueda del Maestro!",           file: "songs/openings/latino/master-quest.mp3",                        image: "images/master-quest.png",                        group: "other", other: "openings-anime", sonidexId: "master-quest", variant: "latino" },
+  { title: "¡Fuerza Máxima!",                     file: "songs/openings/latino/advanced.mp3",                            image: "images/advanced.png",                            group: "other", other: "openings-anime", sonidexId: "advanced", variant: "latino" },
+  { title: "¡Reto Máximo!",                       file: "songs/openings/latino/advanced-challenge.mp3",                  image: "images/advanced-challenge.png",                  group: "other", other: "openings-anime", sonidexId: "advanced-challenge", variant: "latino" },
+  { title: "¡Batalla Avanzada!",                  file: "songs/openings/latino/advanced-battle.mp3",                     image: "images/advanced-battle.png",                     group: "other", other: "openings-anime", sonidexId: "advanced-battle", variant: "latino" },
+  { title: "¡Batalla de la Frontera!",            file: "songs/openings/latino/battle-frontier.mp3",                     image: "images/battle-frontier.png",                     group: "other", other: "openings-anime", sonidexId: "battle-frontier", variant: "latino" },
+  { title: "¡Diamante y Perla!",                  file: "songs/openings/latino/diamante-perla.mp3",                      image: "images/diamante-perla.png",                      group: "other", other: "openings-anime", sonidexId: "diamante-perla", variant: "latino" },
+  { title: "¡Dimensión de Batalla!",              file: "songs/openings/latino/battle-dimension.mp3",                    image: "images/battle-dimension.png",                    group: "other", other: "openings-anime", sonidexId: "battle-dimension", variant: "latino" },
+  { title: "¡Batallas Galácticas!",               file: "songs/openings/latino/combates-galacticos.mp3",                 image: "images/combates-galacticos.png",                 group: "other", other: "openings-anime", sonidexId: "combates-galacticos", variant: "latino" },
+  { title: "¡Los Vencedores de la Liga Sinnoh!",  file: "songs/openings/latino/los-vencedores-de-la-liga-de-sinnoh.mp3", image: "images/los-vencedores-de-la-liga-de-sinnoh.png", group: "other", other: "openings-anime", sonidexId: "los-vencedores-de-la-liga-de-sinnoh", variant: "latino" },
+  { title: "¡Blanco y Negro!",                    file: "songs/openings/latino/negro-y-blanco.mp3",                      image: "images/negro-y-blanco.png",                      group: "other", other: "openings-anime", sonidexId: "negro-y-blanco", variant: "latino" },
+  { title: "¡Destinos Rivales!",                  file: "songs/openings/latino/destinos-rivales.mp3",                    image: "images/destinos-rivales.png",                    group: "other", other: "openings-anime", sonidexId: "destinos-rivales", variant: "latino" },
+  { title: "¡Aventuras en Unova!",                file: "songs/openings/latino/aventuras-en-teselia.mp3",                image: "images/aventuras-en-teselia.png",                group: "other", other: "openings-anime", sonidexId: "aventuras-en-teselia", variant: "latino" },
+  { title: "¡XY Kalos Quest!",                    file: "songs/openings/latino/expediciones-en-kalos.mp3",               image: "images/expediciones-en-kalos.png",               group: "other", other: "openings-anime", sonidexId: "expediciones-en-kalos", variant: "latino" },
+
+  // Openings del Anime — versión inglesa (mismas imágenes que arriba, pero
+  // cada uno con el título original en inglés; solo cambia `file`, `title` y
+  // se añade `variant: "english"`). Es la única variante que se usa jugando
+  // con settings.language === "en" (ver buildPool()).
+  { title: "Indigo League",                       file: "songs/openings/english/hazte-con-todos.mp3",                     image: "images/hazte-con-todos.png",                     group: "other", other: "openings-anime", sonidexId: "hazte-con-todos", variant: "english" },
+  { title: "Adventures in the Orange Islands",    file: "songs/openings/english/aventuras-en-las-islas-naranja.mp3",      image: "images/aventuras-en-las-islas-naranja.png",      group: "other", other: "openings-anime", sonidexId: "aventuras-en-las-islas-naranja", variant: "english" },
+  { title: "The Johto Journeys",                  file: "songs/openings/english/los-viajes-johto.mp3",                    image: "images/los-viajes-johto.png",                    group: "other", other: "openings-anime", sonidexId: "los-viajes-johto", variant: "english" },
+  { title: "Johto League Champions",              file: "songs/openings/english/los-campeones-de-la-liga-de-johto.mp3",   image: "images/los-campeones-de-la-liga-de-johto.png",   group: "other", other: "openings-anime", sonidexId: "los-campeones-de-la-liga-de-johto", variant: "english" },
+  { title: "Master Quest",                        file: "songs/openings/english/master-quest.mp3",                        image: "images/master-quest.png",                        group: "other", other: "openings-anime", sonidexId: "master-quest", variant: "english" },
+  { title: "Advanced",                            file: "songs/openings/english/advanced.mp3",                            image: "images/advanced.png",                            group: "other", other: "openings-anime", sonidexId: "advanced", variant: "english" },
+  { title: "Advanced Challenge",                  file: "songs/openings/english/advanced-challenge.mp3",                  image: "images/advanced-challenge.png",                  group: "other", other: "openings-anime", sonidexId: "advanced-challenge", variant: "english" },
+  { title: "Advanced Battle",                     file: "songs/openings/english/advanced-battle.mp3",                     image: "images/advanced-battle.png",                     group: "other", other: "openings-anime", sonidexId: "advanced-battle", variant: "english" },
+  { title: "Battle Frontier",                     file: "songs/openings/english/battle-frontier.mp3",                     image: "images/battle-frontier.png",                     group: "other", other: "openings-anime", sonidexId: "battle-frontier", variant: "english" },
+  { title: "Diamond and Pearl",                   file: "songs/openings/english/diamante-perla.mp3",                      image: "images/diamante-perla.png",                      group: "other", other: "openings-anime", sonidexId: "diamante-perla", variant: "english" },
+  { title: "Battle Dimension",                    file: "songs/openings/english/battle-dimension.mp3",                    image: "images/battle-dimension.png",                    group: "other", other: "openings-anime", sonidexId: "battle-dimension", variant: "english" },
+  { title: "Galactic Battles",                    file: "songs/openings/english/combates-galacticos.mp3",                 image: "images/combates-galacticos.png",                 group: "other", other: "openings-anime", sonidexId: "combates-galacticos", variant: "english" },
+  { title: "Sinnoh League Victors",               file: "songs/openings/english/los-vencedores-de-la-liga-de-sinnoh.mp3", image: "images/los-vencedores-de-la-liga-de-sinnoh.png", group: "other", other: "openings-anime", sonidexId: "los-vencedores-de-la-liga-de-sinnoh", variant: "english" },
+  { title: "Black & White",                       file: "songs/openings/english/negro-y-blanco.mp3",                      image: "images/negro-y-blanco.png",                      group: "other", other: "openings-anime", sonidexId: "negro-y-blanco", variant: "english" },
+  { title: "Rival Destinies",                     file: "songs/openings/english/destinos-rivales.mp3",                    image: "images/destinos-rivales.png",                    group: "other", other: "openings-anime", sonidexId: "destinos-rivales", variant: "english" },
+  { title: "Adventures in Unova",                 file: "songs/openings/english/aventuras-en-teselia.mp3",                image: "images/aventuras-en-teselia.png",                group: "other", other: "openings-anime", sonidexId: "aventuras-en-teselia", variant: "english" },
+  { title: "XY Kalos Quest",                      file: "songs/openings/english/expediciones-en-kalos.mp3",               image: "images/expediciones-en-kalos.png",               group: "other", other: "openings-anime", sonidexId: "expediciones-en-kalos", variant: "english" },
 ];
 
 // Número de rondas por partida (Modo Fácil, Normal, Difícil y fases de región del Modo Historia)
@@ -561,112 +631,174 @@ const AVATAR_UNLOCKS = {
   grovyle:    { achId: "perfect_mystery_dungeon" },
   wigglytuff: { achId: "perfect_mystery_dungeon" },
   lucario:    { achId: "perfect_combat"          },
-  meowth:     { level: 2  },
-  psyduck:    { level: 2  },
-  snubbull:   { level: 2  },
-  vulpix:     { level: 3  },
-  rattata:    { level: 3  },
-  geodude:    { level: 3  },
-  cubone:     { level: 4  },
-  sunkern:    { level: 4  },
-  wooper:     { level: 4  },
-  skitty:     { level: 5  },
-  togepi:     { level: 5  },
-  mareep:     { level: 5  },
-  chikorita:  { level: 6  },
-  cyndaquil:  { level: 6  },
-  totodile:   { level: 6  },
-  kecleon:    { level: 7  },
-  staryu:     { level: 7  },
-  teddiursa:  { level: 7  },
-  kangaskhan: { level: 8  },
-  ralts:      { level: 8  },
-  magikarp:   { level: 8  },
-  absol:      { level: 9  },
-  smeargle:   { level: 9  },
-  corsola:    { level: 9  },
-  gardevoir:  { level: 10 },
-  marill:     { level: 10 },
-  growlithe:  { level: 10 },
-  riolu:      { level: 11 },
-  feebas:     { level: 11 },
-  swablu:     { level: 11 },
-  treecko:    { level: 12 },
-  mudkip:     { level: 12 },
-  torchic:    { level: 12 },
-  gyarados:   { level: 13 },
-  dratini:    { level: 13 },
-  trapinch:   { level: 13 },
-  scyther:    { level: 14 },
-  larvitar:   { level: 14 },
-  hoothoot:   { level: 14 },
-  arcanine:   { level: 15 },
-  beldum:     { level: 15 },
-  bagon:      { level: 16 },
-  onix:       { level: 16 },
-  gible:      { level: 17 },
-  heracross:  { level: 17 },
-  turtwig:    { level: 18 },
-  piplup:     { level: 18 },
-  chimchar:   { level: 18 },
-  milotic:    { level: 19 },
-  magmar:     { level: 19 },
-  jynx:       { level: 20 },
-  wobbuffet:  { level: 20 },
-  chatot:     { level: 21 },
-  electabuzz: { level: 21 },
-  sylveon:    { level: 22 },
-  tauros:     { level: 22 },
-  shuckle:    { level: 23 },
-  aerodactyl: { level: 23 },
-  snivy:      { level: 24 },
-  oshawott:   { level: 24 },
-  tepig:      { level: 24 },
-  flareon:    { level: 25 },
-  cacnea:     { level: 25 },
-  vaporeon:   { level: 26 },
-  whiscash:   { level: 26 },
-  lapras:     { level: 27 },
-  jolteon:    { level: 27 },
-  zoroark:    { level: 28 },
-  unown:      { level: 28 },
-  scizor:     { level: 29 },
-  sneasler:   { level: 29 },
-  fennekin:   { level: 30 },
-  chespin:    { level: 30 },
-  froakie:    { level: 30 },
-  xatu:       { level: 31 },
-  spinda:     { level: 31 },
-  miltank:    { level: 32 },
-  spoink:     { level: 32 },
-  alakazam:   { level: 33 },
-  loudred:    { level: 33 },
-  dunsparce:  { level: 34 },
-  ledian:     { level: 34 },
-  torkoal:    { level: 35 },
-  sharpedo:   { level: 35 },
-  medicham:   { level: 36 },
-  shedinja:   { level: 36 },
-  mantine:    { level: 37 },
-  sableye:    { level: 37 },
-  lunatone:   { level: 38 },
-  solrock:    { level: 38 },
-  sunflora:   { level: 39 },
-  ninetales:  { level: 39 },
-  aggron:     { level: 40 },
-  flygon:     { level: 41 },
-  salamence:  { level: 42 },
-  volcarona:  { level: 43 },
-  dragonite:  { level: 44 },
-  tyranitar:  { level: 45 },
-  garchomp:   { level: 46 },
-  metagross:  { level: 47 },
-  latios:     { level: 48 },
-  latias:     { level: 48 },
-  lugia:      { level: 49 },
-  "ho-oh":    { level: 49 },
-  celebi:     { level: 50 },
-  jirachi:    { level: 50 },
+  sunkern:     { level: 2  },
+  magikarp:    { level: 2  },
+  ralts:       { level: 2  },
+  rattata:     { level: 2  },
+  shedinja:    { level: 2  },
+  feebas:      { level: 3  },
+  togepi:      { level: 3  },
+  bidoof:      { level: 3  },
+  riolu:       { level: 3  },
+  hoothoot:    { level: 3  },
+  wooper:      { level: 4  },
+  smeargle:    { level: 4  },
+  mareep:      { level: 4  },
+  vulpix:      { level: 4  },
+  unown:       { level: 4  },
+  marill:      { level: 5  },
+  trapinch:    { level: 5  },
+  meowth:      { level: 5  },
+  growlithe:   { level: 5  },
+  dratini:     { level: 5  },
+  chikorita:   { level: 6  },
+  cyndaquil:   { level: 6  },
+  totodile:    { level: 6  },
+  geodude:     { level: 6  },
+  snubbull:    { level: 6  },
+  beldum:      { level: 7  },
+  bagon:       { level: 7  },
+  larvitar:    { level: 7  },
+  psyduck:     { level: 7  },
+  skitty:      { level: 7  },
+  cacnea:      { level: 8  },
+  spoink:      { level: 8  },
+  swablu:      { level: 8  },
+  cubone:      { level: 8  },
+  staryu:      { level: 8  },
+  teddiursa:   { level: 9  },
+  pachirisu:   { level: 9  },
+  sableye:     { level: 9  },
+  onix:        { level: 9  },
+  ledian:      { level: 9  },
+  chatot:      { level: 10 },
+  kricketune:  { level: 10 },
+  corsola:     { level: 10 },
+  dunsparce:   { level: 10 },
+  gible:       { level: 10 },
+  spinda:      { level: 11 },
+  sunflora:    { level: 11 },
+  medicham:    { level: 11 },
+  whiscash:    { level: 11 },
+  jynx:        { level: 11 },
+  treecko:     { level: 12 },
+  torchic:     { level: 12 },
+  mudkip:      { level: 12 },
+  kecleon:     { level: 12 },
+  loudred:     { level: 13 },
+  rotom:       { level: 13 },
+  lunatone:    { level: 13 },
+  mantine:     { level: 13 },
+  wobbuffet:   { level: 14 },
+  solrock:     { level: 14 },
+  absol:       { level: 14 },
+  torkoal:     { level: 14 },
+  lopunny:     { level: 15 },
+  staraptor:   { level: 15 },
+  electabuzz:  { level: 15 },
+  magmar:      { level: 15 },
+  scrafty:     { level: 16 },
+  kangaskhan:  { level: 16 },
+  lapras:      { level: 16 },
+  heracross:   { level: 16 },
+  xatu:        { level: 17 },
+  miltank:     { level: 17 },
+  abomasnow:   { level: 17 },
+  excadrill:   { level: 17 },
+  turtwig:     { level: 18 },
+  chimchar:    { level: 18 },
+  piplup:      { level: 18 },
+  cosmog:      { level: 18 },
+  scyther:     { level: 19 },
+  ninetales:   { level: 19 },
+  alakazam:    { level: 19 },
+  gliscor:     { level: 19 },
+  scizor:      { level: 20 },
+  gardevoir:   { level: 20 },
+  weavile:     { level: 20 },
+  tauros:      { level: 20 },
+  shuckle:     { level: 21 },
+  sneasler:    { level: 21 },
+  zoroark:     { level: 21 },
+  chandelure:  { level: 21 },
+  aerodactyl:  { level: 22 },
+  flygon:      { level: 22 },
+  luxray:      { level: 22 },
+  flareon:     { level: 22 },
+  jolteon:     { level: 23 },
+  vaporeon:    { level: 23 },
+  sylveon:     { level: 23 },
+  snivy:       { level: 24 },
+  tepig:       { level: 24 },
+  oshawott:    { level: 24 },
+  sharpedo:    { level: 24 },
+  aggron:      { level: 25 },
+  gyarados:    { level: 25 },
+  arcanine:    { level: 25 },
+  milotic:     { level: 26 },
+  volcarona:   { level: 26 },
+  "kommo-o":   { level: 26 },
+  dragonite:   { level: 27 },
+  metagross:   { level: 27 },
+  tyranitar:   { level: 27 },
+  salamence:   { level: 28 },
+  hydreigon:   { level: 28 },
+  garchomp:    { level: 28 },
+  "tapu-koko": { level: 29 },
+  "tapu-lele": { level: 29 },
+  "tapu-bulu": { level: 29 },
+  chespin:     { level: 30 },
+  fennekin:    { level: 30 },
+  froakie:     { level: 30 },
+  "tapu-fini": { level: 30 },
+  articuno:    { level: 31 },
+  zapdos:      { level: 31 },
+  moltres:     { level: 31 },
+  raikou:      { level: 32 },
+  entei:       { level: 32 },
+  suicune:     { level: 32 },
+  regirock:    { level: 33 },
+  regice:      { level: 33 },
+  registeel:   { level: 33 },
+  uxie:        { level: 34 },
+  mesprit:     { level: 34 },
+  azelf:       { level: 34 },
+  keldeo:      { level: 35 },
+  heatran:     { level: 35 },
+  cresselia:   { level: 35 },
+  rowlet:      { level: 36 },
+  litten:      { level: 36 },
+  popplio:     { level: 36 },
+  latios:      { level: 37 },
+  latias:      { level: 37 },
+  celebi:      { level: 38 },
+  jirachi:     { level: 38 },
+  darkrai:     { level: 38 },
+  deoxys:      { level: 39 },
+  manaphy:     { level: 39 },
+  shaymin:     { level: 39 },
+  meloetta:    { level: 40 },
+  diancie:     { level: 40 },
+  hoopa:       { level: 40 },
+  lugia:       { level: 41 },
+  "ho-oh":     { level: 41 },
+  kyogre:      { level: 42 },
+  groudon:     { level: 42 },
+  regigigas:   { level: 43 },
+  rayquaza:    { level: 43 },
+  dialga:      { level: 44 },
+  palkia:      { level: 44 },
+  giratina:    { level: 45 },
+  kyurem:      { level: 45 },
+  reshiram:    { level: 46 },
+  zekrom:      { level: 46 },
+  xerneas:     { level: 47 },
+  yveltal:     { level: 47 },
+  solgaleo:    { level: 48 },
+  lunala:      { level: 48 },
+  zygarde:     { level: 49 },
+  marshadow:   { level: 49 },
+  arceus:      { level: 50 },
 };
 
 /** Indica si un avatar del catálogo (AVATAR_CATALOG) está desbloqueado para
@@ -759,10 +891,12 @@ let session = {
   mode: null,            // GameMode
   normalRegion: null,    // "Kanto"...
   otherGame: null,       // "mystery-dungeon" | "colosseum-xd" | "ranger" | "title-screens" | "openings-anime"
-  openingsVariant: null, // null (España) | "latino" — solo aplica cuando otherGame === "openings-anime";
-                          // fija qué canciones de esa categoría entran en el pool (ver buildPool()).
+  openingsVariant: null, // null (España) | "latino" — solo aplica cuando otherGame === "openings-anime"
+                          // Y ADEMÁS settings.language === "es" (con "en" se ignora, ver buildPool()).
                           // Se pregunta con la pantalla previa "screen-openings-lang-select" (solo si
                           // settings.language === "es") justo antes de startGame(GameMode.OTHER, "openings-anime").
+                          // Junto con settings.language, fija qué canciones de esa categoría entran en
+                          // el pool (España / Latino / Inglés — ver buildPool()).
   pool: [],              // canciones filtradas para la sesión
   questionType: "title", // "title" | "region"
   roundsTarget: 10,      // nº de rondas de la partida actual (se recalcula en startGame)
@@ -1001,8 +1135,11 @@ ENCOUNTER_CONDITION_IDS.forEach(id => {
 
 // Cuenta cuántas canciones de una lista están desbloqueadas en la Sonidex
 // para unas estadísticas de logros dadas (usado por los condicionales de arriba).
+// Deduplica por ficha (ver sonidexGroupSongs()) antes de contar, para que una
+// canción con varias variantes de idioma (p. ej. un opening) cuente como una
+// sola ficha aquí también, igual que en la pantalla Sonidex.
 function sonidexUnlockedCountForList(s, list) {
-  return list.filter(song => ((s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0) >= SONIDEX_UNLOCK_COUNT).length;
+  return sonidexGroupSongs(list).filter(song => ((s.songCorrectCounts && s.songCorrectCounts[sonidexKey(song)]) || 0) >= SONIDEX_UNLOCK_COUNT).length;
 }
 
 // ── Modos desbloqueables mediante nivel de perfil o logros ──
@@ -1140,25 +1277,86 @@ function trackCorrectAnswer() {
 // ── Sonidex: nº de aciertos necesarios para desbloquear una canción ──
 const SONIDEX_UNLOCK_COUNT = 10;
 
+/** Clave que identifica una FICHA de la Sonidex para una canción: por
+ * defecto es el propio archivo de audio (`song.file`) — una canción, un
+ * archivo, una ficha —, salvo que la canción tenga `sonidexId`: eso marca
+ * que hay VARIAS canciones del catálogo (mismo `title`, distinto `file`)
+ * que en realidad son la MISMA canción en idiomas/doblajes distintos (p.
+ * ej. las tres `variant` de un mismo opening de Openings del Anime —
+ * España/Latino/Inglés, ver el catálogo `songs` más arriba). Esas
+ * comparten un único `sonidexId` (el mismo en las tres) y por tanto una
+ * única ficha: acertar cualquiera de sus versiones suma al mismo contador
+ * de `songCorrectCounts`, y solo aparece una vez en la pantalla Sonidex.
+ * @param {Object} song
+ * @returns {string}
+ */
+function sonidexKey(song) {
+  return song.sonidexId || song.file;
+}
+
+/** A partir de una lista de canciones (normalmente `songs` filtrado por
+ * una categoría de la Sonidex), la reduce a como mucho UNA canción por
+ * ficha (ver sonidexKey()): las que comparten `sonidexId` se colapsan en
+ * una sola, usada como "representante" de esa ficha para pintar su
+ * carátula/reproducirla — se prefiere la versión del idioma actual del
+ * juego (settings.language) si existe entre las variantes, y si no la
+ * primera que se encuentre. Las canciones sin `sonidexId` (la inmensa
+ * mayoría del catálogo) pasan tal cual, una a una. */
+function sonidexGroupSongs(list) {
+  const seen = new Map();
+  list.forEach(song => {
+    const key = sonidexKey(song);
+    const existing = seen.get(key);
+    if (!existing) { seen.set(key, song); return; }
+    const wantedVariant = settings.language === "en" ? "english" : null;
+    if ((existing.variant || null) !== wantedVariant && (song.variant || null) === wantedVariant) {
+      seen.set(key, song);
+    }
+  });
+  return [...seen.values()];
+}
+
+// Orden fijo en el que se ofrecen las variantes de idioma/doblaje de una
+// ficha de la Sonidex con más de una versión (p. ej. los openings del
+// anime, ver el botón de cambiar idioma en sonidexSongCard() de ui.js):
+// España (sin `variant`) primero, luego Latino, luego Inglés.
+const SONIDEX_VARIANT_ORDER = [null, "latino", "english"];
+
+/** Devuelve, en el orden de SONIDEX_VARIANT_ORDER, todas las canciones del
+ * catálogo que son la MISMA ficha de la Sonidex que `song` (comparten
+ * `sonidexId`) — es decir, todas sus variantes de idioma/doblaje
+ * disponibles para escuchar desde esa ficha. Si `song` no tiene
+ * `sonidexId` (la inmensa mayoría del catálogo), devuelve solo `[song]`:
+ * no hay variantes entre las que elegir, así que el botón de cambiar
+ * idioma de la ficha no debe mostrarse. */
+function sonidexVariantsFor(song) {
+  if (!song.sonidexId) return [song];
+  const siblings = songs.filter(s => s.sonidexId === song.sonidexId);
+  return SONIDEX_VARIANT_ORDER.map(v => siblings.find(s => (s.variant || null) === v)).filter(Boolean);
+}
+
 /** Una canción aparece "desbloqueada" en la Sonidex cuando se ha
  * acertado un número mínimo de veces (SONIDEX_UNLOCK_COUNT). */
 function isSongUnlocked(song) {
   const s = achievementsData.stats;
-  const count = (s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0;
+  const count = (s.songCorrectCounts && s.songCorrectCounts[sonidexKey(song)]) || 0;
   return count >= SONIDEX_UNLOCK_COUNT;
 }
 
 /** Incrementa el contador de aciertos de una canción concreta (para la
- * Sonidex) y comprueba si con este acierto pasa a desbloquearse. */
+ * Sonidex) y comprueba si con este acierto pasa a desbloquearse. Cuenta
+ * por ficha (ver sonidexKey()): acertar cualquiera de las variantes de
+ * idioma de un mismo opening suma siempre al mismo contador. */
 function trackSongCorrect(song) {
   // No cuenta en Modo Fácil (ahí se adivina la región, no la canción)
   if (session.mode === GameMode.EASY) return;
 
   const s = achievementsData.stats;
   if (!s.songCorrectCounts) s.songCorrectCounts = {};
+  const key = sonidexKey(song);
 
   const wasUnlocked = isSongUnlocked(song);
-  s.songCorrectCounts[song.file] = (s.songCorrectCounts[song.file] || 0) + 1;
+  s.songCorrectCounts[key] = (s.songCorrectCounts[key] || 0) + 1;
   saveAchievements();
 
   const nowUnlocked = isSongUnlocked(song);
@@ -1367,11 +1565,24 @@ function buildPool() {
     session.pool = songs.filter(s => s.group === "main");
     session.questionType = "title";
   } else if (session.mode === GameMode.OTHER) {
-    // Openings del Anime tiene dos variantes de doblaje (España/Latino, ver
-    // session.openingsVariant); el resto de categorías no usan `variant` en absoluto,
-    // así que Boolean(s.variant) es siempre false para ellas y este filtro no les afecta.
-    const wantLatino = session.otherGame === "openings-anime" && session.openingsVariant === "latino";
-    session.pool = songs.filter(s => s.group === "other" && s.other === session.otherGame && Boolean(s.variant) === wantLatino);
+    // Openings del Anime tiene tres variantes de doblaje/idioma (España/Latino/
+    // Inglés — ver el campo `variant` de cada canción en el catálogo de arriba).
+    // Cuál se usa depende del idioma actual del juego y, si es español, de la
+    // elección del jugador en la pantalla previa (session.openingsVariant):
+    //   - settings.language === "en": siempre la versión inglesa (`variant:
+    //     "english"`), sin pasar por la pantalla previa (ver el listener de
+    //     [data-other] más abajo, que se la salta directamente en ese caso).
+    //   - settings.language === "es": la versión que haya elegido el jugador en
+    //     esa pantalla — España (session.openingsVariant === null, sin `variant`
+    //     en el catálogo) o Latino (session.openingsVariant === "latino").
+    // El resto de categorías de Minijuegos no usan `variant` en absoluto (todas
+    // sus canciones tienen `variant === undefined`), así que wantedVariant es
+    // siempre `null` para ellas y este filtro no les afecta.
+    let wantedVariant = null;
+    if (session.otherGame === "openings-anime") {
+      wantedVariant = settings.language === "en" ? "english" : session.openingsVariant;
+    }
+    session.pool = songs.filter(s => s.group === "other" && s.other === session.otherGame && (s.variant || null) === wantedVariant);
     session.questionType = "title";
   } else if (session.mode === GameMode.INFINITE) {
     // Desafío Infinito: todas las canciones principales, sin límite de rondas, EXCEPTO las de Combate y las de Minijuegos
@@ -2011,7 +2222,8 @@ document.querySelectorAll("[data-other]").forEach(btn => {
     playSFX(SFX.go);
     // Se reinicia aquí (y no dentro de startGame) para que quede a null tanto si esta
     // categoría no es Openings del Anime como si el jugador entra en Openings del Anime
-    // jugando en inglés (sin pantalla previa, siempre versión España).
+    // jugando en inglés (sin pantalla previa: buildPool() fuerza la versión inglesa
+    // directamente a partir de settings.language, ignorando este valor).
     session.openingsVariant = null;
     if (key === "openings-anime" && settings.language === "es") {
       // Jugando en español: antes de arrancar, preguntar España/Latino (ver botones

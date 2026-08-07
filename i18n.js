@@ -48,6 +48,8 @@ const I18N = {
     "profileSetup.namePlaceholder": "Tu nombre de entrenador",
     "profileSetup.avatarLabel": "Elige tu imagen de perfil",
     "profileSetup.confirm": "✔ ¡Empezar a jugar!",
+    "profileSetup.checking": "Comprobando…",
+    "profileSetup.nameTaken": "Ese nombre de entrenador ya está en uso. Elige otro.",
 
     "profile.editNameTitle": "Cambiar nombre",
     "profile.changeAvatarBtn": "🖼️ Cambiar imagen de perfil",
@@ -233,6 +235,7 @@ const I18N = {
     "sonidex.note": "🔓 Acierta una misma canción 10 veces (en cualquier modo excepto el Fácil) para desbloquear su ficha.",
     "sonidex.progress": "{n} / {total} canciones desbloqueadas",
     "sonidex.progressShort": "{n} / {total} desbloqueadas",
+    "sonidex.changeLanguage": "Cambiar idioma del opening",
 
     "leaderboard.title": "🏆 Clasificaciones",
     "leaderboard.subtitle": "Los 50 mejores de cada categoría",
@@ -341,6 +344,8 @@ const I18N = {
     "profileSetup.namePlaceholder": "Your trainer name",
     "profileSetup.avatarLabel": "Choose your profile picture",
     "profileSetup.confirm": "✔ Start playing!",
+    "profileSetup.checking": "Checking…",
+    "profileSetup.nameTaken": "That trainer name is already taken. Choose another one.",
 
     "profile.editNameTitle": "Change name",
     "profile.changeAvatarBtn": "🖼️ Change profile picture",
@@ -527,6 +532,7 @@ const I18N = {
     "sonidex.note": "🔓 Guess the same song 10 times (in any mode except Easy) to unlock its entry.",
     "sonidex.progress": "{n} / {total} songs unlocked",
     "sonidex.progressShort": "{n} / {total} unlocked",
+    "sonidex.changeLanguage": "Change opening language",
 
     "leaderboard.title": "🏆 Leaderboards",
     "leaderboard.subtitle": "The top 50 of each category",
@@ -1150,7 +1156,40 @@ const I18N = {
     "song.Surf Kalos": "Kalos Surf",
     "song.Montura Acuática Alola": "Alola Water Ride",
 
+    // Pokémon Mundo Misterioso
+    "song.Arboleda Chica": "Tiny Woods",
+    "song.Base Equipo": "Rescue Base",
+    "song.Bosque Helado": "Frosty Forest",
+    "song.Bosque Niebla": "Foggy Forest",
+    "song.Bosque Sombrío": "Darknight Forest",
+    "song.Bosque Tétrico": "Sinister Woods",
+    "song.Caverna Magma": "Magma Cavern",
+    "song.Colina Oscura": "Dark Hill",
+    "song.Cueva Abismo": "Chasm Cave",
+    "song.Cueva Bajamar": "Beach Cave",
+    "song.Cueva Cristal": "Crystal Cave",
+    "song.Desierto Norte": "Northern Desert",
+    "song.Dialga Primario": "Primal Dialga",
+    "song.Dojo Makuhita": "Makuhita Dojo",
+    "song.Fugitivos": "Fugitives",
+    "song.Gran Cañón": "Great Canyon",
+    "song.Manzanar": "Apple Woods",
+    "song.A Través del Mar del Tiempo": "Through the Sea of Time",
+    "song.Mina Onda Trueno": "Thunderwave Cave",
+    "song.Monte Acero": "Mt. Steel",
+    "song.Monte Árido": "Mt. Bristle",
+    "song.Monte Escarcha": "Mt. Freeze",
+    "song.Monte Ígneo": "Mt. Blaze",
+    "song.Monte Trueno": "Mt. Thunder",
+    "song.Plaza Pokémon": "Pokémon Square",
+    "song.Pokégremio": "Wigglytuff's Guild",
+    "song.Risco Calado": "Drenched Bluff",
+    "song.Sima Silenciosa": "Silent Chasm",
+    "song.Test Personalidad": "Personality Test",
+    "song.Torre Del Cielo": "Sky Tower",
+
     // Pokémon Colosseum / XD
+    "song.Básix": "The Under",
     "song.Ciudad Oasis": "Phenac City",
     "song.Guarida Equipo Cepo": "Cipher Peon Hideout",
     "song.Laboratorio Aura": "Lab (Aura)",
@@ -1183,14 +1222,27 @@ const I18N = {
     "song.Pantalla de Título Kalos": "Kalos Title Screen",
     "song.Pantalla de Título Alola": "Alola Title Screen",
 
-    // Openings del Anime
-    "song.Opening Kanto": "Kanto Opening",
-    "song.Opening Johto": "Johto Opening",
-    "song.Opening Hoenn": "Hoenn Opening",
-    "song.Opening Sinnoh": "Sinnoh Opening",
-    "song.Opening Teselia": "Unova Opening",
-    "song.Opening Kalos": "Kalos Opening",
-    "song.Opening Alola": "Alola Opening",
+    // Openings del Anime (mismas claves para las tres variantes/doblajes —
+    // España/Latino/Inglés—, ya que comparten `title` en el catálogo de game.js;
+    // ver la nota de songDisplayName() sobre cómo se usa esta traducción también
+    // para las fichas de Sonidex, no solo mientras se juega en inglés).
+    "song.Hazte con Todos": "Pokémon Theme",
+    "song.Aventuras en las Islas Naranja": "Born to Be a Winner",
+    "song.Los Viajes de Johto": "Pokémon Johto",
+    "song.Los Campeones de la Liga de Johto": "Johto League Champions",
+    "song.Master Quest": "Master Quest",
+    "song.Advanced": "Advanced",
+    "song.Advanced Challenge": "Advanced Challenge",
+    "song.Advanced Battle": "Advanced Battle",
+    "song.Battle Frontier": "Battle Frontier",
+    "song.Diamante y Perla": "Diamond and Pearl",
+    "song.Battle Dimension": "Battle Dimension",
+    "song.Combates Galácticos": "Galactic Battles",
+    "song.Los Vencedores de la Liga de Sinnoh": "Sinnoh League Victors",
+    "song.Negro y Blanco": "Black and White",
+    "song.Destinos Rivales": "Rival Destinies",
+    "song.Aventuras en Teselia": "Adventures in Unova",
+    "song.Expediciones en Kalos": "XY",
   },
 };
 

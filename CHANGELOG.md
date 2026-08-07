@@ -16,7 +16,165 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Añadido
+- **63 avatares de perfil nuevos** (legendarios, singulares y algunos
+  populares que faltaban): Abomasnow, Arceus, Articuno, Azelf, Bidoof,
+  Chandelure, Cosmog, Cresselia, Darkrai, Deoxys, Dialga, Diancie, Entei,
+  Excadrill, Giratina, Gliscor, Groudon, Heatran, Hoopa, Hydreigon,
+  Keldeo, Kommo-o, Kricketune, Kyogre, Kyurem, Litten, Lopunny, Lunala,
+  Luxray, Manaphy, Marshadow, Meloetta, Mesprit, Moltres, Pachirisu,
+  Palkia, Popplio, Raikou, Rayquaza, Regice, Regigigas, Regirock,
+  Registeel, Reshiram, Rotom, Rowlet, Scrafty, Shaymin, Solgaleo,
+  Staraptor, Suicune, Tapu Bulu, Tapu Fini, Tapu Koko, Tapu Lele, Uxie,
+  Weavile, Xerneas, Yveltal, Zapdos, Zekrom y Zygarde. (Celebi y Jirachi
+  no se añaden porque ya estaban en el catálogo.) Todos quedan
+  disponibles desde el principio, sin entrada en `AVATAR_UNLOCKS`.
+  - `storage.js`: 63 entradas nuevas al final de `AVATAR_CATALOG`, mismo
+    formato que las existentes (retrato de PMDCollab/SpriteCollab según
+    su número de la Pokédex nacional).
+
+### Cambiado
+- **Los avatares de Gible y Jynx ahora requieren nivel de perfil**, en
+  vez de estar desbloqueados desde el principio.
+  - `game.js`: dos entradas nuevas en `AVATAR_UNLOCKS` —
+    `gible: { level: 10 }` y `jynx: { level: 11 }` —, junto al resto de
+    avatares de esos mismos niveles.
+
 ### Corregido
+- **Los títulos de "Openings del Anime" no cambiaban según el doblaje/idioma
+  con el que sonaba la canción.** Las tres entradas de cada opening real
+  (España/Latino/Inglés en `game.js`, distinguidas por `variant`) compartían
+  el mismo `title` en español de España aunque `file` sí apuntara al mp3 del
+  doblaje correcto, así que un opening que sonaba en latino o en inglés se
+  mostraba (título de la ronda, pantalla de resultado, Sonidex...) con su
+  nombre en español de España en vez del nombre real de esa versión.
+  - `game.js`: cada una de las 17 entradas `variant: "latino"` y
+    `variant: "english"` del bloque "Openings del Anime" tiene ahora su
+    `title` correcto para ese doblaje (p. ej. "¡Atrápalos Ya!" en latino /
+    "Indigo League" en inglés, en vez de "Hazte con Todos"). De paso, las
+    dos entradas de España cuyo `title` no coincidía con el nombre real del
+    doblaje español se corrigen también: "Negro y Blanco" → "Blanco y
+    Negro", "Aventuras en Teselia" → "Aventuras en Unova". No se toca
+    `file`, `image` ni `sonidexId` de ninguna entrada.
+
+- **No se podía abrir el modal de perfil (bug introducido en un cambio
+  anterior que quitó la edición de nombre).** El marcado de
+  `#profile-overlay` en `index.html` había dejado de tener el botón
+  "editar nombre" y su campo de texto (`#profile-edit-name-btn`/
+  `#profile-modal-name-input`), pero `ui.js` seguía intentando
+  engancharles un listener nada más cargar el script
+  (`profileEditNameBtn.addEventListener(...)`, fuera de cualquier
+  función). Al ser `null`, esa línea lanzaba una excepción en cuanto se
+  cargaba la página y detenía la ejecución del resto de `ui.js`
+  (Modo Historia, logros, router de pantallas...), así que ni siquiera
+  hacía falta abrir el perfil para notar el problema.
+  - `ui.js`: eliminadas las referencias a `profile-edit-name-btn`/
+    `profile-modal-name-input` (ya no existen en el HTML) y toda la
+    lógica de `commitProfileNameEdit()` que dependía de ellas.
+    `openProfileModal()` ya no intenta tocar el campo de edición. El
+    nombre de entrenador vuelve a poder verse con normalidad en el
+    modal de perfil; sigue sin poder editarse ahí (comportamiento ya
+    buscado en el cambio anterior, solo que ahora sin romper el resto
+    de la app).
+
+### Añadido
+- **Botón para cambiar el idioma/doblaje del opening desde su ficha de la
+  Sonidex**: cada ficha de "Openings del Anime" que tenga más de una
+  variante de idioma (España/Latino/Inglés) muestra ahora, junto a los
+  botones de reproducir/detener, un pequeño botón con una bandera que va
+  rotando entre esas variantes; el que se reproduce con ▶️ es siempre la
+  variante seleccionada en ese momento, sin que esto afecte para nada al
+  contador de aciertos de la ficha (sigue siendo uno solo, compartido entre
+  las tres — ver el cambio anterior).
+  - `game.js`: nueva función `sonidexVariantsFor(song)` (con
+    `SONIDEX_VARIANT_ORDER` para el orden España → Latino → Inglés), que
+    devuelve todas las canciones del catálogo que comparten `sonidexId` con
+    `song`; para el resto de canciones (sin `sonidexId`) devuelve solo
+    `[song]`, así que no les afecta.
+  - `ui.js`: `sonidexSongCard()` guarda en `currentVariantSong` la variante
+    que se está escuchando en esa ficha (empieza siendo el representante
+    que ya elegía `sonidexGroupSongs()`) y añade el botón `.sonidex-lang-btn`
+    (solo si `sonidexVariantsFor(song).length > 1`) que la va rotando y
+    reinicia la reproducción si la ficha ya estaba sonando. Nueva función
+    `sonidexVariantFlag()` para el emoji de cada variante (🇪🇸/🌎/🇬🇧). El
+    "restaurar estado sonando" al volver a pintar la Sonidex ahora
+    comprueba todas las variantes de la ficha, no solo `song.file`.
+  - `i18n.js`: nueva clave `sonidex.changeLanguage` (aria-label/title del
+    botón) en español e inglés.
+  - `styles.css`: estilo `.sonidex-lang-btn` (mismo lenguaje visual que
+    `.sonidex-play-btn`/`.sonidex-stop-btn`, más pequeño).
+
+### Corregido
+- **La Sonidex mostraba (y contaba) una ficha distinta por cada variante de
+  idioma de un mismo opening de "Openings del Anime"** (hasta 3 fichas —
+  España/Latino/Inglés— para lo que en realidad es una sola canción), porque
+  el contador de aciertos y el listado de la pantalla Sonidex usaban
+  `song.file` como identificador de ficha, y cada variante tiene su propio
+  archivo de audio.
+  - `game.js`: catálogo `songs` — las 51 entradas de Openings del Anime
+    tienen ahora un `sonidexId` compartido entre sus tres variantes (p. ej.
+    `sonidexId: "hazte-con-todos"` en las tres versiones de esa canción).
+    Nuevas funciones `sonidexKey(song)` (devuelve `song.sonidexId ||
+    song.file`) y `sonidexGroupSongs(list)` (colapsa una lista de canciones a
+    una por ficha, prefiriendo como representante la variante del idioma
+    actual). `isSongUnlocked()`, `trackSongCorrect()` y
+    `sonidexUnlockedCountForList()` usan ahora `sonidexKey()` en vez de
+    `song.file` directamente, así que acertar cualquiera de las tres
+    versiones de un opening suma al mismo contador.
+  - `ui.js`: `renderSonidexScreen()` deduplica cada grupo con
+    `sonidexGroupSongs()` antes de pintar sus tarjetas (17 fichas para
+    Openings del Anime, no 51); `sonidexSongCard()` consulta el contador con
+    `sonidexKey()`; `updateHomeSonidexSummary()` deduplica igual el catálogo
+    completo para que el resumen "X / Y fichas" del Inicio siga cuadrando con
+    la pantalla Sonidex.
+  - No afecta a ninguna otra canción del catálogo (todas siguen sin
+    `sonidexId`, así que `sonidexKey()` sigue devolviendo `song.file` para
+    ellas exactamente igual que antes — ni se pierde progreso ya guardado en
+    `songCorrectCounts`, ni cambia el comportamiento de ninguna otra
+    categoría).
+
+### Añadido
+- **Catálogo real de "Openings del Anime" + versión inglesa del minijuego**:
+  las 17 canciones de ejemplo (`Opening Kanto`...`Opening Alola`) se han
+  sustituido por los 17 openings reales de la serie (de "Hazte con Todos" a
+  "Expediciones en Kalos"), cada uno con sus tres doblajes/idiomas
+  (España/Latino/Inglés — mismo `title` e `image` en las tres, solo cambia
+  `file` y el campo `variant`).
+  - `game.js`: catálogo `songs` actualizado (51 entradas: 17 openings × 3
+    variantes). Las de España viven en `songs/other/openings/españa/`, sin
+    `variant`; las de Latino en `songs/openings/latino/` con
+    `variant: "latino"`; las de Inglés en `songs/openings/english/` con
+    `variant: "english"` (nótese que Latino e Inglés NO cuelgan de `other/`,
+    a diferencia de España — así están las carpetas reales). `buildPool()`
+    ahora calcula `wantedVariant` también a partir de `settings.language`
+    (antes solo miraba `session.openingsVariant`): con el juego en inglés se
+    fuerza siempre la variante `"english"`, sin pasar por la pantalla previa
+    de selección de doblaje (que sigue existiendo tal cual para español,
+    ofreciendo España/Latino).
+  - `i18n.js`: traducciones al inglés (`song.<título original>`) de los 17
+    títulos nuevos, sustituyendo a las 7 de los openings de ejemplo
+    anteriores.
+- **Reserva de nicknames al registrarse**: al confirmar la pantalla de
+  configuración inicial (nombre + avatar, la primera vez que se juega),
+  ahora se intenta reservar ese nombre de entrenador en el registro
+  global de Firestore antes de crear el perfil, usando
+  `Leaderboard.claimUsername()` (`leaderboard.js`, ya existía pero no
+  se llamaba desde ningún sitio).
+  - `ui.js`: el listener de `profileSetupConfirmBtn` es ahora
+    `async`; mientras se comprueba el nombre, el botón se deshabilita y
+    muestra `profileSetup.checking` ("Comprobando…"). Si
+    `claimUsername()` devuelve `{ok: false, reason: "taken"}` (nombre
+    ya reservado por otro jugador), no se crea el perfil: se marca
+    `#profile-setup-name` con la clase `has-error` y se muestra el
+    aviso `profileSetup.nameTaken` en `#profile-setup-name-error`
+    (ambos ya existían en `index.html`/`styles.css`, preparados para
+    esto pero sin usar). En cualquier otro caso (reserva conseguida, o
+    no se pudo comprobar por falta de red/permisos de Firestore —
+    `reason: "unverified"`/`"invalid"`) se deja crear el perfil con
+    normalidad, para que el juego siga siendo jugable sin backend
+    (mismo criterio que el resto de `leaderboard.js`).
+  - `i18n.js`: nuevas claves `profileSetup.checking`/
+    `profileSetup.nameTaken` en español e inglés.
 - **Con el idioma de la interfaz en inglés, los avisos de "candado"
   (contenido todavía bloqueado) mezclaban texto en español.**
   - `game.js`: `avatarLockRequirementText()` (usada en el título del
