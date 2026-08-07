@@ -40,6 +40,28 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `gible: { level: 10 }` y `jynx: { level: 11 }` —, junto al resto de
     avatares de esos mismos niveles.
 
+- **Nueva categoría de clasificación global: Modo Difícil**, junto a
+  Nivel, Desafío Infinito y Modo Historia.
+  - `storage.js`: nuevo campo `bestHardScore` en `defaultAchStats()`
+    (récord personal de puntuación en Modo Difícil).
+  - `game.js`: en `showResult()`, al terminar una partida de Modo
+    Difícil se compara `state.score` con `achievementsData.stats.bestHardScore`
+    y, si es un récord nuevo, se guarda y se envía a
+    `Leaderboard.submitScore("hard", ...)` — mismo patrón ya usado para
+    Desafío Infinito y Modo Historia.
+  - `leaderboard.js`: nueva entrada `hard: "hardScore"` en
+    `LEADERBOARD_CATEGORIES` (campo `hardScore` en el documento del
+    jugador en Firestore).
+  - `ui.js`: nueva entrada `hard` en `LEADERBOARD_TABS`, y
+    `renderLeaderboardPersonalBests()` ahora también pinta el récord
+    personal de Modo Difícil.
+  - `index.html`: nueva fila de récord personal y nueva pestaña
+    "🔴 Difícil" en la pantalla de Clasificaciones; texto de la guía de
+    Clasificación Global actualizado de "tres" a "cuatro" categorías.
+  - `i18n.js` (es/en): claves nuevas `leaderboard.hard` y
+    `leaderboard.tab.hard`; `guide.leaderboard.intro`/`.update`
+    actualizadas para mencionar las cuatro categorías.
+
 ### Corregido
 - **Los títulos de "Openings del Anime" no cambiaban según el doblaje/idioma
   con el que sonaba la canción.** Las tres entradas de cada opening real

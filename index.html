@@ -695,10 +695,10 @@
     <div class="card guide-section">
       <div class="title" style="font-size:1.1rem;" data-i18n="guide.leaderboard.title">🏆 Clasificación Global</div>
       <div class="guide-item-desc" data-i18n="guide.leaderboard.intro">
-        Desde el botón 🏆 de la pantalla principal puedes consultar tres tablas de clasificación online, con los mejores jugadores del mundo: nivel de perfil, mejor puntuación en Desafío Infinito y mejor puntuación en Modo Historia.
+        Desde el botón 🏆 de la pantalla principal puedes consultar cuatro tablas de clasificación online, con los mejores jugadores del mundo: nivel de perfil, mejor puntuación en Desafío Infinito, mejor puntuación en Modo Historia y mejor puntuación en Modo Difícil.
       </div>
       <div class="guide-item-desc" style="margin-top:8px;" data-i18n="guide.leaderboard.update">
-        Tu puesto se actualiza en automático cada vez que superas tu propio récord anterior en alguna de esas tres categorías; no hace falta enviarlo a mano. Apareces con el nombre y el avatar de tu perfil, así que si quieres identificarte en la clasificación, personalízalos desde la barra de perfil.
+        Tu puesto se actualiza en automático cada vez que superas tu propio récord anterior en alguna de esas cuatro categorías; no hace falta enviarlo a mano. Apareces con el nombre y el avatar de tu perfil, así que si quieres identificarte en la clasificación, personalízalos desde la barra de perfil.
       </div>
     </div>
   </section>
@@ -754,6 +754,10 @@
         <div class="streak-name" data-i18n="leaderboard.story">📖 Modo Historia</div>
         <div class="streak-value">💰 <span id="leaderboard-personal-story">0</span> pts</div>
       </div>
+      <div class="streak-row">
+        <div class="streak-name" data-i18n="leaderboard.hard">🔴 Modo Difícil</div>
+        <div class="streak-value">💰 <span id="leaderboard-personal-hard">0</span> pts</div>
+      </div>
     </div>
 
     <div class="card">
@@ -762,6 +766,7 @@
         <button class="leaderboard-tab active" data-category="level" data-i18n="leaderboard.tab.level">🧑 Nivel</button>
         <button class="leaderboard-tab" data-category="infinite" data-i18n="leaderboard.tab.infinite">♾️ Infinito</button>
         <button class="leaderboard-tab" data-category="story" data-i18n="leaderboard.tab.story">📖 Historia</button>
+        <button class="leaderboard-tab" data-category="hard" data-i18n="leaderboard.tab.hard">🔴 Difícil</button>
       </div>
       <div class="small" id="leaderboard-status" style="margin-bottom:8px;"></div>
       <div class="leaderboard-list" id="leaderboard-list"></div>

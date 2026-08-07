@@ -2163,6 +2163,14 @@ function showResult() {
   overlay.classList.add('show');
   if (state.correct >= 10) playSFX(SFX.victory);
   trackGameFinished(pct, { mode: session.mode, region: session.normalRegion, otherGame: session.otherGame, correctCount: state.correct });
+
+  if (session.mode === GameMode.HARD && state.score > (achievementsData.stats.bestHardScore || 0)) {
+    achievementsData.stats.bestHardScore = state.score;
+    saveAchievements();
+    // Solo se envía al backend de clasificaciones cuando se supera el
+    // récord personal (no en cada partida): ver leaderboard.js.
+    Leaderboard.submitScore("hard", profile.username, profile.avatarId, state.score, ensurePlayerId());
+  }
 }
 
 /** Cierra la pantalla de resultado y vuelve a arrancar una partida con

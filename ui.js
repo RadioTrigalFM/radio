@@ -562,13 +562,14 @@ function updateHomeAchievementSummary() {
 // ═══════════════════════════════════════════════
 //  🏆 PANTALLA DE CLASIFICACIONES
 // ═══════════════════════════════════════════════
-// Las tres categorías de clasificación disponibles (deben coincidir con
-// las claves de LEADERBOARD_CATEGORIES en leaderboard.js): id → cómo
+// Las categorías de clasificación disponibles (deben coincidir con las
+// claves de LEADERBOARD_CATEGORIES en leaderboard.js): id → cómo
 // formatear el valor (nivel o puntuación) en cada fila de la tabla.
 const LEADERBOARD_TABS = {
   level:    { formatValue: v => `Nv. ${v || 1}` },
   infinite: { formatValue: v => `💰 ${v || 0}` },
   story:    { formatValue: v => `💰 ${v || 0}` },
+  hard:     { formatValue: v => `💰 ${v || 0}` },
 };
 // Categoría actualmente seleccionada en la pantalla de Clasificaciones.
 let leaderboardActiveCategory = "level";
@@ -590,9 +591,9 @@ function leaderboardRankIcon(rank) {
   return `#${rank}`;
 }
 
-/** Pinta en la tarjeta "Tus récords" los tres récords personales
- * (nivel de jugador, Desafío Infinito, Modo Historia), que ya se tienen
- * en local y no requieren pedirlos al backend. */
+/** Pinta en la tarjeta "Tus récords" los récords personales (nivel de
+ * jugador, Desafío Infinito, Modo Historia, Modo Difícil), que ya se
+ * tienen en local y no requieren pedirlos al backend. */
 function renderLeaderboardPersonalBests() {
   const levelEl = document.getElementById("leaderboard-personal-level");
   if (levelEl) levelEl.textContent = computeLevelInfo(profile.xp).level;
@@ -600,6 +601,8 @@ function renderLeaderboardPersonalBests() {
   if (infiniteEl) infiniteEl.textContent = achievementsData.stats.bestInfiniteScore || 0;
   const storyEl = document.getElementById("leaderboard-personal-story");
   if (storyEl) storyEl.textContent = achievementsData.stats.bestStoryScore || 0;
+  const hardEl = document.getElementById("leaderboard-personal-hard");
+  if (hardEl) hardEl.textContent = achievementsData.stats.bestHardScore || 0;
 }
 
 /** Reconstruye la pantalla de Clasificaciones para la categoría

@@ -2,8 +2,8 @@
    RADIO TRIGAL FM — CLASIFICACIÓN GLOBAL (leaderboard.js)
    ══════════════════════════════════════════════════════════════════════
    Adaptador hacia Firebase/Firestore, la base de datos donde viven las
-   clasificaciones globales (nivel de jugador, Desafío Infinito y Modo
-   Historia — ver LEADERBOARD_CATEGORIES más abajo) y, además, el
+   clasificaciones globales (nivel de jugador, Desafío Infinito, Modo
+   Historia y Modo Difícil — ver LEADERBOARD_CATEGORIES más abajo) y, además, el
    registro de nombres de entrenador ya elegidos por otros jugadores
    (para que un mismo nickname no pueda usarlo más de una persona a la
    vez — ver `claimUsername()`). Este fichero NO decide nada de las
@@ -70,11 +70,12 @@
    mismo nombre).
 
    Cada documento tiene un campo por categoría (ver
-   LEADERBOARD_CATEGORIES: `level`, `infiniteScore`, `storyScore`), más
-   `username`, `avatarId` y `updatedAt`. Un jugador puede aparecer en las
-   tres clasificaciones a la vez con un solo documento: `submitScore()`
-   solo escribe (con `merge: true`) el campo de la categoría que se le
-   pide, sin tocar ni pisar los campos de las otras dos.
+   LEADERBOARD_CATEGORIES: `level`, `infiniteScore`, `storyScore`,
+   `hardScore`), más `username`, `avatarId` y `updatedAt`. Un jugador
+   puede aparecer en las cuatro clasificaciones a la vez con un solo
+   documento: `submitScore()` solo escribe (con `merge: true`) el campo
+   de la categoría que se le pide, sin tocar ni pisar los campos de las
+   otras tres.
 
    Colección "usernames": UN documento por nombre de entrenador ya
    elegido, con el ID del documento = el nombre normalizado (recortado y
@@ -129,13 +130,14 @@ const LEADERBOARD_CATEGORIES = {
   level: "level",
   infinite: "infiniteScore",
   story: "storyScore",
+  hard: "hardScore",
 };
 
 /**
  * Pide a Firestore los N mejores jugadores de una categoría de la
  * clasificación (nivel de jugador, Desafío Infinito o Modo Historia),
  * ordenados de mayor a menor.
- * @param {"level"|"infinite"|"story"} category  una de las claves de
+ * @param {"level"|"infinite"|"story"|"hard"} category  una de las claves de
  *   LEADERBOARD_CATEGORIES.
  * @param {number} n
  * @returns {Promise<Array|null>}
@@ -173,7 +175,7 @@ async function fetchTop(category, n = 50) {
  * Guarda en Firestore, para una categoría concreta, el nuevo récord del
  * jugador actual, actualizando (con `merge: true`) su documento en vez
  * de crear uno nuevo o pisar sus datos de las otras categorías.
- * @param {"level"|"infinite"|"story"} category  una de las claves de
+ * @param {"level"|"infinite"|"story"|"hard"} category  una de las claves de
  *   LEADERBOARD_CATEGORIES.
  * @param {string} username
  * @param {string} avatarId

@@ -379,6 +379,7 @@ function defaultAchStats() {
     storyRegionsCompleted: [], // regiones cuya fase de región + combate se han superado en Modo Historia
     bestInfiniteScore: 0,    // récord de puntuación en Modo Desafío Infinito
     bestStoryScore: 0,       // récord de puntuación en Modo Historia
+    bestHardScore: 0,        // récord de puntuación en Modo Difícil
     perfectEasyGame: false,   // true si se ha terminado alguna partida perfecta en Modo Fácil
     perfectHardGame: false,   // true si se ha terminado alguna partida perfecta en Modo Difícil
     perfectCombatGame: false, // true si se ha terminado alguna partida perfecta en Modo Combate
