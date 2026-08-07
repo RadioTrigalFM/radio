@@ -1161,6 +1161,14 @@
   }
   input.profile-setup-input::placeholder { color: var(--text-dim); font-weight: 700; }
   input.profile-setup-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-glow); }
+  input.profile-setup-input.has-error { border-color: var(--red); }
+  .profile-setup-error {
+    color: var(--red);
+    font-size: .8rem;
+    font-weight: 700;
+    margin-top: 6px;
+    text-align: left;
+  }
 
   /* Modal de perfil (estadísticas + cambio de avatar), reutiliza el patrón
      visual de #poke-events-info-overlay */
@@ -1208,15 +1216,6 @@
     margin-bottom: 4px;
   }
   .profile-name-row .result-title { margin-bottom: 0; font-size: 1.5rem; }
-  .profile-edit-btn {
-    border: none; background: none;
-    font-size: .95rem;
-    cursor: pointer;
-    opacity: .75;
-    transition: opacity .15s ease, transform .15s ease;
-    flex-shrink: 0;
-  }
-  .profile-edit-btn:hover { opacity: 1; transform: scale(1.1); }
   .profile-stats-list { margin: 18px 0 6px; text-align: left; }
   .profile-stats-title {
     font-weight: 900;

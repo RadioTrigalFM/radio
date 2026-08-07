@@ -425,26 +425,9 @@ const songs = [
   // pool de partida cuando el jugador elige "Español Latino" en la pantalla previa
   // (screen-openings-lang-select, ver session.openingsVariant y buildPool()); las de arriba
   // (sin `variant`) son las que se usan con "Español de España" o con idioma "en".
-  // `variantOf`: el `file` de la canción España "equivalente" (arriba); los aciertos de
-  // esta canción suman para desbloquear LA FICHA DE ESA CANCIÓN en la Sonidex en vez de
-  // crear una ficha propia — ver sonidexCountKey()/sonidexBaseSong() más abajo.
-  // EJEMPLO (sustituye/añade los tuyos, uno por opening real del anime en latino, con su
-  // `variantOf` correspondiente).
-  { title: "Opening Latino Temporada 1", file: "songs/other/openings-latino/temporada1.mp3", image: "images/opening-kanto.png", group: "other", other: "openings-anime", variant: "latino", variantOf: "songs/other/openings-anime/opening-kanto.mp3" },
-  // Openings del Anime — versión en inglés (`variant: "english"`, mismo uso de `variantOf`
-  // que la variante "latino" de arriba). Se usa automáticamente (sin pantalla previa, a
-  // diferencia de "latino") en cuanto settings.language === "en" — ver buildPool().
-  // EJEMPLO (sustituye/añade los tuyos).
-  { title: "Opening English Season 1", file: "songs/other/anime-openings-english/temporada1-english.mp3", image: "images/opening-kanto.png", group: "other", other: "openings-anime", variant: "english", variantOf: "songs/other/openings-anime/opening-kanto.mp3" },
+  // EJEMPLO (sustituye/añade los tuyos, uno por opening real del anime en latino).
+  { title: "Opening Latino Temporada 1", file: "songs/other/openings-latino/temporada1.mp3", image: "images/opening-kanto.png", group: "other", other: "openings-anime", variant: "latino" },
 ];
-
-// Todas las canciones que tienen ficha PROPIA en la Sonidex: todo `songs` salvo las
-// variantes de idioma (`variant`, ver Openings del Anime más arriba), que cuentan para
-// la ficha de su canción base (`variantOf`) en vez de tener una ficha aparte — ver
-// sonidexCountKey()/isSongUnlocked(). Usar esta lista (y no `songs` directamente) en
-// cualquier sitio que cuente/recorra "todas las fichas de la Sonidex", para no
-// contar 2 o 3 veces la misma ficha cuando una de sus variantes también está desbloqueada.
-const SONIDEX_FICHAS = songs.filter(s => !s.variant);
 
 // Número de rondas por partida (Modo Fácil, Normal, Difícil y fases de región del Modo Historia)
 const TOTAL_ROUNDS = 10;
@@ -699,13 +682,16 @@ function isAvatarUnlocked(avatarId) {
 
 /** Texto legible con el requisito para desbloquear un avatar bloqueado
  * (nivel de perfil o logro necesario), usado tanto en el título del botón
- * como en el aviso al pulsar un avatar todavía bloqueado. */
+ * como en el aviso al pulsar un avatar todavía bloqueado. Traducido según
+ * el idioma activo (ver i18n.js: claves "avatar.lockReqLevel"/
+ * "avatar.lockReqAchievement" y "achv.<id>.title" para el nombre del
+ * logro), igual que hace lockReqText() en ui.js para Modos/Minijuegos. */
 function avatarLockRequirementText(avatarId) {
   const cfg = AVATAR_UNLOCKS[avatarId];
   if (!cfg) return "";
-  if (typeof cfg.level === "number") return `nivel ${cfg.level} de perfil`;
+  if (typeof cfg.level === "number") return t("avatar.lockReqLevel", { level: cfg.level });
   const ach = ACHIEVEMENTS.find(a => a.id === cfg.achId);
-  return ach ? `el logro «${ach.title}»` : "un logro";
+  return ach ? t("avatar.lockReqAchievement", { title: tData(`achv.${ach.id}.title`, ach.title) }) : t("avatar.lockReqUnknown");
 }
 
 // Añade puntos ganados en una ronda a la experiencia total del jugador y
@@ -773,11 +759,10 @@ let session = {
   mode: null,            // GameMode
   normalRegion: null,    // "Kanto"...
   otherGame: null,       // "mystery-dungeon" | "colosseum-xd" | "ranger" | "title-screens" | "openings-anime"
-  openingsVariant: null, // null (España) | "latino" — solo aplica cuando otherGame === "openings-anime"
-                          // y settings.language === "es" (se pregunta con la pantalla previa
-                          // "screen-openings-lang-select" justo antes de startGame(GameMode.OTHER,
-                          // "openings-anime")). Con settings.language === "en" este campo se ignora:
-                          // buildPool() usa la variante "english" directamente por idioma, sin pantalla previa.
+  openingsVariant: null, // null (España) | "latino" — solo aplica cuando otherGame === "openings-anime";
+                          // fija qué canciones de esa categoría entran en el pool (ver buildPool()).
+                          // Se pregunta con la pantalla previa "screen-openings-lang-select" (solo si
+                          // settings.language === "es") justo antes de startGame(GameMode.OTHER, "openings-anime").
   pool: [],              // canciones filtradas para la sesión
   questionType: "title", // "title" | "region"
   roundsTarget: 10,      // nº de rondas de la partida actual (se recalcula en startGame)
@@ -965,12 +950,12 @@ const ACHIEVEMENT_CONDITIONS = {
   perfect_combat:            s => s.perfectCombatGame === true,
   perfect_colosseum_xd:      s => s.perfectColosseumGame === true,
   perfect_mystery_dungeon:   s => s.perfectMysteryDungeonGame === true,
-  sonidex_5:                 s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 5,
-  sonidex_10:                s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 10,
-  sonidex_20:                s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 20,
-  sonidex_50:                s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 50,
-  sonidex_100:               s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 100,
-  sonidex_200:               s => sonidexUnlockedCountForList(s, SONIDEX_FICHAS) >= 200,
+  sonidex_5:                 s => sonidexUnlockedCountForList(s, songs) >= 5,
+  sonidex_10:                s => sonidexUnlockedCountForList(s, songs) >= 10,
+  sonidex_20:                s => sonidexUnlockedCountForList(s, songs) >= 20,
+  sonidex_50:                s => sonidexUnlockedCountForList(s, songs) >= 50,
+  sonidex_100:               s => sonidexUnlockedCountForList(s, songs) >= 100,
+  sonidex_200:               s => sonidexUnlockedCountForList(s, songs) >= 200,
   sonidex_kanto:             sonidexRegionCondition("Kanto"),
   sonidex_johto:             sonidexRegionCondition("Johto"),
   sonidex_hoenn:             sonidexRegionCondition("Hoenn"),
@@ -1017,7 +1002,7 @@ ENCOUNTER_CONDITION_IDS.forEach(id => {
 // Cuenta cuántas canciones de una lista están desbloqueadas en la Sonidex
 // para unas estadísticas de logros dadas (usado por los condicionales de arriba).
 function sonidexUnlockedCountForList(s, list) {
-  return list.filter(song => ((s.songCorrectCounts && s.songCorrectCounts[sonidexCountKey(song)]) || 0) >= SONIDEX_UNLOCK_COUNT).length;
+  return list.filter(song => ((s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0) >= SONIDEX_UNLOCK_COUNT).length;
 }
 
 // ── Modos desbloqueables mediante nivel de perfil o logros ──
@@ -1155,38 +1140,16 @@ function trackCorrectAnswer() {
 // ── Sonidex: nº de aciertos necesarios para desbloquear una canción ──
 const SONIDEX_UNLOCK_COUNT = 10;
 
-/** Clave de `songCorrectCounts`/ficha de la Sonidex que corresponde a una
- * canción. Para una variante de idioma de un opening (`variant` +
- * `variantOf` en el catálogo, ver arriba) es el `file` de la canción base
- * indicada en `variantOf`, no el suyo propio: así sus aciertos suman para
- * la MISMA ficha que su versión España, en vez de crear una ficha aparte. */
-function sonidexCountKey(song) {
-  return song.variantOf || song.file;
-}
-
-/** Devuelve el objeto de canción "base" de la Sonidex para una canción
- * dada: la propia canción si no es una variante de idioma, o la canción
- * España a la que apunta su `variantOf` si lo es (con fallback a sí misma
- * si por lo que sea no se encuentra, para no romper nada). */
-function sonidexBaseSong(song) {
-  if (!song.variantOf) return song;
-  return songs.find(s => s.file === song.variantOf) || song;
-}
-
 /** Una canción aparece "desbloqueada" en la Sonidex cuando se ha
- * acertado un número mínimo de veces (SONIDEX_UNLOCK_COUNT), contando
- * también los aciertos de sus variantes de idioma (ver sonidexCountKey). */
+ * acertado un número mínimo de veces (SONIDEX_UNLOCK_COUNT). */
 function isSongUnlocked(song) {
   const s = achievementsData.stats;
-  const count = (s.songCorrectCounts && s.songCorrectCounts[sonidexCountKey(song)]) || 0;
+  const count = (s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0;
   return count >= SONIDEX_UNLOCK_COUNT;
 }
 
 /** Incrementa el contador de aciertos de una canción concreta (para la
- * Sonidex) y comprueba si con este acierto pasa a desbloquearse. Si la
- * canción acertada es una variante de idioma (latino/inglés de un
- * opening), el acierto suma para la ficha de su canción base en vez de
- * para una ficha propia (ver sonidexCountKey/sonidexBaseSong). */
+ * Sonidex) y comprueba si con este acierto pasa a desbloquearse. */
 function trackSongCorrect(song) {
   // No cuenta en Modo Fácil (ahí se adivina la región, no la canción)
   if (session.mode === GameMode.EASY) return;
@@ -1194,15 +1157,13 @@ function trackSongCorrect(song) {
   const s = achievementsData.stats;
   if (!s.songCorrectCounts) s.songCorrectCounts = {};
 
-  const key = sonidexCountKey(song);
   const wasUnlocked = isSongUnlocked(song);
-  s.songCorrectCounts[key] = (s.songCorrectCounts[key] || 0) + 1;
+  s.songCorrectCounts[song.file] = (s.songCorrectCounts[song.file] || 0) + 1;
   saveAchievements();
 
   const nowUnlocked = isSongUnlocked(song);
   if (!wasUnlocked && nowUnlocked) {
-    const baseSong = sonidexBaseSong(song);
-    queueAchievementToasts([{ icon: "🎼", label: t("toast.soundexUnlockedLabel"), title: t("toast.soundexUnlockedTitle", { title: songDisplayName(baseSong) }) }]);
+    queueAchievementToasts([{ icon: "🎼", label: t("toast.soundexUnlockedLabel"), title: t("toast.soundexUnlockedTitle", { title: songDisplayName(song) }) }]);
     updateHomeSonidexSummary();
     if (screens.sonidex.classList.contains("show")) renderSonidexScreen();
   }
@@ -1406,18 +1367,11 @@ function buildPool() {
     session.pool = songs.filter(s => s.group === "main");
     session.questionType = "title";
   } else if (session.mode === GameMode.OTHER) {
-    // Openings del Anime tiene tres variantes de doblaje/idioma (ver `variant` en el
-    // catálogo de canciones más arriba): "latino" (elegida a mano por el jugador en la
-    // pantalla previa, solo si settings.language === "es" — ver session.openingsVariant),
-    // "english" (fija en cuanto settings.language === "en", sin pantalla previa) y la
-    // versión España, que es la que no lleva `variant` (la que se usa por defecto con
-    // idioma "es" si el jugador no elige Latino). El resto de categorías no usan `variant`
-    // en absoluto, así que wantVariant queda a null para ellas y no les afecta este filtro.
-    let wantVariant = null;
-    if (session.otherGame === "openings-anime") {
-      wantVariant = settings.language === "en" ? "english" : session.openingsVariant;
-    }
-    session.pool = songs.filter(s => s.group === "other" && s.other === session.otherGame && (s.variant || null) === wantVariant);
+    // Openings del Anime tiene dos variantes de doblaje (España/Latino, ver
+    // session.openingsVariant); el resto de categorías no usan `variant` en absoluto,
+    // así que Boolean(s.variant) es siempre false para ellas y este filtro no les afecta.
+    const wantLatino = session.otherGame === "openings-anime" && session.openingsVariant === "latino";
+    session.pool = songs.filter(s => s.group === "other" && s.other === session.otherGame && Boolean(s.variant) === wantLatino);
     session.questionType = "title";
   } else if (session.mode === GameMode.INFINITE) {
     // Desafío Infinito: todas las canciones principales, sin límite de rondas, EXCEPTO las de Combate y las de Minijuegos

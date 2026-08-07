@@ -271,17 +271,22 @@ backBtn.addEventListener("click", () => {
  * aplica a Modos, que son los únicos que usan `cfg.level`) o por logro.
  * `levelFmt`/`achievementFmt` dan la redacción exacta que quiere cada
  * sitio que lo usa (el candado del botón y el aviso emergente usan
- * frases distintas para el mismo dato). */
-function lockReqText(cfg, levelFmt, achievementFmt) {
-  return typeof cfg.level === "number" ? levelFmt(cfg.level) : achievementFmt(cfg.reqTitle);
+ * frases distintas para el mismo dato). `translatedReqTitle` es el
+ * nombre del logro ya traducido (ver `${i18nPrefix}.${key}.reqTitle` en
+ * i18n.js), para no colar el texto en español de `cfg.reqTitle`
+ * directamente en el aviso. */
+function lockReqText(cfg, translatedReqTitle, levelFmt, achievementFmt) {
+  return typeof cfg.level === "number" ? levelFmt(cfg.level) : achievementFmt(translatedReqTitle);
 }
 
 /** Sincroniza el aspecto de un conjunto de botones bloqueables (Modos o
  * categorías de Minijuegos) con su estado de desbloqueo actual: añade/
  * quita la clase "locked" y el texto de requisito ("🔒 ..."). `getBtn`
  * decide cómo localizar el botón de cada clave de `unlocksMap` (por id
- * fijo en Modos, por atributo `data-other` en Minijuegos). */
-function updateLocksUI(unlocksMap, isUnlockedFn, getBtn) {
+ * fijo en Modos, por atributo `data-other` en Minijuegos). `i18nPrefix`
+ * ("modeUnlock"/"otherUnlock") es el prefijo usado en i18n.js para
+ * traducir `cfg.reqTitle` cuando el requisito es un logro. */
+function updateLocksUI(unlocksMap, isUnlockedFn, getBtn, i18nPrefix) {
   Object.keys(unlocksMap).forEach(key => {
     const cfg = unlocksMap[key];
     const btn = getBtn(key, cfg);
@@ -295,7 +300,7 @@ function updateLocksUI(unlocksMap, isUnlockedFn, getBtn) {
         reqEl.className = "lock-req";
         btn.appendChild(reqEl);
       }
-      reqEl.textContent = "🔒 " + lockReqText(cfg,
+      reqEl.textContent = "🔒 " + lockReqText(cfg, tData(`${i18nPrefix}.${key}.reqTitle`, cfg.reqTitle),
         level => t("lock.levelReqBadge", { level }),
         title => t("lock.achievementReqBadge", { title }));
     } else if (reqEl) {
@@ -306,31 +311,31 @@ function updateLocksUI(unlocksMap, isUnlockedFn, getBtn) {
 /** Sincroniza el aspecto de los botones de modo con su estado de
  * desbloqueo (candado + texto de requisito). */
 function updateModeLocksUI() {
-  updateLocksUI(MODE_UNLOCKS, isModeUnlocked, (key, cfg) => document.getElementById(cfg.btnId));
+  updateLocksUI(MODE_UNLOCKS, isModeUnlocked, (key, cfg) => document.getElementById(cfg.btnId), "modeUnlock");
 }
 /** Igual que updateModeLocksUI pero para los botones de categorías de
  * Minijuegos (atributo data-other). */
 function updateOtherLocksUI() {
-  updateLocksUI(OTHER_UNLOCKS, isOtherUnlocked, key => document.querySelector(`[data-other="${key}"]`));
+  updateLocksUI(OTHER_UNLOCKS, isOtherUnlocked, key => document.querySelector(`[data-other="${key}"]`), "otherUnlock");
 }
 
 /** Muestra un aviso emergente ("toast" de candado) explicando qué falta
  * para desbloquear un botón bloqueado de `unlocksMap` (Modos o
- * Minijuegos), al pulsarlo. */
-function showLockedMessage(unlocksMap, key) {
+ * Minijuegos), al pulsarlo. `i18nPrefix` — ver `updateLocksUI`. */
+function showLockedMessage(unlocksMap, key, i18nPrefix) {
   const cfg = unlocksMap[key];
   if (!cfg) return;
-  const title = lockReqText(cfg,
+  const title = lockReqText(cfg, tData(`${i18nPrefix}.${key}.reqTitle`, cfg.reqTitle),
     level => t("lock.levelReqToast", { level }),
     reqTitle => t("lock.achievementReqToast", { title: reqTitle }));
   queueAchievementToasts([{ icon: "🔒", label: t("lock.badge"), title }]);
 }
 /** Aviso emergente al intentar entrar en un modo de juego todavía
  * bloqueado. */
-function showLockedModeMessage(key) { showLockedMessage(MODE_UNLOCKS, key); }
+function showLockedModeMessage(key) { showLockedMessage(MODE_UNLOCKS, key, "modeUnlock"); }
 /** Aviso emergente al intentar entrar en una categoría de Minijuegos
  * todavía bloqueada. */
-function showLockedOtherMessage(key) { showLockedMessage(OTHER_UNLOCKS, key); }
+function showLockedOtherMessage(key) { showLockedMessage(OTHER_UNLOCKS, key, "otherUnlock"); }
 
 // ═══════════════════════════════════════════════
 //  🏅 LOGROS: AVISOS (TOASTS) Y PARTÍCULAS
@@ -656,10 +661,6 @@ document.getElementById("leaderboard-tabs")?.querySelectorAll(".leaderboard-tab"
 });
 
 // ── Pantalla Sonidex ──
-// Nota Openings del Anime: las canciones con `variant` (ver game.js: "latino" o
-// "english", pantalla previa / idioma del minijuego) son versiones alternativas de
-// las mismas canciones, no fichas nuevas — quedan fuera de la Sonidex (aquí y en
-// updateHomeSonidexSummary más abajo) para no duplicar el recuento de fichas.
 const SONIDEX_GROUPS = [
   { title: "Kanto",    filter: s => s.group === "main" && s.region === "Kanto" },
   { title: "Johto",    filter: s => s.group === "main" && s.region === "Johto" },
@@ -675,7 +676,7 @@ const SONIDEX_GROUPS = [
   { title: "Bicicletas",           filter: s => s.group === "other" && s.other === "bicicletas" },
   { title: "Música de Surf",       filter: s => s.group === "other" && s.other === "surf" },
   { title: "Pantallas de Título",  filter: s => s.group === "other" && s.other === "title-screens" },
-  { title: "Openings del Anime",   filter: s => s.group === "other" && s.other === "openings-anime" && !s.variant },
+  { title: "Openings del Anime",   filter: s => s.group === "other" && s.other === "openings-anime" },
   { title: "Mundo Misterioso",     filter: s => s.group === "other" && s.other === "mystery-dungeon" },
   { title: "Pokémon Colosseum / XD", filter: s => s.group === "other" && s.other === "colosseum-xd" },
   { title: "Pokémon Ranger",       filter: s => s.group === "other" && s.other === "ranger" },
@@ -686,10 +687,7 @@ const SONIDEX_GROUPS = [
  * desbloqueado según isSongUnlocked. */
 function sonidexSongCard(song) {
   const s = achievementsData.stats;
-  // sonidexCountKey (game.js): para una canción con variantes de idioma (Openings del
-  // Anime en latino/inglés) suma también los aciertos de esas variantes, ya que no
-  // tienen ficha propia — ver isSongUnlocked()/trackSongCorrect() en game.js.
-  const count = (s.songCorrectCounts && s.songCorrectCounts[sonidexCountKey(song)]) || 0;
+  const count = (s.songCorrectCounts && s.songCorrectCounts[song.file]) || 0;
   const unlocked = count >= SONIDEX_UNLOCK_COUNT;
 
   const div = document.createElement("div");
@@ -813,12 +811,8 @@ function updateHomeSonidexSummary(unlockedArg, totalArg) {
     // y TODOS los Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf,
     // Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger), para que la
     // cifra mostrada en el Inicio coincida siempre con la de la pantalla Sonidex.
-    // SONIDEX_FICHAS (game.js) ya excluye las variantes de idioma (Openings del
-    // Anime en Latino/Inglés): no tienen ficha propia, sus aciertos suman para
-    // la ficha de su canción base — ver también el filtro de "Openings del
-    // Anime" en SONIDEX_GROUPS más arriba.
-    totalCount = SONIDEX_FICHAS.length;
-    unlockedCount = SONIDEX_FICHAS.filter(isSongUnlocked).length;
+    totalCount = songs.length;
+    unlockedCount = songs.filter(isSongUnlocked).length;
   }
   el.textContent = t("sonidex.progressShort", { n: unlockedCount, total: totalCount });
 }

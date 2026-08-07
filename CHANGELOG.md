@@ -16,14 +16,40 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Corregido
+- **Con el idioma de la interfaz en inglés, los avisos de "candado"
+  (contenido todavía bloqueado) mezclaban texto en español.**
+  - `game.js`: `avatarLockRequirementText()` (usada en el título del
+    botón y en el aviso emergente al pulsar un avatar bloqueado)
+    construía el texto a mano en español ("nivel X de perfil", "el
+    logro «...»"), en vez de usar `t()`/`tData()` como el resto del
+    proyecto — así que en inglés se veía ese texto en español sin
+    traducir, y además el nombre del logro nunca pasaba por `tData()`
+    (mostraba siempre `ACHIEVEMENTS.title`, en español). Ahora usa las
+    claves nuevas `avatar.lockReqLevel`/`avatar.lockReqAchievement`/
+    `avatar.lockReqUnknown` de `i18n.js`, y el nombre del logro se
+    traduce con `tData(\`achv.${ach.id}.title\`, ach.title)` (mismo
+    patrón que ya usa `game.js` para los avisos de logro desbloqueado).
+  - `ui.js`: `lockReqText()` (candado y aviso emergente de Modos y
+    categorías de Minijuegos bloqueados por logro, p. ej. "Desafío
+    Infinito" o "Pokémon Mundo Misterioso") usaba directamente
+    `cfg.reqTitle`, el texto en español definido en `MODE_UNLOCKS`/
+    `OTHER_UNLOCKS` (`game.js`), en vez del valor ya traducido que
+    `i18n.js` define para esas mismas claves
+    (`modeUnlock.<id>.reqTitle`/`otherUnlock.<id>.reqTitle` — existían
+    y estaban bien traducidas, pero no se usaban). `updateLocksUI()` y
+    `showLockedMessage()` reciben ahora un `i18nPrefix`
+    (`"modeUnlock"`/`"otherUnlock"`) para poder pedir esa traducción
+    con `tData()` antes de componer el mensaje.
+  - No afecta a la versión en español (`tData()` devuelve el mismo
+    texto de siempre cuando no hay traducción o el idioma es español).
+
 ### Añadido
-- **Selección de doblaje (España/Latino/Inglés) para "Openings del Anime"**
+- **Selección de doblaje (España/Latino) para "Openings del Anime"**
   (`game.js`, `index.html`, `ui.js`, `i18n.js`): si el jugador tiene el
   idioma de la interfaz en español y entra en el minijuego "Openings del
   Anime", ahora se le pregunta primero si quiere las canciones con el
   doblaje de España o el latinoamericano, antes de arrancar la partida.
-  Con la interfaz en inglés se usan directamente las versiones en
-  inglés de esas mismas canciones (sin pantalla previa).
   - `index.html`: nueva pantalla `#screen-openings-lang-select` con dos
     botones (`#openings-lang-spain` / `#openings-lang-latino`), con el
     mismo estilo (`menu-btn`/`menu-grid`) que el resto de menús.
@@ -31,37 +57,19 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     para que `showScreen()`/el botón "Atrás" la traten como cualquier otra.
   - `game.js`: el listener de `[data-other]` desvía a la nueva pantalla
     solo para la clave `"openings-anime"` y solo si `settings.language === "es"`
-    (en inglés se arranca directo, con la variante inglesa). Nuevo campo
-    `session.openingsVariant` (`null` = España, `"latino"` = Latino; se
-    ignora si `settings.language === "en"`) y nuevas entradas de catálogo
-    en `songs` con `variant: "latino"` / `variant: "english"` (ejemplos
-    incluidos: `songs/other/openings-latino/temporada1.mp3` y
-    `songs/other/anime-openings-english/temporada1-english.mp3`).
-    `buildPool()` calcula la variante deseada (`null`/`"latino"`/`"english"`)
-    a partir de `settings.language` y `session.openingsVariant`, y filtra
-    por ella cuando la categoría es `"openings-anime"`; el resto de
-    categorías, al no usar nunca el campo `variant`, no se ven afectadas.
+    (en inglés se arranca directo, como hasta ahora). Nuevo campo
+    `session.openingsVariant` (`null` = España, `"latino"` = Latino) y
+    nuevas entradas de catálogo en `songs` con `variant: "latino"`
+    (ejemplo incluido: `songs/other/openings-latino/temporada1.mp3`).
+    `buildPool()` filtra por `session.openingsVariant` cuando la
+    categoría es `"openings-anime"`; el resto de categorías, al no usar
+    nunca el campo `variant`, no se ven afectadas por el nuevo filtro.
   - `i18n.js`: claves nuevas `openingsLang.*` en español e inglés para
     los textos de la pantalla previa.
-  - `ui.js`: las canciones con `variant` (Latino o Inglés) quedan
-    excluidas de la Sonidex (`SONIDEX_GROUPS` y `updateHomeSonidexSummary`),
-    tanto del recuento total como de las tarjetas mostradas — son
-    versiones alternativas de la misma canción, no fichas nuevas.
-
-- **Los aciertos en Latino/Inglés cuentan para la ficha España en la
-  Sonidex** (`game.js`, `ui.js`): cada canción `variant` del catálogo
-  lleva ahora un `variantOf` con el `file` de su canción España
-  "equivalente". `trackSongCorrect()`/`isSongUnlocked()` usan la nueva
-  `sonidexCountKey(song)` (= `song.variantOf || song.file`) en vez de
-  `song.file` directamente, así que acertar la versión latina o inglesa
-  de un opening suma para desbloquear la MISMA ficha que su versión
-  España, en vez de tener contador propio. El toast de "ficha
-  desbloqueada" usa la nueva `sonidexBaseSong(song)` para mostrar
-  siempre el título de la canción España, aunque el acierto que la
-  desbloquee sea de una variante. Nueva lista `SONIDEX_FICHAS` (= todas
-  las `songs` salvo las `variant`) usada en los logros `sonidex_5`...`sonidex_200`
-  y en `updateHomeSonidexSummary()`, para no contar 2-3 veces la misma
-  ficha cuando ella y sus variantes están todas desbloqueadas a la vez.
+  - `ui.js`: las canciones con `variant: "latino"` quedan excluidas de
+    la Sonidex (`SONIDEX_GROUPS` y `updateHomeSonidexSummary`), tanto
+    del recuento total como de las tarjetas mostradas — son una versión
+    alternativa de la misma canción, no una ficha nueva.
 
 - **Traducción al inglés de los 3 títulos de Combate que quedaban
   pendientes por referencia poco clara** (`i18n.js`): `"song.Helio":

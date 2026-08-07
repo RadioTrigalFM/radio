@@ -72,6 +72,9 @@ const I18N = {
     "lock.achievementReqToast": "Consigue «{title}» para desbloquear",
     "avatar.lockedTitle": "{name} (bloqueado — requiere {req})",
     "avatar.lockedToast": "Consigue {req} para desbloquear este avatar",
+    "avatar.lockReqLevel": "nivel {level} de perfil",
+    "avatar.lockReqAchievement": "el logro «{title}»",
+    "avatar.lockReqUnknown": "un logro",
 
     "streaks.easyMode": "Modo fácil",
     "streaks.hardMode": "Modo difícil",
@@ -362,6 +365,9 @@ const I18N = {
     "lock.achievementReqToast": "Get “{title}” to unlock",
     "avatar.lockedTitle": "{name} (locked — requires {req})",
     "avatar.lockedToast": "Get {req} to unlock this avatar",
+    "avatar.lockReqLevel": "profile level {level}",
+    "avatar.lockReqAchievement": "the “{title}” achievement",
+    "avatar.lockReqUnknown": "an achievement",
 
     "streaks.easyMode": "Easy mode",
     "streaks.hardMode": "Hard mode",

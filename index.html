@@ -65,6 +65,7 @@
     <div class="result-title" data-i18n="profileSetup.title">¡Bienvenido, entrenador!</div>
     <div class="profile-setup-desc" data-i18n="profileSetup.desc">Antes de empezar, elige tu nombre de entrenador y tu imagen de perfil.</div>
     <input type="text" id="profile-setup-name" class="profile-setup-input" data-i18n-placeholder="profileSetup.namePlaceholder" placeholder="Tu nombre de entrenador" maxlength="16" autocomplete="off">
+    <div class="profile-setup-error" id="profile-setup-name-error" style="display:none;"></div>
     <div class="profile-setup-avatar-label" data-i18n="profileSetup.avatarLabel">Elige tu imagen de perfil</div>
     <div class="profile-avatar-grid" id="profile-setup-avatar-grid"></div>
     <button type="button" class="restart-btn profile-setup-confirm" id="profile-setup-confirm" disabled data-i18n="profileSetup.confirm">✔ ¡Empezar a jugar!</button>
@@ -115,9 +116,7 @@
     </div>
     <div class="profile-name-row">
       <div class="result-title" id="profile-modal-name">Entrenador</div>
-      <button type="button" class="profile-edit-btn" id="profile-edit-name-btn" data-i18n-title="profile.editNameTitle" title="Cambiar nombre">✏️</button>
     </div>
-    <input type="text" id="profile-modal-name-input" class="profile-setup-input" maxlength="16" autocomplete="off" style="display:none; margin-top:8px;">
     <div class="profile-level-line" id="profile-level-line"><span data-i18n="profile.levelLabel">Nivel</span> <span id="profile-level-num">1</span></div>
     <div class="profile-xp-bar-bg"><div class="profile-xp-bar-fill" id="profile-xp-bar-fill"></div></div>
     <div class="profile-xp-label" id="profile-xp-label">0 / 150 XP para el siguiente nivel</div>
