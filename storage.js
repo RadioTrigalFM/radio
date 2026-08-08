@@ -337,6 +337,33 @@ const CURSOR_CATALOG = [
   { id: "poke_ball",  name: "Poké Ball",     url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" },
   { id: "super_rod",  name: "Supercaña",     url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-rod.png" },
   { id: "rare_candy", name: "Caramelo Raro", url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" },
+  // Punteros con forma de Pokémon, cada uno desbloqueado por un logro
+  // distinto (ver CURSOR_UNLOCKS en game.js). A diferencia de los cuatro
+  // de arriba (sprites remotos de PokeAPI, ya pensados como iconos
+  // pequeños), estos sprites viven en local (images/) y son sprites de
+  // Pokémon a tamaño normal, así que llevan `scale: 1/3` para pedir que
+  // se muestren a un tercio de su tamaño real y centrados en la punta
+  // del puntero (en vez del hotspot fijo "4 4" de los de arriba, pensado
+  // para iconos ya pequeños) — ver buildScaledCursor()/applyCursorStyle()
+  // en ui.js, que es quien interpreta este campo.
+  { id: "shuckle",      name: "Shuckle",      url: "images/cursor-shuckle.png",      scale: 1/3 },
+  { id: "cosmog",       name: "Cosmog",       url: "images/cursor-cosmog.png",       scale: 1/3 },
+  { id: "togedemaru",   name: "Togedemaru",   url: "images/cursor-togedemaru.png",   scale: 1/3 },
+  { id: "zygarde",      name: "Zygarde",      url: "images/cursor-zygarde.png",      scale: 1/3 },
+  { id: "dedenne",      name: "Dedenne",      url: "images/cursor-dedenne.png",      scale: 1/3 },
+  { id: "emolga",       name: "Emolga",       url: "images/cursor-emolga.png",       scale: 1/3 },
+  { id: "rotom",        name: "Rotom",        url: "images/cursor-rotom.png",        scale: 1/3 },
+  { id: "pachirisu",    name: "Pachirisu",    url: "images/cursor-pachirisu.png",    scale: 1/3 },
+  { id: "plusle",       name: "Plusle",       url: "images/cursor-plusle.png",       scale: 1/3 },
+  { id: "pichu",        name: "Pichu",        url: "images/cursor-pichu.png",        scale: 1/3 },
+  { id: "mew",          name: "Mew",          url: "images/cursor-mew.png",          scale: 1/3 },
+  { id: "bulbasaur",    name: "Bulbasaur",    url: "images/cursor-bulbasaur.png",    scale: 1/3 },
+  { id: "squirtle",     name: "Squirtle",     url: "images/cursor-squirtle.png",     scale: 1/3 },
+  { id: "charmander",   name: "Charmander",   url: "images/cursor-charmander.png",   scale: 1/3 },
+  { id: "meowth",       name: "Meowth",       url: "images/cursor-meowth.png",       scale: 1/3 },
+  { id: "charizard_y",  name: "Charizard Y",  url: "images/cursor-charizard-y.png",  scale: 1/3 },
+  { id: "charizard_x",  name: "Charizard X",  url: "images/cursor-charizard-x.png",  scale: 1/3 },
+  { id: "pikachu",      name: "Pikachu",      url: "images/cursor-pikachu.png",      scale: 1/3 },
 ];
 
 // Id del avatar preseleccionado para un jugador nuevo: tanto en `profile`

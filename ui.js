@@ -2102,23 +2102,121 @@ function renderCursorGrid() {
   });
 }
 
+/** Elemento `<img>` flotante (ver index.html, #pokemon-cursor-overlay)
+ * usado como puntero "de mentira" para los estilos con forma de Pokémon
+ * (los que llevan `scale` en CURSOR_CATALOG, storage.js) — ver el
+ * comentario de `.pokemon-cursor-overlay` en styles.css para el porqué
+ * de no usar el cursor nativo del navegador para estos. */
+const pokemonCursorEl = document.getElementById("pokemon-cursor-overlay");
+
+/** Última posición del ratón conocida (actualizada en cada mousemove). Se
+ * guarda aparte de la propia función de pintado solo para que
+ * applyCursorStyle() pueda repintar "con la última posición conocida" sin
+ * esperar a un mousemove nuevo (ver más abajo). */
+let pokemonCursorX = 0;
+let pokemonCursorY = 0;
+
+function paintPokemonCursorPosition() {
+  // Un solo `transform` (nunca left/top): mover un elemento por
+  // transform no obliga al navegador a recalcular el layout de toda la
+  // página en cada fotograma, a diferencia de left/top en un elemento
+  // position:fixed — ver el comentario de .pokemon-cursor-overlay en
+  // styles.css. El translate(-50%,-50%) final centra la imagen sobre
+  // el punto, sea cual sea su tamaño.
+  pokemonCursorEl.style.transform = `translate(${pokemonCursorX}px, ${pokemonCursorY}px) translate(-50%, -50%)`;
+}
+
+/** Guarda la posición del ratón y la pinta ya, en el propio mousemove —
+ * a propósito SIN pasar por requestAnimationFrame. `transform` es una
+ * propiedad que el navegador solo compone (no recalcula layout ni
+ * repinta el resto de la página), así que retrasarla a "una vez por
+ * fotograma" no ahorra nada de trabajo real y, en cambio, añade hasta
+ * un fotograma entero de retraso frente a la posición real del ratón —
+ * ese retraso extra es lo que se notaba como "lag" en los punteros con
+ * forma de Pokémon (los de objeto no lo sufren porque son el cursor
+ * nativo del navegador, sin JS de por medio). Se deja escuchando
+ * siempre para no tener que añadir/quitar el listener en cada cambio de
+ * estilo; mientras la <img> está oculta (display:none) esto solo cuesta
+ * una escritura de `transform` en un elemento no visible, algo
+ * insignificante. */
+document.addEventListener("mousemove", (e) => {
+  pokemonCursorX = e.clientX;
+  pokemonCursorY = e.clientY;
+  paintPokemonCursorPosition();
+});
+
+/** Caché en memoria (no se persiste; se regenera al recargar la página)
+ * del tamaño ya calculado —a 1/3 de su tamaño natural— de cada puntero
+ * con forma de Pokémon, para no tener que esperar a que la imagen cargue
+ * de nuevo cada vez que se reselecciona el mismo estilo. Clave: id del
+ * estilo → { width, height } en px. */
+const pokemonCursorSizeCache = {};
+
 /** Aplica (o quita) al <body> el puntero del ratón sustituido por el
  * sprite del estilo elegido en `settings.cursorStyle`. Comprueba también
  * isCursorUnlocked() (no solo el valor guardado), para que un estilo
  * guardado de una partida antigua no tenga efecto si, por lo que sea, su
- * logro ya no constara como desbloqueado. */
+ * logro ya no constara como desbloqueado.
+ *
+ * Dos caminos distintos según el estilo (ver CURSOR_CATALOG en
+ * storage.js):
+ * - Sprites de OBJETO (sin `scale`): cursor nativo del navegador de
+ *   siempre, vía la variable CSS --cursor-url y la clase
+ *   `custom-cursor` (ver styles.css).
+ * - Sprites con forma de POKÉMON (con `scale`): la <img> flotante
+ *   `pokemonCursorEl`, puesta a `entry.scale` de su tamaño natural
+ *   (medido la primera vez que se carga, y cacheado después en
+ *   `pokemonCursorSizeCache`) y centrada sobre el puntero por CSS —
+ *   ver el porqué de no usar el cursor nativo para estos en el
+ *   comentario de `.pokemon-cursor-overlay` en styles.css. */
 function applyCursorStyle() {
   const id = settings.cursorStyle;
   const unlocked = id !== "normal" && typeof isCursorUnlocked === "function" && isCursorUnlocked(id);
   const cursorData = unlocked ? CURSOR_CATALOG.find(c => c.id === id) : null;
-  if (cursorData) {
-    document.body.classList.add("custom-cursor");
-    document.body.style.setProperty("--cursor-url", `url("${cursorData.url}")`);
-  } else {
+
+  if (!cursorData || !cursorData.scale) {
+    // No hay puntero de Pokémon activo (o no hay ninguno elegido):
+    // apaga la <img> flotante y el "cursor: none" que la acompaña.
+    pokemonCursorEl.style.display = "none";
+    document.body.classList.remove("pokemon-cursor-active");
+  }
+
+  if (!cursorData) {
     document.body.classList.remove("custom-cursor");
     document.body.style.removeProperty("--cursor-url");
+    return;
+  }
+
+  if (cursorData.scale) {
+    document.body.classList.remove("custom-cursor");
+    document.body.style.removeProperty("--cursor-url");
+    const applySize = (w, h) => {
+      pokemonCursorEl.style.width = Math.max(1, Math.round(w * cursorData.scale)) + "px";
+      pokemonCursorEl.style.height = Math.max(1, Math.round(h * cursorData.scale)) + "px";
+      pokemonCursorEl.src = cursorData.url;
+      pokemonCursorEl.style.display = "block";
+      document.body.classList.add("pokemon-cursor-active");
+      paintPokemonCursorPosition(); // pinta ya con la última posición conocida, sin esperar al próximo mousemove
+    };
+    const cachedSize = pokemonCursorSizeCache[id];
+    if (cachedSize) {
+      applySize(cachedSize.width, cachedSize.height);
+    } else {
+      const probe = new Image();
+      probe.onload = () => {
+        if (settings.cursorStyle !== id) return; // el jugador ya cambió de estilo mientras cargaba
+        pokemonCursorSizeCache[id] = { width: probe.naturalWidth, height: probe.naturalHeight };
+        applySize(probe.naturalWidth, probe.naturalHeight);
+      };
+      probe.onerror = () => console.error(`[Cursor] No se pudo cargar el sprite de "${id}" (${cursorData.url}).`);
+      probe.src = cursorData.url;
+    }
+  } else {
+    document.body.classList.add("custom-cursor");
+    document.body.style.setProperty("--cursor-url", `url("${cursorData.url}") 4 4`);
   }
 }
+
 
 musicSlider.addEventListener("input", () => {
   settings.musicVol = clamp01(parseInt(musicSlider.value, 10) / 100);

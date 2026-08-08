@@ -58,6 +58,109 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `.cursor-style-option` (mismo criterio visual que
     `.profile-avatar-grid`/`.profile-avatar-option`, con botones
     cuadrados y una etiqueta de texto bajo cada sprite).
+
+- **18 estilos de puntero nuevos con forma de Pokémon**, ampliando el
+  catálogo anterior (Poké Flauta/Poké Ball/Supercaña/Caramelo Raro).
+  A diferencia de esos cuatro, estos sprites no vienen de PokeAPI: son
+  locales, en `images/cursor-<nombre>.png` (p. ej.
+  `images/cursor-pikachu.png`). Logro que desbloquea cada uno:
+  `story_johto` ("Historia: Johto") → Shuckle, `perfect_normal_region`
+  ("Región perfecta") → Cosmog, `sonidex_alola` ("Sonidex de Alola") →
+  Togedemaru, `games_50` ("Veterano") → Zygarde, `sonidex_kalos`
+  ("Sonidex de Kalos") → Dedenne, `sonidex_teselia` ("Sonidex de
+  Teselia") → Emolga, `story_sinnoh` ("Historia: Sinnoh") → Rotom,
+  `sonidex_sinnoh` ("Sonidex de Sinnoh") → Pachirisu, `sonidex_hoenn`
+  ("Sonidex de Hoenn") → Plusle, `sonidex_johto` ("Sonidex de Johto") →
+  Pichu, `hard_correct_8` ("Reto superado") → Mew, `perfect_easy`
+  ("Fácil perfecto") → Meowth, `sonidex_kanto` ("Sonidex de Kanto") →
+  Pikachu, y `story_kanto` ("Historia: Kanto") → Bulbasaur, Squirtle y
+  Charmander a la vez (tres punteros comparten ese mismo logro), igual
+  que `games_30` ("Entrenador dedicado") → Charizard Y y Charizard X a
+  la vez.
+  - `storage.js`: 18 entradas nuevas en `CURSOR_CATALOG`.
+  - `game.js`: 18 entradas nuevas en `CURSOR_UNLOCKS`, mapeando cada id
+    nuevo a su logro (sin tocar `isCursorUnlocked()` ni
+    `getFeatureUnlocksForAchievement()`, que ya son genéricas sobre
+    `CURSOR_UNLOCKS`).
+  - `i18n.js`: `cursorStyle.<id>.name` en español e inglés para los 18
+    ids nuevos.
+  - No ha hecho falta tocar `ui.js`, `index.html` ni `styles.css`: la
+    rejilla de Opciones (`renderCursorGrid()`) ya itera sobre
+    `CURSOR_CATALOG` de forma genérica.
+
+### Corregido
+- **Tamaño y punto de clic de los punteros con forma de Pokémon**: se
+  mostraban a tamaño completo y con el punto de clic en la esquina
+  superior izquierda del sprite (heredado del hotspot fijo "4 4"
+  pensado para los sprites de objeto, de solo 30×30). Ahora estos 18
+  estilos se reescalan a 1/3 de su tamaño original y el punto de clic
+  queda centrado en el sprite ya reescalado.
+  - `storage.js`: nuevo campo opcional `scale` en `CURSOR_CATALOG`
+    (`1/3` en los 18 estilos de Pokémon; ausente, por tanto sin cambio
+    de comportamiento, en los 4 estilos de objeto).
+  - `ui.js`: `buildScaledCursor()` (nueva) genera, la primera vez que
+    se elige cada estilo con `scale`, una versión reescalada del
+    sprite en un `<canvas>` oculto y calcula su hotspot como el centro
+    exacto de ese canvas; el resultado se cachea en memoria
+    (`scaledCursorCache`) para no regenerarlo en cada cambio de
+    pantalla. `applyCursorStyle()` ahora decide, por estilo, si pasa
+    por `buildScaledCursor()` (Pokémon) o usa el sprite tal cual con
+    el hotspot fijo "4 4" de siempre (objetos), y compone el hotspot
+    directamente dentro de la variable CSS `--cursor-url` (antes
+    llevaba solo la URL).
+  - `styles.css`: la regla `body.custom-cursor` ya no fija "4 4" a
+    mano — usa `var(--cursor-url)` completo (URL + hotspot), porque
+    ahora el hotspot varía según el estilo elegido en vez de ser el
+    mismo para todos.
+  - `ui.js` (corrección posterior, mismo día): los punteros de Pokémon
+    seguían apareciendo en la esquina superior izquierda del sprite (o
+    directamente no se veían) pese al primer intento de arreglo
+    (reescalado + hotspot centrado vía `<canvas>`/`toDataURL()`). Se
+    descarta ese enfoque —el cursor CSS nativo tiene un límite de
+    tamaño que el navegador ignora en silencio si se supera, y
+    `toDataURL()` puede fallar si el juego se abre como archivo local—
+    y se sustituye por una `<img>` real que seguía al ratón por JS
+    (`pokemon-cursor-overlay`, ver index.html) y se centra siempre
+    sobre él con `transform: translate(-50%, -50%)` en CSS, sea cual
+    sea su tamaño; el "1/3 del tamaño" ahora se aplica poniendo el
+    `width`/`height` de esa imagen a 1/3 del tamaño natural del sprite
+    (medido una vez y cacheado). Los estilos de objeto (Poké Flauta...)
+    no se han tocado: siguen usando el cursor nativo del navegador de
+    siempre.
+  - `index.html`: nuevo elemento `<img id="pokemon-cursor-overlay">`
+    (oculto por defecto), justo antes de los `<script>` finales.
+  - `styles.css`: `.pokemon-cursor-overlay` (posición fija, centrada
+    sobre el ratón, sin interceptar clics) y `body.pokemon-cursor-active`
+    (oculta el cursor real del sistema mientras se muestra esa imagen).
+  - `styles.css` (segunda corrección, mismo día): al restaurar la regla
+    de los estilos de objeto en el cambio anterior se dejó, por error,
+    un `4 4` fijo tras `var(--cursor-url)` — pero esa variable, puesta
+    por `applyCursorStyle()` en ui.js, ya incluye su propio `4 4` dentro
+    del valor. El resultado (`cursor: url("...") 4 4 4 4, auto;`) es una
+    declaración inválida que el navegador descarta entera, así que
+    Poké Flauta/Poké Ball/Supercaña/Caramelo Raro dejaban de verse.
+    Se quita el `4 4` duplicado de la regla CSS.
+  - `ui.js`/`styles.css` (tercera corrección, mismo día): el puntero de
+    Pokémon iba con retraso ("lag") al mover el ratón. Causa: se movía
+    la `<img>` flotante con `left`/`top`, que en un elemento `position:
+    fixed` obligan al navegador a recalcular el layout de toda la
+    página en cada `mousemove` (potencialmente decenas de veces por
+    fotograma). Se cambia a mover la imagen solo con `transform`
+    (`translate(x,y) translate(-50%,-50%)`, sin tocar left/top —
+    compositing por GPU, sin recalcular layout), y se agrupan las
+    actualizaciones con `requestAnimationFrame` para pintar como mucho
+    una vez por fotograma, siempre con la posición más reciente del
+    ratón conocida en ese momento.
+  - `ui.js`/`styles.css` (cuarta corrección): el puntero de Pokémon
+    seguía notándose con retraso frente a los estilos de objeto (cursor
+    nativo del navegador, sin JS de por medio). Causa: aunque `transform`
+    ya no obliga a recalcular layout, seguir agrupando su actualización
+    con `requestAnimationFrame` retrasaba el pintado hasta el siguiente
+    fotograma en vez de hacerlo en el propio `mousemove` — un fotograma
+    entero de más que no ahorraba ningún trabajo real, porque `transform`
+    no toca layout. Se quita el `requestAnimationFrame`: ahora
+    `paintPokemonCursorPosition()` se llama directamente en cada
+    `mousemove`.
   - `i18n.js`: claves nuevas en español e inglés (`options.cursor.*`,
     `cursorStyle.<id>.name` por cada estilo, `cursorStyle.lockedTitle`/
     `lockedToast`, `toast.newCursorTitle`, `feature.cursorName`,

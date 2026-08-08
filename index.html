@@ -909,6 +909,17 @@
 <audio id="snorlax-snore-audio" loop></audio>
 <audio id="jigglypuff-audio"></audio>
 
+<!-- Puntero "de mentira" para los estilos de puntero con forma de Pokémon
+     (ver CURSOR_CATALOG en storage.js, los que llevan `scale`): en vez de
+     pedirle al navegador que use el sprite como cursor nativo (limitado
+     en tamaño, y con problemas al leer el píxel del sprite vía <canvas>
+     si el juego se abre como archivo local), esta <img> sigue al ratón
+     por JS (ver pokemonCursor.* en ui.js) y se centra siempre sobre él
+     mediante transform: translate(-50%, -50%) en styles.css, sea cual
+     sea su tamaño. Los estilos de puntero de objeto (Poké Flauta...)
+     siguen usando el cursor nativo de siempre, sin pasar por esta img. -->
+<img id="pokemon-cursor-overlay" class="pokemon-cursor-overlay" alt="" aria-hidden="true">
+
 <script src="storage.js"></script>
 <script src="i18n.js"></script>
 <script type="module" src="leaderboard.js"></script>

@@ -99,23 +99,74 @@
      sustituye la flecha por el sprite del estilo elegido en
      settings.cursorStyle, desbloqueado por su logro correspondiente —
      ver CURSOR_UNLOCKS/isCursorUnlocked() en game.js y applyCursorStyle()
-     en ui.js. La URL del sprite se pasa en la variable CSS --cursor-url
-     (puesta por JS), en vez de una regla fija por estilo, porque hay
-     varios estilos posibles (Poké Flauta, Poké Ball, Supercaña, Caramelo
-     Raro...) que comparten la misma regla. El "4 4" fija el punto exacto
-     del sprite (30×30, ver sprites de objetos de PokeAPI) que actúa como
-     punta del puntero; "auto"/"pointer" son el resguardo si el navegador
-     no pudiera cargar la imagen. */
+     en ui.js. Solo se usa para los estilos de OBJETO (Poké Flauta, Poké
+     Ball, Supercaña, Caramelo Raro — los que NO llevan `scale` en
+     CURSOR_CATALOG, storage.js): sprites ya pequeños (30×30) donde el
+     cursor nativo del navegador funciona bien con un hotspot fijo. La
+     variable --cursor-url (puesta por JS) lleva ya el hotspot incluido
+     dentro del propio valor (p. ej. `url("...") 4 4`) — por eso aquí NO
+     se le añade ningún "4 4" propio: hacerlo duplicaría el hotspot
+     ("...4 4 4 4, auto") y el navegador descartaría la declaración
+     entera por inválida. Los estilos con forma de Pokémon usan, en su
+     lugar, la <img> flotante de abajo (#pokemon-cursor-overlay), no esta
+     regla — ver el comentario de esa clase para el porqué. */
   body.custom-cursor {
-    cursor: var(--cursor-url) 4 4, auto;
+    cursor: var(--cursor-url), auto;
   }
   body.custom-cursor button,
   body.custom-cursor a,
   body.custom-cursor .toggle,
   body.custom-cursor [style*="cursor:pointer"],
   body.custom-cursor .answer-btn {
-    cursor: var(--cursor-url) 4 4, pointer;
+    cursor: var(--cursor-url), pointer;
   }
+
+  /* Puntero "de mentira" para los estilos con forma de Pokémon (los que
+     llevan `scale` en CURSOR_CATALOG). No se usan como cursor nativo del
+     navegador porque eso tiene dos problemas con sprites de Pokémon a
+     tamaño normal: (1) los navegadores limitan el tamaño del bitmap que
+     aceptan como cursor (suele rondar 128 px) e ignoran el cursor entero,
+     sin avisar, si se supera; y (2) leer los píxeles del sprite para
+     reescalarlo (vía <canvas>) puede fallar si el juego se abre como
+     archivo local en vez de servido por http. En su lugar, se posiciona
+     esta <img> real seguiendo al ratón por JS (ver pokemonCursor.* en
+     ui.js) y se centra siempre sobre el puntero con translate(-50%,-50%),
+     sea cual sea su tamaño — así el "centrado" no depende de calcular a
+     mano ningún hotspot en píxeles. */
+  .pokemon-cursor-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* Puesto por JS en cada mousemove (ver paintPokemonCursorPosition()
+       en ui.js): translate(x,y) la mueve a la posición del ratón, y el
+       segundo translate(-50%,-50%) la centra sobre ese punto usando el
+       propio tamaño de la imagen (por eso el centrado no depende de
+       calcular el tamaño del sprite a mano). Solo se usa `transform` —
+       nunca `left`/`top` — porque `transform` no obliga a recalcular el
+       layout de la página (a diferencia de `left`/`top` en un elemento
+       `position: fixed`), y por eso mismo se pinta directamente en el
+       propio evento `mousemove`, sin pasar por requestAnimationFrame:
+       al no tocar layout, retrasarla a "una vez por fotograma" solo
+       añadía un fotograma de retraso ("lag") sin ahorrar nada — ver el
+       comentario de paintPokemonCursorPosition() en ui.js. */
+    transform: translate(-9999px, -9999px);
+    will-change: transform;
+    pointer-events: none;
+    z-index: 9999;
+    image-rendering: pixelated;
+  }
+  /* Mientras se muestra ese puntero "de mentira", se oculta el cursor
+     real del sistema (si no, se verían los dos a la vez). */
+  body.pokemon-cursor-active,
+  body.pokemon-cursor-active button,
+  body.pokemon-cursor-active a,
+  body.pokemon-cursor-active .toggle,
+  body.pokemon-cursor-active [style*="cursor:pointer"],
+  body.pokemon-cursor-active .answer-btn {
+    cursor: none;
+  }
+
 
   ::selection { background: var(--yellow); color: #000; }
   ::-webkit-scrollbar { width: 8px; height: 8px; }

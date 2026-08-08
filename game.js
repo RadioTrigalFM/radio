@@ -1238,6 +1238,31 @@ const CURSOR_UNLOCKS = {
   poke_ball:  { achId: "correct_50" },   // logro "Conocedor musical"
   super_rod:  { achId: "sonidex_5" },    // logro "Primeras notas"
   rare_candy: { achId: "all_modes" },    // logro "Explorador"
+  // Punteros con forma de Pokémon (ver CURSOR_CATALOG en storage.js).
+  // Nótese que "Historia: Kanto" y "Entrenador dedicado" desbloquean cada
+  // una DOS/TRES punteros distintos a la vez (varios ids de
+  // CURSOR_CATALOG apuntando al mismo achId): eso es intencional, no un
+  // error — CURSOR_UNLOCKS admite esa relación N a 1 sin problema, ya que
+  // isCursorUnlocked()/getFeatureUnlocksForAchievement() comprueban cada
+  // puntero por separado.
+  shuckle:     { achId: "story_johto" },           // logro "Historia: Johto"
+  cosmog:      { achId: "perfect_normal_region" }, // logro "Región perfecta"
+  togedemaru:  { achId: "sonidex_alola" },          // logro "Sonidex de Alola"
+  zygarde:     { achId: "games_50" },               // logro "Veterano"
+  dedenne:     { achId: "sonidex_kalos" },          // logro "Sonidex de Kalos"
+  emolga:      { achId: "sonidex_teselia" },        // logro "Sonidex de Teselia"
+  rotom:       { achId: "story_sinnoh" },           // logro "Historia: Sinnoh"
+  pachirisu:   { achId: "sonidex_sinnoh" },         // logro "Sonidex de Sinnoh"
+  plusle:      { achId: "sonidex_hoenn" },          // logro "Sonidex de Hoenn"
+  pichu:       { achId: "sonidex_johto" },          // logro "Sonidex de Johto"
+  mew:         { achId: "hard_correct_8" },         // logro "Reto superado"
+  bulbasaur:   { achId: "story_kanto" },            // logro "Historia: Kanto"
+  squirtle:    { achId: "story_kanto" },            // logro "Historia: Kanto"
+  charmander:  { achId: "story_kanto" },            // logro "Historia: Kanto"
+  meowth:      { achId: "perfect_easy" },           // logro "Fácil perfecto"
+  charizard_y: { achId: "games_30" },               // logro "Entrenador dedicado"
+  charizard_x: { achId: "games_30" },               // logro "Entrenador dedicado"
+  pikachu:     { achId: "sonidex_kanto" },          // logro "Sonidex de Kanto"
 };
 
 /** Indica si un estilo de puntero (id de CURSOR_CATALOG, o "normal")
