@@ -24,10 +24,9 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
   7 subcategorías (una por región: Kanto, Johto, Hoenn, Sinnoh, Teselia,
   Kalos, Alola), cada una con su propio Top 50 global y su propio récord
   personal — el de una región no compite con el de otra, ni con el de
-  Combate. Igual que ya pasaba con Difícil, el récord/envío al backend
-  solo se actualiza en partidas jugadas sin el interruptor ♾️ activado
-  (una partida con ♾️ no es comparable a una partida normal de esa
-  región/Combate).
+  Combate. El récord/envío al backend se actualiza igual con o sin el
+  interruptor ♾️ activado (ver también el cambio correspondiente más
+  abajo, en la sección "Cambiado").
   - `leaderboard.js`: `LEADERBOARD_CATEGORIES` pasa de 4 a 12 entradas —
     añade `combat` (campo `combatScore`) y `region_Kanto`…`region_Alola`
     (campos `regionKantoScore`…`regionAlolaScore`), un campo más en el
@@ -161,6 +160,24 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `endlessInfo.dontShowAgain` y `endlessInfo.ok` (ES/EN).
 
 ### Cambiado
+- **Envío a la clasificación global de Normal/Difícil/Combate jugados
+  con el interruptor ♾️ activado**: antes, superar el propio récord en
+  Difícil, Combate o cualquier región del Modo Normal mientras estaba
+  activado el interruptor ♾️ de ese modo no se enviaba a la
+  clasificación global (`showResult()` salía de la función antes de
+  llegar a esa comprobación, por compartir camino con el Desafío
+  Infinito). Ahora sí se envía, exactamente igual que en una partida sin
+  ♾️: solo cambia lo que ya cambiaba antes (menos/otras opciones, región
+  fija, sin Eventos Pokémon...), no si el récord cuenta para la
+  clasificación.
+  - `game.js`: en `showResult()`, el `return` anticipado del bloque de
+    `isEndlessSession()` pasa a ejecutarse solo cuando `session.mode ===
+    GameMode.INFINITE` (el único caso que de verdad no debe mezclarse
+    con las demás clasificaciones); para el resto de modos con ♾️
+    activado, la función continúa hacia los bloques ya existentes de
+    `bestHardScore`/`bestCombatScore`/`bestRegionScore`, sin duplicar esa
+    lógica.
+
 - **Botón "ⓘ" de información de Eventos Pokémon (pantalla previa de
   región del Modo Historia)**: se duplica su tamaño (de 50×50px a
   100×100px, con el icono escalado a juego) para que destaque más. Ya se

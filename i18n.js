@@ -64,6 +64,9 @@ const I18N = {
     "profile.stats.bestStreak": "🔥 Mejor racha",
     "profile.stats.infiniteRecord": "♾️ Récord Desafío Infinito",
     "profile.stats.storyRecord": "📖 Récord Modo Historia",
+    "profile.stats.hardRecord": "🔴 Récord Modo Difícil",
+    "profile.stats.combatRecord": "⚔️ Récord Modo Combate",
+    "profile.stats.regionRecordsTitle": "🗺️ Récords por región",
     "profile.stats.perfectGames": "🎯 Partidas perfectas",
     "common.pts": "pts",
 
@@ -374,6 +377,9 @@ const I18N = {
     "profile.stats.bestStreak": "🔥 Best streak",
     "profile.stats.infiniteRecord": "♾️ Endless Challenge record",
     "profile.stats.storyRecord": "📖 Story Mode record",
+    "profile.stats.hardRecord": "🔴 Hard Mode record",
+    "profile.stats.combatRecord": "⚔️ Battle Mode record",
+    "profile.stats.regionRecordsTitle": "🗺️ Records by region",
     "profile.stats.perfectGames": "🎯 Perfect games",
     "common.pts": "pts",
 

@@ -2303,10 +2303,30 @@ function renderProfileStats() {
     { label: t("profile.stats.bestStreak"), value: s.bestStreak || 0 },
     { label: t("profile.stats.infiniteRecord"), value: `${s.bestInfiniteScore || 0} ${pts}` },
     { label: t("profile.stats.storyRecord"), value: `${s.bestStoryScore || 0} ${pts}` },
+    { label: t("profile.stats.hardRecord"), value: `${s.bestHardScore || 0} ${pts}` },
+    { label: t("profile.stats.combatRecord"), value: `${s.bestCombatScore || 0} ${pts}` },
     { label: t("profile.stats.perfectGames"), value: s.perfectGamesCount || 0 },
   ];
+
+  // Un récord por región (Modo Normal): igual que en la tarjeta "Tus
+  // récords" de la pantalla de Clasificaciones (ver
+  // renderLeaderboardPersonalBests()), se genera aquí a partir de
+  // REGIONS/regionDisplayName (game.js, que carga después que ui.js) en
+  // vez de como filas fijas en index.html — seguro porque esta función
+  // solo se ejecuta al abrir el modal de perfil, nunca durante la carga
+  // inicial de la página.
+  const bestByRegion = s.bestRegionScore || {};
+  const regionRows = REGIONS.map(r => `
+    <div class="streak-row">
+      <div class="streak-name">🗺️ ${regionDisplayName(r)}</div>
+      <div class="streak-value">${bestByRegion[r] || 0} ${pts}</div>
+    </div>
+  `).join("");
+
   profileStatsList.innerHTML = `<div class="profile-stats-title">${t("profile.stats.title")}</div>` +
-    rows.map(r => `<div class="streak-row"><div class="streak-name">${r.label}</div><div class="streak-value">${r.value}</div></div>`).join("");
+    rows.map(r => `<div class="streak-row"><div class="streak-name">${r.label}</div><div class="streak-value">${r.value}</div></div>`).join("") +
+    `<div class="profile-stats-title">${t("profile.stats.regionRecordsTitle")}</div>` +
+    regionRows;
   renderProfileLevelUI();
 }
 

@@ -2263,27 +2263,34 @@ function showResult() {
     // opciones, región fija, sin Eventos Pokémon...), así que esa
     // puntuación no es comparable a la del Desafío Infinito y no debe
     // mezclarse con su clasificación ni con su récord guardado.
-    if (session.mode === GameMode.INFINITE && state.score > (achievementsData.stats.bestInfiniteScore || 0)) {
-      achievementsData.stats.bestInfiniteScore = state.score;
-      saveAchievements();
-      // Solo se envía al backend de clasificaciones cuando se supera el
-      // récord personal (no en cada partida): ver leaderboard.js.
-      Leaderboard.submitScore("infinite", profile.username, profile.avatarId, state.score, ensurePlayerId());
+    if (session.mode === GameMode.INFINITE) {
+      if (state.score > (achievementsData.stats.bestInfiniteScore || 0)) {
+        achievementsData.stats.bestInfiniteScore = state.score;
+        saveAchievements();
+        // Solo se envía al backend de clasificaciones cuando se supera el
+        // récord personal (no en cada partida): ver leaderboard.js.
+        Leaderboard.submitScore("infinite", profile.username, profile.avatarId, state.score, ensurePlayerId());
+      }
+      return;
     }
-    return;
+    // Normal/Difícil/Combate jugados con el interruptor ♾️ activado: su
+    // récord y su envío a la clasificación global correspondiente
+    // (hard/combat/region_<Región>, según el caso) se gestionan igual
+    // que en una partida normal, así que seguimos con el resto de la
+    // función en vez de salir aquí.
+  } else {
+    const pct = Math.round(state.correct / session.roundsTarget * 100);
+    let emoji = '😅', title = t("result.attempt");
+    if (pct >= 90) { emoji = '🏆'; title = t("result.master"); }
+    else if (pct >= 70) { emoji = '⭐'; title = t("result.great"); }
+    else if (pct >= 50) { emoji = '🎵'; title = t("result.good"); }
+    document.getElementById('result-emoji').textContent = emoji;
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-score-num').textContent = t("result.roundsScore", { n: state.correct, total: session.roundsTarget, score: state.score });
+    overlay.classList.add('show');
+    if (state.correct >= 10) playSFX(SFX.victory);
+    trackGameFinished(pct, { mode: session.mode, region: session.normalRegion, otherGame: session.otherGame, correctCount: state.correct });
   }
-
-  const pct = Math.round(state.correct / session.roundsTarget * 100);
-  let emoji = '😅', title = t("result.attempt");
-  if (pct >= 90) { emoji = '🏆'; title = t("result.master"); }
-  else if (pct >= 70) { emoji = '⭐'; title = t("result.great"); }
-  else if (pct >= 50) { emoji = '🎵'; title = t("result.good"); }
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-score-num').textContent = t("result.roundsScore", { n: state.correct, total: session.roundsTarget, score: state.score });
-  overlay.classList.add('show');
-  if (state.correct >= 10) playSFX(SFX.victory);
-  trackGameFinished(pct, { mode: session.mode, region: session.normalRegion, otherGame: session.otherGame, correctCount: state.correct });
 
   if (session.mode === GameMode.HARD && state.score > (achievementsData.stats.bestHardScore || 0)) {
     achievementsData.stats.bestHardScore = state.score;
