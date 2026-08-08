@@ -1003,9 +1003,20 @@ function renderSonidexScreen() {
   updateHomeSonidexSummary(totalUnlocked, totalSongs);
 }
 
+/** Calcula cuántas fichas de la Sonidex están desbloqueadas y cuántas
+ * hay en total (Main + Combate + todos los Minijuegos), colapsando antes
+ * las variantes de idioma de una misma canción con sonidexGroupSongs()
+ * para que cuenten como una sola ficha. La usan tanto
+ * updateHomeSonidexSummary() como renderProfileStats(), para no repetir
+ * el mismo cálculo en dos sitios (Regla nº2 de CLAUDE.md). */
+function computeSonidexTotals() {
+  const allSonidexSongs = sonidexGroupSongs(songs);
+  return { unlocked: allSonidexSongs.filter(isSongUnlocked).length, total: allSonidexSongs.length };
+}
+
 /** Actualiza el resumen "X / Y fichas" de la Sonidex en la pantalla de
  * Inicio. Si no se le pasan los totales ya calculados, los recalcula
- * a partir de todas las canciones (main + combate + minijuegos). */
+ * con computeSonidexTotals() (main + combate + minijuegos). */
 function updateHomeSonidexSummary(unlockedArg, totalArg) {
   const el = document.getElementById("home-sonidex-summary");
   if (!el) return;
@@ -1015,12 +1026,9 @@ function updateHomeSonidexSummary(unlockedArg, totalArg) {
     // y TODOS los Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf,
     // Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger), para que la
     // cifra mostrada en el Inicio coincida siempre con la de la pantalla Sonidex.
-    // sonidexGroupSongs() deduplica antes de contar (ver su comentario en
-    // game.js), para que canciones con varias variantes de idioma (los
-    // openings) cuenten como una sola ficha aquí también.
-    const allSonidexSongs = sonidexGroupSongs(songs);
-    totalCount = allSonidexSongs.length;
-    unlockedCount = allSonidexSongs.filter(isSongUnlocked).length;
+    const totals = computeSonidexTotals();
+    unlockedCount = totals.unlocked;
+    totalCount = totals.total;
   }
   el.textContent = t("sonidex.progressShort", { n: unlockedCount, total: totalCount });
 }
@@ -2294,6 +2302,7 @@ function renderProfileLevelUI() {
 function renderProfileStats() {
   const s = achievementsData.stats;
   const unlockedCount = Object.keys(achievementsData.unlocked).length;
+  const sonidexTotals = computeSonidexTotals();
   const pts = t("common.pts");
   const rows = [
     { label: t("profile.stats.totalPoints"), value: profile.xp || 0 },
@@ -2305,7 +2314,7 @@ function renderProfileStats() {
     { label: t("profile.stats.storyRecord"), value: `${s.bestStoryScore || 0} ${pts}` },
     { label: t("profile.stats.hardRecord"), value: `${s.bestHardScore || 0} ${pts}` },
     { label: t("profile.stats.combatRecord"), value: `${s.bestCombatScore || 0} ${pts}` },
-    { label: t("profile.stats.perfectGames"), value: s.perfectGamesCount || 0 },
+    { label: t("profile.stats.sonidexUnlocked"), value: `${sonidexTotals.unlocked} / ${sonidexTotals.total}` },
   ];
 
   // Un récord por región (Modo Normal): igual que en la tarjeta "Tus

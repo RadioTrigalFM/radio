@@ -67,7 +67,7 @@ const I18N = {
     "profile.stats.hardRecord": "🔴 Récord Modo Difícil",
     "profile.stats.combatRecord": "⚔️ Récord Modo Combate",
     "profile.stats.regionRecordsTitle": "🗺️ Récords por región",
-    "profile.stats.perfectGames": "🎯 Partidas perfectas",
+    "profile.stats.sonidexUnlocked": "🎼 Fichas de la Sonidex desbloqueadas",
     "common.pts": "pts",
 
     "lock.badge": "Bloqueado",
@@ -380,7 +380,7 @@ const I18N = {
     "profile.stats.hardRecord": "🔴 Hard Mode record",
     "profile.stats.combatRecord": "⚔️ Battle Mode record",
     "profile.stats.regionRecordsTitle": "🗺️ Records by region",
-    "profile.stats.perfectGames": "🎯 Perfect games",
+    "profile.stats.sonidexUnlocked": "🎼 Soundex entries unlocked",
     "common.pts": "pts",
 
     "lock.badge": "Locked",

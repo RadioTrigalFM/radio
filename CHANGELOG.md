@@ -17,6 +17,85 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **21 avatares nuevos en el catálogo de perfil**: Cobalion, Terrakion,
+  Virizion, Tornadus, Thundurus, Landorus, Volcanion, Necrozma,
+  Magearna, Zeraora, Meltan, Dragapult, Zacian, Zamazenta, Eternatus,
+  Urshifu, Regieleki, Regidrago, Glastrier, Spectrier y Calyrex. Los 21
+  se desbloquean por logro (ver la entrada siguiente), no desde el
+  principio.
+  - `storage.js`: se añaden al final de `AVATAR_CATALOG`, siguiendo el
+    mismo formato (`id`/`name`/`url` de retrato PMDCollab/SpriteCollab)
+    que el resto del catálogo.
+- **Esos 21 avatares nuevos, ligados al logro que los desbloquea**
+  (en vez de quedar disponibles desde el principio): Dragapult →
+  "Fanático de la música" (`correct_250`), Eternatus → "Enciclopedia
+  musical" (`correct_500`), Necrozma → "Racha imparable" (`streak_30`),
+  Meltan → "Leyenda viviente" (`streak_20`), Tornadus/Thundurus/
+  Landorus → "Genio musical" (`perfect_hard`), Magearna → "Especialista
+  regional" (`perfect_regions_normal_5`), Terrakion/Virizion/Cobalion →
+  "Historia: Teselia" (`story_teselia`), Volcanion → "Historia: Kalos"
+  (`story_kalos`), Zacian/Zamazenta → "Historia perfecta"
+  (`story_complete_100`), Calyrex → "Biblioteca sonora"
+  (`sonidex_200`), Spectrier/Glastrier → "Archivo sonoro"
+  (`sonidex_100`), Regieleki/Regidrago → "Melómano experto"
+  (`sonidex_50`), Urshifu → "Oído fino" (`sonidex_20`), Zeraora →
+  "Coleccionista de sonidos" (`sonidex_10`).
+  - `game.js`: 21 entradas nuevas en `AVATAR_UNLOCKS`, cada una con
+    `{ achId: "..." }` apuntando al logro correspondiente de
+    `ACHIEVEMENTS` (varios avatares pueden compartir el mismo logro,
+    igual que ya ocurría con Espeon/Umbreon → `perfect_colosseum_xd`).
+
+### Cambiado
+- **Fila "Partidas perfectas" del modal de perfil, sustituida por
+  "Fichas de la Sonidex desbloqueadas"**: la estadística de partidas
+  perfectas (`achievementsData.stats.perfectGamesCount`) se sigue
+  contabilizando igual en `game.js`/`storage.js` (no se toca), pero deja
+  de mostrarse en el perfil; en su lugar aparece el mismo recuento
+  "X / Y" que ya se veía en Inicio y en la pantalla Sonidex.
+  - `ui.js`: se extrae `computeSonidexTotals()` (fichas desbloqueadas y
+    total, colapsando variantes de idioma con `sonidexGroupSongs()`) a
+    partir del cálculo que ya hacía `updateHomeSonidexSummary()`, para
+    que ambas funciones —y ahora también `renderProfileStats()`— usen la
+    misma lógica en vez de repetirla (Regla nº2 de `CLAUDE.md`).
+  - `i18n.js`: la clave `profile.stats.perfectGames` (ES/EN), que ya no
+    se usaba en ningún sitio, se sustituye por
+    `profile.stats.sonidexUnlocked` (ES/EN).
+
+### Cambiado
+- **Orden de los 3 logros de encuentro de cada Pokémon/evento
+  (`ACHIEVEMENTS`, sección "encounters")**: dentro de cada trío (mismo
+  Pokémon, mismo icono), las dos primeras entradas estaban en el orden
+  contrario a su umbral real de apariciones — p. ej. Charizard mostraba
+  primero "Avistamiento: Charizard" (10 apariciones) y después "Cazador
+  de llamas" (5 apariciones). Ahora cada trío sigue siempre el orden
+  5 → 10 → 20 apariciones (p. ej. "Cazador de llamas" → "Avistamiento:
+  Charizard" → "Brillo de Charizard"), igual para los 18 Pokémon/eventos.
+  - `game.js`: solo se reordenan las 54 líneas de `ACHIEVEMENTS`
+    correspondientes (intercambiando la 1ª y 2ª de cada trío de tres,
+    sin tocar la 3ª); no cambian ids, descripciones ni umbrales
+    (`ACHIEVEMENT_CONDITIONS`, generadas en bucle a partir de
+    `ENCOUNTER_CONDITION_IDS`, no dependen del orden del array).
+
+### Añadido
+- **Récord de Difícil, Combate y Modo Normal (por región) en el modal
+  de perfil personal**: la tarjeta de estadísticas del perfil (icono de
+  perfil → modal) ya mostraba el récord de Desafío Infinito y de Modo
+  Historia; ahora añade también el récord de Modo Difícil, el de Modo
+  Combate y uno por cada una de las 7 regiones del Modo Normal (Kanto,
+  Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola), bajo un subtítulo
+  "🗺️ Récords por región" nuevo. Mismos datos que ya usaba la tarjeta
+  "Tus récords" de la pantalla de Clasificaciones
+  (`achievementsData.stats.bestHardScore`/`bestCombatScore`/
+  `bestRegionScore`), sin pedir nada nuevo al backend.
+  - `ui.js`: `renderProfileStats()` añade dos filas fijas
+    (`profile.stats.hardRecord`/`combatRecord`) al array `rows` ya
+    existente, y genera las 7 filas de región reutilizando
+    `REGIONS`/`regionDisplayName` (mismo criterio que
+    `renderLeaderboardPersonalBests()`, sin duplicar esa lógica).
+  - `i18n.js`: nuevas claves `profile.stats.hardRecord`,
+    `profile.stats.combatRecord` y `profile.stats.regionRecordsTitle`
+    (ES/EN).
+
 - **Dos clasificaciones globales nuevas: "Combate" y "Regiones"**: junto
   a Nivel/Infinito/Historia/Difícil, la pantalla de Clasificaciones
   incorpora ahora una pestaña "⚔️ Combate" (récord de puntuación del
