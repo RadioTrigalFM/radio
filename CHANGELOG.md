@@ -17,6 +17,14 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Nuevo avatar de perfil: Lotad**, desbloqueado por el logro
+  `correct_20` ("Oído entrenado"). Mismo patrón que el resto del
+  catálogo (retrato PMDCollab/SpriteCollab, sin clave de traducción
+  propia porque el nombre es igual en español e inglés).
+  - `storage.js`: nueva entrada `lotad` en `AVATAR_CATALOG`.
+  - `game.js`: nueva entrada `lotad: { achId: "correct_20" }` en
+    `AVATAR_UNLOCKS`.
+
 - **Nuevo puntero con forma de Pokémon: Spinda**, desbloqueado por el
   logro `streak_5` ("En racha"). Mismo patrón que el resto de punteros
   de Pokémon (sprite local, `scale: 1/3`, sin cursor de objeto nativo).

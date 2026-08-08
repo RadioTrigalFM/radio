@@ -654,6 +654,7 @@ const AVATAR_UNLOCKS = {
   regidrago:  { achId: "sonidex_50"               },
   urshifu:    { achId: "sonidex_20"               },
   zeraora:    { achId: "sonidex_10"               },
+  lotad:      { achId: "correct_20"               }, // logro "Oído entrenado"
   sunkern:     { level: 2  },
   magikarp:    { level: 2  },
   ralts:       { level: 2  },

@@ -313,6 +313,7 @@ const AVATAR_CATALOG = [
   { id: "glastrier",  name: "Glastrier",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0896/Normal.png" },
   { id: "spectrier",  name: "Spectrier",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0897/Normal.png" },
   { id: "calyrex",    name: "Calyrex",    url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0898/Normal.png" },
+  { id: "lotad",      name: "Lotad",      url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0270/Normal.png" },
 ];
 /** Devuelve la URL de imagen del avatar con ese id, o la del primer
  * avatar del catálogo si no se encuentra (avatar por defecto). */
