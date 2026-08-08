@@ -214,7 +214,7 @@ Dos cosas independientes entre sí:
 2. **Pokémon de fondo**: construidos automáticamente a partir del mismo
    catálogo (`buildBgPokemon`, `addBgPokemon`, `initBgPokeWalk`,
    `isHillPokemonUnlocked` — se desbloquean vía logros de "encuentro" a
-   las 10 apariciones). Un segundo logro, más difícil, a las 20
+   las 5 apariciones). Un segundo logro, más difícil, a las 20
    apariciones (`encounter_<id>_20`) no añade un Pokémon nuevo sino que
    le cambia el sprite al shiny (`isHillPokemonShinyUnlocked`,
    `hillPokemonSpriteInfo`, `refreshBgPokemonSprite` — caso especial: el
@@ -233,7 +233,10 @@ Regla de separación (explícita en la cabecera del archivo): si la
 función **decide** algo sobre las reglas del juego → `game.js`; si solo
 **refleja en el DOM** un estado ya decidido en otro sitio → `ui.js`. Por
 eso `healLife()`/`loseLife()` están en `game.js` pero
-`renderLives()`/`updateNervousState()` están aquí.
+`renderLives()`/`updateNervousState()` están aquí. Mismo criterio para
+`renderEndlessTogglesUI()`: solo pinta la clase `active`/`aria-pressed`
+de los interruptores ♾️ de Fácil/Normal/Difícil/Combate a partir del
+estado `endlessToggle`, decidido en `game.js`.
 
 ### `game.js` — núcleo del juego
 El "cerebro": reglas y estado, no dibujado. Secciones principales (en
@@ -272,9 +275,19 @@ este orden dentro del archivo):
    `getCurrentLives`, `healLife`, `loseLife`, `storyGameOver`,
    `electrodeExplode`) y **flujo de partida**: `startGame`,
    `startRound`, `resumeAudio`, `handleAnswer`, `nextRound`,
-   `showResult`, `restartGame`, `exitGame`.
+   `showResult`, `restartGame`, `exitGame`. Incluye también
+   `isEndlessSession()`: decide si la partida en curso tiene rondas sin
+   límite y termina con el primer fallo, ya sea porque el modo es el
+   propio Desafío Infinito (`GameMode.INFINITE`) o porque se activó el
+   interruptor ♾️ de Fácil/Normal/Difícil/Combate al arrancarla
+   (`session.endless`, fijado por `startGame(mode, extra, {endless})`).
+   `nextRound()`/`handleAnswer()`/`showResult()` usan este único punto de
+   comprobación en vez de mirar `GameMode.INFINITE` por separado.
 8. **Menús: handlers** — listeners de los botones de cada pantalla,
-   `REGION_META`, pills de región.
+   `REGION_META`, pills de región. Incluye `endlessToggle` (estado de
+   los interruptores ♾️ de Fácil/Normal/Difícil/Combate — el propio
+   Desafío Infinito no lleva uno, ya es infinito por sí mismo) y
+   `setupEndlessToggle()`, que engancha el click/teclado de cada uno.
 9. **Modo Historia** (recorrido): `startStoryMode`,
    `handleStoryStageComplete`, `storyFinish`.
 10. **INIT**: bloque que arranca la app al cargar la página (carga

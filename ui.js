@@ -333,6 +333,64 @@ function showLockedMessage(unlocksMap, key, i18nPrefix) {
 /** Aviso emergente al intentar entrar en un modo de juego todavía
  * bloqueado. */
 function showLockedModeMessage(key) { showLockedMessage(MODE_UNLOCKS, key, "modeUnlock"); }
+// ═══════════════════════════════════════════════
+//  ♾️ INTERRUPTORES DE MODO INFINITO POR BOTÓN DE MODO
+// ═══════════════════════════════════════════════
+/** Sincroniza el aspecto visual (activo/inactivo) de los pequeños
+ * interruptores ♾️ de los botones Fácil/Normal/Difícil/Combate con el
+ * estado ya decidido en `endlessToggle` (game.js): no decide nada, solo
+ * refleja ese estado en el DOM (clase "active" + `aria-pressed`). Se
+ * llama tras cada click del interruptor y una vez en el INIT de
+ * game.js. */
+/** Sincroniza el aspecto visual (activo/inactivo) de los pequeños
+ * interruptores ♾️ de los botones Fácil/Normal/Difícil/Combate y de las
+ * categorías de Minijuegos con el estado ya decidido en
+ * `endlessToggle`/`otherEndlessToggle` (game.js): no decide nada, solo
+ * refleja ese estado en el DOM (clase "active" + `aria-pressed`). Se
+ * llama tras cada click de cualquiera de esos interruptores y una vez
+ * en el INIT de game.js. */
+function renderEndlessTogglesUI() {
+  const syncToggles = (toggleState, idPrefix) => {
+    Object.keys(toggleState).forEach(key => {
+      const el = document.getElementById(`${idPrefix}-${key}-endless`);
+      if (!el) return;
+      const active = !!toggleState[key];
+      el.classList.toggle("active", active);
+      el.setAttribute("aria-pressed", String(active));
+    });
+  };
+  syncToggles(endlessToggle, "mode");
+  syncToggles(otherEndlessToggle, "other");
+}
+
+const endlessInfoOverlay = document.getElementById('endless-info-overlay');
+const endlessInfoOkBtn = document.getElementById('endless-info-ok-btn');
+const endlessInfoDontShowCheckbox = document.getElementById('endless-info-dont-show');
+
+/** Muestra el aviso de "modo infinito activado" (rondas sin límite, un
+ * fallo termina la partida) al pulsar el interruptor ♾️ de un botón de
+ * modo. No hace nada si el jugador ya marcó antes "No volver a mostrar"
+ * (`settings.hideEndlessInfo`, ver storage.js). Solo pinta el aviso: la
+ * decisión de CUÁNDO llamarla (al activar el interruptor, no al
+ * desactivarlo) vive en `setupEndlessToggle()` (game.js). */
+function showEndlessInfoModal() {
+  if (settings.hideEndlessInfo) return;
+  endlessInfoDontShowCheckbox.checked = false;
+  endlessInfoOverlay.classList.add('show');
+}
+/** Cierra el aviso de "modo infinito activado" y, si el jugador marcó la
+ * casilla "No volver a mostrar", persiste esa preferencia para que el
+ * aviso deje de aparecer en cualquier modo de juego. */
+function closeEndlessInfoModal() {
+  if (endlessInfoDontShowCheckbox.checked) {
+    settings.hideEndlessInfo = true;
+    saveSettings();
+  }
+  endlessInfoOverlay.classList.remove('show');
+}
+endlessInfoOkBtn.addEventListener('click', () => { playSFX(SFX.back); closeEndlessInfoModal(); });
+endlessInfoOverlay.addEventListener('click', (e) => { if (e.target === endlessInfoOverlay) closeEndlessInfoModal(); });
+
 /** Aviso emergente al intentar entrar en una categoría de Minijuegos
  * todavía bloqueada. */
 function showLockedOtherMessage(key) { showLockedMessage(OTHER_UNLOCKS, key, "otherUnlock"); }

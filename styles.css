@@ -644,6 +644,52 @@
     margin-bottom: 0;
   }
 
+  /* Interruptor ♾️ pequeño dentro de un botón de modo (Fácil/Normal/
+     Difícil/Combate): activa que ESE modo se juegue con rondas sin
+     límite y un fallo terminando la partida (ver game.js, endlessToggle).
+     Se posiciona en la esquina del botón grande sin alterar su layout
+     interno (position:absolute), y su propio click no debe "colar" al
+     botón grande que lo contiene (ver stopPropagation en game.js). */
+  .menu-btn-endless-toggle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    line-height: 1;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
+    z-index: 2;
+  }
+  .menu-btn-endless-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--blue);
+    color: var(--text);
+  }
+  .menu-btn-endless-toggle:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+  .menu-btn-endless-toggle.active {
+    background: linear-gradient(150deg, var(--yellow), var(--blue));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  /* Si el modo está bloqueado (candado), el interruptor no debe usarse. */
+  .menu-btn.locked .menu-btn-endless-toggle {
+    pointer-events: none;
+    opacity: .5;
+  }
+
   .menu-btn.locked {
     opacity: .55;
     cursor: not-allowed;
@@ -969,6 +1015,28 @@
   }
   body.light #leave-story-confirm-overlay { background: #00000066; }
   #leave-story-confirm-overlay.show { opacity: 1; pointer-events: all; }
+
+  /* ── AVISO: modo infinito activado (interruptor ♾️ de un modo) ──
+     Mismo patrón visual que #leave-story-confirm-overlay (reutiliza
+     .result-card, .result-emoji, .result-title, .result-score y
+     .result-actions), con una casilla ".dont-show-again" añadida antes
+     de las acciones. */
+  #endless-info-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: #0a0e1add;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(6px);
+  }
+  body.light #endless-info-overlay { background: #00000066; }
+  #endless-info-overlay.show { opacity: 1; pointer-events: all; }
+  .dont-show-again {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: .82rem; font-weight: 800; color: var(--text-dim);
+    margin-bottom: 22px; cursor: pointer; user-select: none;
+  }
+  .dont-show-again input { width: 18px; height: 18px; accent-color: var(--yellow); cursor: pointer; }
   .result-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -2023,18 +2091,20 @@
 
   /* Botón de información en la pantalla previa de región (Modo Historia):
      abre un listado con la descripción de todos los Eventos Pokémon que
-     pueden aparecer durante las rondas. Solo se muestra en la pantalla
-     previa de región, no en el aviso de enemigo poderoso (.combat). */
+     pueden aparecer durante las rondas. Se muestra en la pantalla previa
+     de CUALQUIER región (Kanto, Johto...), no en el aviso de enemigo
+     poderoso (.combat). Tamaño doblado (100x100, antes 50x50) para que
+     destaque más como punto de entrada a la info de Eventos Pokémon. */
   .story-info-btn {
     position: absolute;
     top: 18px; right: 18px;
     z-index: 2;
-    width: 50px; height: 50px;
+    width: 100px; height: 100px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-card2);
     color: var(--yellow);
-    font-size: 1.5rem;
+    font-size: 3rem;
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;

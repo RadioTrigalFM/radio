@@ -45,6 +45,7 @@ const settings = {
   animatedBg: true,   // Opciones gráficas: cielo/nubes/Pokémon de fondo
   particles: true,    // Opciones gráficas: chispas al acertar / logros
   language: "es",     // idioma de los menús: "es" (Español) o "en" (English) — ver i18n.js
+  hideEndlessInfo: false, // true = no volver a mostrar el aviso "modo infinito activado" (ver showEndlessInfoModal() en ui.js)
 };
 
 /** Carga las opciones del jugador (volumen, modo oscuro, fondo animado,
@@ -67,6 +68,7 @@ function loadSettings() {
     if (typeof obj.animatedBg === "boolean") settings.animatedBg = obj.animatedBg;
     if (typeof obj.particles === "boolean") settings.particles = obj.particles;
     if (obj.language === "es" || obj.language === "en") settings.language = obj.language;
+    if (typeof obj.hideEndlessInfo === "boolean") settings.hideEndlessInfo = obj.hideEndlessInfo;
   } catch(e) {}
 }
 /** Persiste el objeto `settings` completo en localStorage. */

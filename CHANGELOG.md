@@ -16,6 +16,180 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Añadido
+- **Interruptor ♾️ de "modo infinito" en Fácil/Normal/Difícil/Combate y en
+  las nueve categorías de Minijuegos**: cada uno de los cuatro botones
+  grandes del menú de Jugar, y también cada uno de los botones de
+  categoría de Minijuegos (Centro Pokémon, Laboratorios, Bicicletas,
+  Surf, Pantallas de Título, Openings del Anime, Mundo Misterioso,
+  Colosseum/XD, Ranger), incorpora un pequeño interruptor con el símbolo
+  del infinito. Al activarlo, la siguiente partida de ESE modo/categoría
+  (con sus propias reglas: región de Fácil/Normal, temporizador de 10s
+  de Difícil, música de Combate, pool propio de cada categoría de
+  Minijuegos...) se juega con rondas sin límite y un fallo termina la
+  partida directamente, en vez de las rondas habituales del modo (o de
+  `OTHER_ROUNDS`/`OTHER_ROUNDS_OVERRIDES` en Minijuegos) — igual que ya
+  hacía el Desafío Infinito, pero sin adoptar sus reglas propias (número
+  de opciones, pool de cualquier región, Eventos Pokémon). El propio
+  botón "Modo Desafío Infinito" no lleva este interruptor, porque ya es
+  infinito por sí mismo.
+  - `index.html`: un `<span class="menu-btn-endless-toggle" role="button">`
+    con el icono ♾️ dentro de cada uno de esos cuatro `<button class="menu-btn">`
+    de modo (no puede ser un `<button>` real anidado dentro de otro
+    `<button>`), y otro más dentro de cada uno de los nueve `<button
+    class="menu-btn" data-other="...">` de Minijuegos.
+  - `styles.css`: nueva clase `.menu-btn-endless-toggle` (círculo pequeño
+    en la esquina del botón grande, se resalta con la clase `.active`) y
+    `.menu-btn.locked .menu-btn-endless-toggle` (se deshabilita
+    visualmente si el modo/categoría aún está bloqueado por nivel/logro)
+    — al ser reglas genéricas de `.menu-btn`, no hizo falta CSS nuevo
+    para los botones de Minijuegos.
+  - `game.js`: nuevo estado `endlessToggle = {easy, normal, hard, combat}`
+    y `otherEndlessToggle = {"centro-pokemon", "laboratorios", ...}` (uno
+    por cada `data-other`), y nuevo campo `session.endless` (si la
+    partida EN CURSO se está jugando así). `setupEndlessToggle()` pasa a
+    recibir el objeto de estado (`endlessToggle` u `otherEndlessToggle`)
+    como parámetro en vez de asumir siempre el mismo, para no duplicar
+    la lógica de "enganchar un interruptor" entre modos y Minijuegos
+    (Regla nº2 de `CLAUDE.md`). Nueva función `isEndlessSession()` que
+    unifica `mode === GameMode.INFINITE` y `session.endless` en un único
+    punto de comprobación; `nextRound()`, `handleAnswer()` y
+    `showResult()` (antes escritos solo para `GameMode.INFINITE`) pasan a
+    usarla, así que las reglas de "sin límite de rondas" y "un fallo
+    termina la partida" quedan en un único sitio válido para todos los
+    casos. El récord personal y el envío a la clasificación global
+    "infinite" (dentro de `showResult()`) siguen aplicando solo al
+    Desafío Infinito real, para no mezclar con esa clasificación
+    puntuaciones obtenidas con reglas distintas (menos opciones, región
+    fija, pool de una sola categoría de Minijuegos...). `startGame()`
+    acepta un parámetro opcional `opts.endless` (ya válido para
+    `GameMode.OTHER`, no solo para Fácil/Normal/Difícil/Combate);
+    `restartGame()` conserva el valor de `session.endless` de la partida
+    anterior al reiniciar, también para Minijuegos (antes solo lo hacía
+    para Fácil/Normal/Difícil/Combate — corregido de paso, ya que ahora
+    también aplica a Minijuegos).
+  - `ui.js`: nueva función `renderEndlessTogglesUI()` (solo pinta la
+    clase `active`/`aria-pressed` de los interruptores según
+    `endlessToggle`/`otherEndlessToggle`, decidido en `game.js` — Regla
+    nº1 de `CLAUDE.md`).
+  - `i18n.js`: nueva clave `modes.endlessToggle.title` (ES/EN) para el
+    tooltip/aria-label del interruptor (compartida por los botones de
+    modo y de Minijuegos).
+- **Aviso informativo al activar el interruptor ♾️**: cada vez que el
+  jugador ACTIVA (no al desactivar) el interruptor de modo infinito de
+  Fácil/Normal/Difícil/Combate o de una categoría de Minijuegos, aparece
+  un aviso emergente explicando que las rondas pasarán a ser infinitas y
+  que un solo fallo termina la partida. Incluye una casilla "No volver a
+  mostrar" que, una vez marcada, deja de mostrar el aviso en cualquiera
+  de esos modos/categorías.
+  - `storage.js`: nuevo campo `settings.hideEndlessInfo` (por defecto
+    `false`), con su validación de tipo en `loadSettings()` (Regla nº6
+    de `CLAUDE.md`).
+  - `index.html`: nuevo overlay `#endless-info-overlay` (mismo patrón
+    visual que `#leave-story-confirm-overlay`), con una casilla
+    `#endless-info-dont-show` y un botón `#endless-info-ok-btn`.
+  - `styles.css`: nuevas reglas `#endless-info-overlay` y
+    `.dont-show-again` (misma familia visual que
+    `#leave-story-confirm-overlay`/`.result-card`).
+  - `ui.js`: nuevas funciones `showEndlessInfoModal()` (pinta el aviso,
+    respetando `settings.hideEndlessInfo`) y `closeEndlessInfoModal()`
+    (cierra el aviso y persiste la casilla "No volver a mostrar" si está
+    marcada) — Regla nº1 de `CLAUDE.md`: solo pintan un estado, no
+    deciden reglas de juego.
+  - `game.js`: `setupEndlessToggle()` llama a `showEndlessInfoModal()`
+    solo cuando `toggleState[key]` pasa a `true` (al activar, no al
+    desactivar), tanto para los interruptores de modo como para los de
+    Minijuegos.
+  - `i18n.js`: nuevas claves `endlessInfo.title`, `endlessInfo.body`,
+    `endlessInfo.dontShowAgain` y `endlessInfo.ok` (ES/EN).
+
+### Cambiado
+- **Botón "ⓘ" de información de Eventos Pokémon (pantalla previa de
+  región del Modo Historia)**: se duplica su tamaño (de 50×50px a
+  100×100px, con el icono escalado a juego) para que destaque más. Ya se
+  mostraba en la pantalla previa de CUALQUIER región del recorrido
+  (Kanto, Johto...), no solo en Kanto — es el mismo `#story-info-btn`
+  reutilizado por `storyShowRegionSplash()` (ui.js) en cada región; solo
+  se oculta en el aviso de enemigo poderoso (`.combat`). Cambio
+  únicamente visual en `styles.css` (`.story-info-btn`), sin tocar
+  `index.html`/`ui.js`/`game.js`.
+- **Umbrales de los logros de "encuentro" de Eventos Pokémon** (los que
+  cuentan cuántas veces ha aparecido cada Pokémon de evento): se
+  intercambian los dos primeros escalones.
+  - El que desbloquea el **avatar de perfil** de ese Pokémon
+    (`encounter_<id>_5` en `AVATAR_UNLOCKS`/`ACHIEVEMENTS`) pasa de
+    requerir 5 apariciones a requerir **10**.
+  - El que lo desbloquea para **pasear por las colinas** del fondo
+    (`encounter_<id>`, sin sufijo) pasa de requerir 10 apariciones a
+    requerir **5**.
+  - El tercer escalón, que cambia el sprite de las colinas a shiny
+    (`encounter_<id>_20`, 20 apariciones), no cambia.
+  - `game.js`: las constantes `ENCOUNTER_THRESHOLD_5`/`ENCOUNTER_THRESHOLD`
+    (usadas para generar en bucle las condiciones de todos los Pokémon de
+    evento — ver `ENCOUNTER_CONDITION_IDS`) se renombran a
+    `ENCOUNTER_THRESHOLD_AVATAR = 10`/`ENCOUNTER_THRESHOLD_HILL = 5` para
+    que el nombre siga describiendo su propósito y no un número que ya no
+    le corresponde; las descripciones de los 18 logros afectados (en
+    `ACHIEVEMENTS`) se actualizan para seguir diciendo el número correcto
+    de apariciones.
+  - `i18n.js`: mismo intercambio en las 18 traducciones al inglés
+    correspondientes (`achv.encounter_<id>_5.desc` /
+    `achv.encounter_<id>.desc`).
+  - Los ids de los logros no cambian (solo su umbral y su descripción),
+    así que un jugador que ya tuviera alguno desbloqueado lo conserva sin
+    necesidad de migración (Regla nº6 de `CLAUDE.md`).
+  - `PROJECT.md`: se actualiza la mención al número de apariciones
+    necesario para desbloquear un Pokémon de las colinas.
+
+- **Evento Pokémon Venusaur en el Desafío Infinito**: antes, la vida
+  extra que concedía al acertar no servía de nada en la práctica, porque
+  cualquier fallo posterior terminaba la partida igualmente (el sistema
+  de vidas del Desafío Infinito no se consultaba al fallar, solo al
+  activarse Electrode). Ahora, si el jugador falla teniendo alguna vida
+  Venusaur disponible (`session.infiniteLives > 0`), se resta una de esas
+  vidas y la partida continúa con normalidad; solo termina la partida si
+  ya no le queda ninguna.
+  - `game.js`: nueva función `loseInfiniteLife()` (análoga a `loseLife()`
+    pero para `session.infiniteLives`, sin terminar nunca la partida por
+    sí sola) que se llama ahora desde `handleAnswer()` en el fallo del
+    Desafío Infinito cuando quedan vidas Venusaur, y que además sustituye
+    a la lógica que ya tenía `electrodeExplode()` para ese mismo caso
+    (Regla nº2 de `CLAUDE.md`: se unifica en un único sitio en vez de
+    mantener dos copias de la misma lógica).
+
+### Corregido
+- **Bug: al completar el Modo Historia entero con 1 sola vida
+  restante, el aviso de "nervios" (pulso rojo en toda la pantalla,
+  `#nervous-overlay`) se quedaba encendido sobre el menú principal**
+  incluso después de terminar la partida. `storyFinish()` (la partida
+  termina con éxito) nunca llamaba a `renderLives()` ni salía del Modo
+  Historia (`session.mode` seguía siendo `GameMode.STORY`), a diferencia
+  de `storyGameOver()` (la partida termina por Game Over), que sí lo
+  hacía. Como `#nervous-overlay` es un overlay fijo que se pinta por
+  encima de cualquier pantalla, se quedaba "colgado" tal cual estaba en
+  el último instante de la última ronda.
+  - `game.js`: `storyFinish()` ahora también resetea `session.storyLives`
+    a 3 y pone `session.mode` a `null` (saliendo así del Modo Historia) y
+    llama a `renderLives()`, igual que ya hacía `storyGameOver()` para el
+    caso de fallo — mismo criterio (Regla nº1/nº2 de `CLAUDE.md`) para
+    ambas formas de terminar la partida.
+
+- **Bug: pulsar repetidamente la pantalla mientras se muestra la
+  notificación de un Evento Pokémon podía saltarse una ronda entera**
+  (la ronda saltada no llegaba a mostrarse). Pasaba porque el botón
+  "Siguiente Ronda" seguía siendo pulsable (clase `visible`, que solo se
+  quita dentro de `startRound()`) durante todo el tiempo que tarda en
+  aparecer y desaparecer la notificación del evento; cada pulsación de
+  más durante esa ventana disparaba su propia llamada a `nextRound()`.
+  - `game.js`: se añade `goToNextRound()` como punto único de entrada
+    para pasar de ronda (usado tanto por el click del botón como por el
+    atajo de barra espaciadora), que ignora cualquier pulsación mientras
+    ya hay una en curso (`nextRoundInFlight`) y solo se desbloquea dentro
+    de `startRound()`, cuando la ronda siguiente arranca de verdad. Sin
+    querer, esto también simplifica el atajo de teclado: ya no hace falta
+    el cooldown de 2s (`lastNextRoundKeyPress`) que se usaba para paliar
+    el mismo problema solo en ese caso.
+
 ### Eliminado
 - **El logro "Campeón Pokémon"** (`games_100`, jugar 100 partidas).
   - `game.js`: se quita su entrada de la lista de logros y su condición

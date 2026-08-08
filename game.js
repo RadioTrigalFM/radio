@@ -120,7 +120,7 @@ const songs = [
   { title: "Faro Ciudad Olivo",  file: "songs/main/johto/faro-johto.mp3",     image: "images/faro-johto.png",   group: "main",  region: "Johto" },
   { title: "Parque Nacional",  file: "songs/main/johto/parque-nacional.mp3",     image: "images/parque-nacional.png",   group: "main",  region: "Johto" },
   { title: "Casino de Ciudad Trigal", file: "songs/main/johto/casino-johto.mp3", image: "images/casino-johto.png", group: "main", region: "Johto" },
-  { title: "Chicas Kimono", file: "songs/main/johto/chicas-komono.mp3", image: "images/chicas-komono.png", group: "main", region: "Johto" },
+  { title: "Chicas Kimono", file: "songs/main/johto/chicas-komono.mp3", image: "images/chicas-kimono.png", group: "main", region: "Johto" },
   { title: "Ruinas Sinjoh", file: "songs/main/johto/ruinas-sinjoh.mp3", image: "images/ruinas-sinjoh.png", group: "main", region: "Johto" },
   { title: "Ruta Helada", file: "songs/main/johto/ruta-helada.mp3", image: "images/ruta-helada.png", group: "main", region: "Johto" },
   { title: "Villa Raíz",  file: "songs/main/hoenn/villa-raiz.mp3",     image: "images/villa-raiz.png",   group: "main",  region: "Hoenn" },
@@ -160,7 +160,7 @@ const songs = [
   { title: "Pueblo Aromaflor",  file: "songs/main/sinnoh/pueblo-aromaflor.mp3",     image: "images/pueblo-aromaflor.png",   group: "main",  region: "Sinnoh" },
   { title: "Pueblo Hojaverde",  file: "songs/main/sinnoh/pueblo-hojaverde.mp3",     image: "images/pueblo-hojaverde.png",   group: "main",  region: "Sinnoh" },
   { title: "Liga Pokémon Sinnoh",  file: "songs/main/sinnoh/liga-sinnoh.mp3",     image: "images/liga-sinnoh.png",   group: "main",  region: "Sinnoh" },
-  { title: "Lago Sinnoh",  file: "songs/main/sinnoh/lago.mp3",     image: "images/lago.png",   group: "main",  region: "Sinnoh" },
+  { title: "Lago Sinnoh",  file: "songs/main/sinnoh/lago.mp3",     image: "images/lago-sinnoh.png",   group: "main",  region: "Sinnoh" },
   { title: "Subsuelo",  file: "songs/main/sinnoh/subsuelo.mp3",     image: "images/subsuelo.png",   group: "main",  region: "Sinnoh" },
   { title: "Bosque Vetusto",  file: "songs/main/sinnoh/bosque-vetusto.mp3",     image: "images/bosque-vetusto.png",   group: "main",  region: "Sinnoh" },
   { title: "Pueblo Sosiego",  file: "songs/main/sinnoh/pueblo-sosiego.mp3",     image: "images/pueblo-sosiego.png",   group: "main",  region: "Sinnoh" },
@@ -599,8 +599,10 @@ function computeLevelInfo(totalXp) {
 //   - { achId: "…" } → desbloqueado al conseguir ese logro (ver
 //     isAvatarUnlocked()). Se usa para los avatares de los Pokémon que
 //     protagonizan un Evento Pokémon: se desbloquean con el logro
-//     "Avistamiento: <nombre>" (el de 5 apariciones, `encounter_<id>_5`
-//     en ACHIEVEMENTS), no con el más difícil de 10.
+//     "Avistamiento: <nombre>" (`encounter_<id>_5` en ACHIEVEMENTS, pese
+//     al sufijo `_5` en el id ahora requiere 10 apariciones — ver
+//     ENCOUNTER_THRESHOLD_AVATAR), no con el más fácil de 5 apariciones
+//     que desbloquea a ese mismo Pokémon para pasear por las colinas.
 // El resto del catálogo (los que no aparecen en este objeto: Umbreon,
 // Espeon, los legendarios/pseudolegendarios y el resto de avatares
 // añadidos en tandas anteriores) se considera desbloqueado desde el
@@ -886,6 +888,35 @@ const GameMode = {
 // Modo Historia: nº de rondas de la partida de combate contra el "enemigo poderoso"
 const STORY_COMBAT_ROUNDS = 3;
 
+// Estado (activado/desactivado) del interruptor ♾️ pequeño de cada botón
+// de modo en el menú de Jugar (Fácil/Normal/Difícil/Combate — el propio
+// Desafío Infinito no lleva interruptor, ya es infinito por sí mismo).
+// Se lee en cada click de "empezar partida" de esos cuatro botones (ver
+// sección "🧩 MENÚS: handlers" más abajo) para decidir si esa partida
+// concreta arranca con `session.endless = true`. No vive en `session`
+// porque debe sobrevivir a cambios de pantalla previos a arrancar la
+// partida (p. ej. Normal pasa primero por la selección de región).
+let endlessToggle = { easy: false, normal: false, hard: false, combat: false };
+
+// Mismo interruptor ♾️, pero para cada categoría de Minijuegos (Modo
+// OTHER — ver `data-other` en index.html). Claves = los mismos valores
+// que `data-other`/`session.otherGame`. Igual que `endlessToggle`, no
+// vive en `session` por la misma razón (sobrevive a la pantalla previa
+// de Openings del Anime, que pregunta España/Latino antes de arrancar).
+let otherEndlessToggle = {
+  "centro-pokemon": false, "laboratorios": false, "bicicletas": false,
+  "surf": false, "title-screens": false, "openings-anime": false,
+  "mystery-dungeon": false, "colosseum-xd": false, "ranger": false,
+};
+
+/** Indica si la partida actual (ya en curso, `session.mode` fijado) tiene
+ * rondas sin límite y termina con el primer fallo: o bien porque el modo
+ * en sí es el Desafío Infinito, o bien porque se activó el interruptor
+ * ♾️ de Fácil/Normal/Difícil/Combate al arrancarla (`session.endless`). */
+function isEndlessSession() {
+  return session.mode === GameMode.INFINITE || session.endless;
+}
+
 let session = {
   mode: null,            // GameMode
   normalRegion: null,    // "Kanto"...
@@ -899,6 +930,15 @@ let session = {
   pool: [],              // canciones filtradas para la sesión
   questionType: "title", // "title" | "region"
   roundsTarget: 10,      // nº de rondas de la partida actual (se recalcula en startGame)
+
+  // Interruptor ♾️ activado (desde el botón de modo) para ESTA partida:
+  // rondas sin límite y un fallo termina la partida, aplicado sobre las
+  // reglas propias del modo en curso (región de Fácil/Normal, temporizador
+  // de Difícil, música de Combate...). No confundir con
+  // `mode === GameMode.INFINITE`, que es el Desafío Infinito en sí (su
+  // propio modo, con sus propias reglas de pool/opciones — ver
+  // `isEndlessSession()` más abajo, que cubre ambos casos a la vez).
+  endless: false,
 
   // ── Modo Historia ──
   storyRegionIndex: 0,     // índice de REGIONS por el que va el recorrido
@@ -977,59 +1017,59 @@ const ACHIEVEMENTS = [
   { id: "story_kalos",            icon: "📜", title: "Historia: Kalos",        desc: "Completa Kalos en el modo Historia.", section: "story" },
   { id: "story_complete",         icon: "🏅", title: "Maestro de la Historia", desc: "Completa el modo Historia.", section: "story" },
   { id: "story_complete_100",     icon: "👑", title: "Historia perfecta",      desc: "Completa el modo Historia con un 100 % de aciertos.", section: "story" },
-  { id: "encounter_charizard_5",   icon: "🔥", title: "Avistamiento: Charizard",  desc: "Haz que Charizard aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_charizard",    icon: "🔥", title: "Cazador de llamas",      desc: "Haz que Charizard aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_charizard_5",   icon: "🔥", title: "Avistamiento: Charizard",  desc: "Haz que Charizard aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_charizard",    icon: "🔥", title: "Cazador de llamas",      desc: "Haz que Charizard aparezca 5 veces.", section: "encounters" },
   { id: "encounter_charizard_20", icon: "🌟", title: "Brillo de Charizard",    desc: "Haz que Charizard aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_slowpoke_5",    icon: "🐌", title: "Avistamiento: Slowpoke",   desc: "Haz que Slowpoke aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_slowpoke",     icon: "🐌", title: "Paciencia Slowpoke",     desc: "Haz que Slowpoke aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_slowpoke_5",    icon: "🐌", title: "Avistamiento: Slowpoke",   desc: "Haz que Slowpoke aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_slowpoke",     icon: "🐌", title: "Paciencia Slowpoke",     desc: "Haz que Slowpoke aparezca 5 veces.", section: "encounters" },
   { id: "encounter_slowpoke_20",  icon: "🌟", title: "Brillo de Slowpoke",     desc: "Haz que Slowpoke aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_rapidash_5",    icon: "🐎", title: "Avistamiento: Rapidash",   desc: "Haz que Rapidash aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_rapidash",     icon: "🐎", title: "Velocidad Rapidash",     desc: "Haz que Rapidash aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_rapidash_5",    icon: "🐎", title: "Avistamiento: Rapidash",   desc: "Haz que Rapidash aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_rapidash",     icon: "🐎", title: "Velocidad Rapidash",     desc: "Haz que Rapidash aparezca 5 veces.", section: "encounters" },
   { id: "encounter_rapidash_20",  icon: "🌟", title: "Brillo de Rapidash",     desc: "Haz que Rapidash aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_ditto_5",       icon: "🟣", title: "Avistamiento: Ditto",      desc: "Haz que Ditto aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_ditto",        icon: "🟣", title: "Imitador Ditto",         desc: "Haz que Ditto aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_ditto_5",       icon: "🟣", title: "Avistamiento: Ditto",      desc: "Haz que Ditto aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_ditto",        icon: "🟣", title: "Imitador Ditto",         desc: "Haz que Ditto aparezca 5 veces.", section: "encounters" },
   { id: "encounter_ditto_20",     icon: "🌟", title: "Brillo de Ditto",        desc: "Haz que Ditto aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_inkay_5",       icon: "🔄", title: "Avistamiento: Inkay",      desc: "Haz que Inkay aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_inkay",        icon: "🔄", title: "Giro Inkay",             desc: "Haz que Inkay aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_inkay_5",       icon: "🔄", title: "Avistamiento: Inkay",      desc: "Haz que Inkay aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_inkay",        icon: "🔄", title: "Giro Inkay",             desc: "Haz que Inkay aparezca 5 veces.", section: "encounters" },
   { id: "encounter_inkay_20",     icon: "🌟", title: "Brillo de Inkay",        desc: "Haz que Inkay aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_hypno_5",       icon: "🌙", title: "Avistamiento: Hypno",      desc: "Haz que Hypno aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_hypno",        icon: "🌙", title: "Hypnosis de Hypno",      desc: "Haz que Hypno aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_hypno_5",       icon: "🌙", title: "Avistamiento: Hypno",      desc: "Haz que Hypno aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_hypno",        icon: "🌙", title: "Hypnosis de Hypno",      desc: "Haz que Hypno aparezca 5 veces.", section: "encounters" },
   { id: "encounter_hypno_20",     icon: "🌟", title: "Brillo de Hypno",        desc: "Haz que Hypno aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_chansey_5",     icon: "🥚", title: "Avistamiento: Chansey",    desc: "Haz que Chansey aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_chansey",      icon: "🥚", title: "Segunda oportunidad",    desc: "Haz que Chansey aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_chansey_5",     icon: "🥚", title: "Avistamiento: Chansey",    desc: "Haz que Chansey aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_chansey",      icon: "🥚", title: "Segunda oportunidad",    desc: "Haz que Chansey aparezca 5 veces.", section: "encounters" },
   { id: "encounter_chansey_20",   icon: "🌟", title: "Brillo de Chansey",      desc: "Haz que Chansey aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_gengar_5",      icon: "👻", title: "Avistamiento: Gengar",     desc: "Haz que Gengar aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_gengar",       icon: "👻", title: "Sombra de Gengar",       desc: "Haz que Gengar aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_gengar_5",      icon: "👻", title: "Avistamiento: Gengar",     desc: "Haz que Gengar aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_gengar",       icon: "👻", title: "Sombra de Gengar",       desc: "Haz que Gengar aparezca 5 veces.", section: "encounters" },
   { id: "encounter_gengar_20",    icon: "🌟", title: "Brillo de Gengar",       desc: "Haz que Gengar aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_pikachu_5",     icon: "⚡", title: "Avistamiento: Pikachu",    desc: "Haz que Pikachu aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_pikachu",      icon: "⚡", title: "Chispa de Pikachu",      desc: "Haz que Pikachu aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_pikachu_5",     icon: "⚡", title: "Avistamiento: Pikachu",    desc: "Haz que Pikachu aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_pikachu",      icon: "⚡", title: "Chispa de Pikachu",      desc: "Haz que Pikachu aparezca 5 veces.", section: "encounters" },
   { id: "encounter_pikachu_20",   icon: "🌟", title: "Brillo de Pikachu",      desc: "Haz que Pikachu aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_blastoise_5",   icon: "💧", title: "Avistamiento: Blastoise",  desc: "Haz que Blastoise aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_blastoise",    icon: "💧", title: "Danza lluvia",           desc: "Haz que Blastoise aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_blastoise_5",   icon: "💧", title: "Avistamiento: Blastoise",  desc: "Haz que Blastoise aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_blastoise",    icon: "💧", title: "Danza lluvia",           desc: "Haz que Blastoise aparezca 5 veces.", section: "encounters" },
   { id: "encounter_blastoise_20", icon: "🌟", title: "Brillo de Blastoise",    desc: "Haz que Blastoise aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_venusaur_5",    icon: "🌿", title: "Avistamiento: Venusaur",   desc: "Haz que Venusaur aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_venusaur",     icon: "🌿", title: "Aroma de Venusaur",      desc: "Haz que Venusaur aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_venusaur_5",    icon: "🌿", title: "Avistamiento: Venusaur",   desc: "Haz que Venusaur aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_venusaur",     icon: "🌿", title: "Aroma de Venusaur",      desc: "Haz que Venusaur aparezca 5 veces.", section: "encounters" },
   { id: "encounter_venusaur_20",  icon: "🌟", title: "Brillo de Venusaur",     desc: "Haz que Venusaur aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_electrode_5",   icon: "💥", title: "Avistamiento: Electrode",  desc: "Haz que Electrode aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_electrode",    icon: "💥", title: "Cuenta atrás",           desc: "Haz que Electrode aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_electrode_5",   icon: "💥", title: "Avistamiento: Electrode",  desc: "Haz que Electrode aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_electrode",    icon: "💥", title: "Cuenta atrás",           desc: "Haz que Electrode aparezca 5 veces.", section: "encounters" },
   { id: "encounter_electrode_20", icon: "🌟", title: "Brillo de Electrode",    desc: "Haz que Electrode aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_porygon_5",     icon: "🖥️", title: "Avistamiento: Porygon",    desc: "Haz que Porygon aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_porygon",      icon: "🖥️", title: "Fallo digital",          desc: "Haz que Porygon aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_porygon_5",     icon: "🖥️", title: "Avistamiento: Porygon",    desc: "Haz que Porygon aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_porygon",      icon: "🖥️", title: "Fallo digital",          desc: "Haz que Porygon aparezca 5 veces.", section: "encounters" },
   { id: "encounter_porygon_20",   icon: "🌟", title: "Brillo de Porygon",      desc: "Haz que Porygon aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_snorlax_5",     icon: "😴", title: "Avistamiento: Snorlax",    desc: "Haz que Snorlax aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_snorlax",      icon: "😴", title: "Siesta de Snorlax",      desc: "Haz que Snorlax aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_snorlax_5",     icon: "😴", title: "Avistamiento: Snorlax",    desc: "Haz que Snorlax aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_snorlax",      icon: "😴", title: "Siesta de Snorlax",      desc: "Haz que Snorlax aparezca 5 veces.", section: "encounters" },
   { id: "encounter_snorlax_20",   icon: "🌟", title: "Brillo de Snorlax",      desc: "Haz que Snorlax aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_jigglypuff_5",  icon: "🎤", title: "Avistamiento: Jigglypuff", desc: "Haz que Jigglypuff aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_jigglypuff",   icon: "🎤", title: "Canción de cuna",        desc: "Haz que Jigglypuff aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_jigglypuff_5",  icon: "🎤", title: "Avistamiento: Jigglypuff", desc: "Haz que Jigglypuff aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_jigglypuff",   icon: "🎤", title: "Canción de cuna",        desc: "Haz que Jigglypuff aparezca 5 veces.", section: "encounters" },
   { id: "encounter_jigglypuff_20", icon: "🌟", title: "Brillo de Jigglypuff",  desc: "Haz que Jigglypuff aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_shiny_5",       icon: "✨", title: "Avistamiento brillante",  desc: "Encuentra 5 veces un Pokémon shiny.", section: "encounters" },
-  { id: "encounter_shiny",        icon: "✨", title: "Cazabrillos",            desc: "Encuentra 10 veces un Pokémon shiny.", section: "encounters" },
+  { id: "encounter_shiny_5",       icon: "✨", title: "Avistamiento brillante",  desc: "Encuentra 10 veces un Pokémon shiny.", section: "encounters" },
+  { id: "encounter_shiny",        icon: "✨", title: "Cazabrillos",            desc: "Encuentra 5 veces un Pokémon shiny.", section: "encounters" },
   { id: "encounter_shiny_20",     icon: "🌟", title: "Evolución brillante",    desc: "Encuentra 20 veces un Pokémon shiny.", section: "encounters" },
-  { id: "encounter_mewtwo_5",      icon: "🧬", title: "Avistamiento: Mewtwo",     desc: "Haz que Mewtwo aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_mewtwo",       icon: "🧬", title: "Clon psíquico",          desc: "Haz que Mewtwo aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_mewtwo_5",      icon: "🧬", title: "Avistamiento: Mewtwo",     desc: "Haz que Mewtwo aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_mewtwo",       icon: "🧬", title: "Clon psíquico",          desc: "Haz que Mewtwo aparezca 5 veces.", section: "encounters" },
   { id: "encounter_mewtwo_20",    icon: "🌟", title: "Brillo de Mewtwo",       desc: "Haz que Mewtwo aparezca 20 veces.", section: "encounters" },
-  { id: "encounter_mew_5",         icon: "🎭", title: "Avistamiento: Mew",        desc: "Haz que Mew aparezca 5 veces.", section: "encounters" },
-  { id: "encounter_mew",          icon: "🎭", title: "Transformista",          desc: "Haz que Mew aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_mew_5",         icon: "🎭", title: "Avistamiento: Mew",        desc: "Haz que Mew aparezca 10 veces.", section: "encounters" },
+  { id: "encounter_mew",          icon: "🎭", title: "Transformista",          desc: "Haz que Mew aparezca 5 veces.", section: "encounters" },
   { id: "encounter_mew_20",       icon: "🌟", title: "Brillo de Mew",          desc: "Haz que Mew aparezca 20 veces.", section: "encounters" },
 ];
 
@@ -1108,16 +1148,18 @@ const ACHIEVEMENT_CONDITIONS = {
 // aparecido este Pokémon/evento N veces o más?), así que en vez de repetir
 // la misma expresión una y otra vez cambiando solo la clave, se generan
 // aquí en bucle a partir de la lista de ids. Hay dos escalones por cada
-// Pokémon/evento: uno a las 5 apariciones (id `encounter_<id>_5`) y otro,
-// más difícil, a las 10 (id `encounter_<id>`, el histórico). Si en el
-// futuro cambia alguno de los dos umbrales, solo hay que tocarlo aquí.
-const ENCOUNTER_THRESHOLD_5 = 5;
-const ENCOUNTER_THRESHOLD = 10;
+// Pokémon/evento: uno que desbloquea el avatar de perfil de ese Pokémon
+// (id `encounter_<id>_5`, ver AVATAR_UNLOCKS) y otro que lo desbloquea
+// para pasear por las colinas del fondo (id `encounter_<id>`, el
+// histórico — ver el bloque de hillToasts más abajo). Si en el futuro
+// cambia alguno de los dos umbrales, solo hay que tocarlo aquí.
+const ENCOUNTER_THRESHOLD_AVATAR = 10;
+const ENCOUNTER_THRESHOLD_HILL = 5;
 // Tercer escalón, más difícil aún: a las 20 apariciones («encounter_<id>_20»),
 // que no desbloquea al Pokémon de las colinas (ya lo estaba desde el
-// escalón de 10) sino que cambia SU SPRITE ahí por el shiny — ver
-// isHillPokemonShinyUnlocked()/hillPokemonSpriteInfo() en pokemon.js y su
-// uso en checkAchievements() más abajo.
+// escalón de las colinas) sino que cambia SU SPRITE ahí por el shiny —
+// ver isHillPokemonShinyUnlocked()/hillPokemonSpriteInfo() en pokemon.js
+// y su uso en checkAchievements() más abajo.
 const ENCOUNTER_THRESHOLD_20 = 20;
 const ENCOUNTER_CONDITION_IDS = [
   "charizard", "slowpoke", "rapidash", "ditto", "inkay", "hypno", "chansey",
@@ -1125,10 +1167,11 @@ const ENCOUNTER_CONDITION_IDS = [
   "porygon", "snorlax", "jigglypuff", "shiny", "mewtwo", "mew",
 ];
 ENCOUNTER_CONDITION_IDS.forEach(id => {
-  ACHIEVEMENT_CONDITIONS[`encounter_${id}_5`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_5;
-  ACHIEVEMENT_CONDITIONS[`encounter_${id}`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD;
+  ACHIEVEMENT_CONDITIONS[`encounter_${id}_5`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_AVATAR;
+  ACHIEVEMENT_CONDITIONS[`encounter_${id}`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_HILL;
   ACHIEVEMENT_CONDITIONS[`encounter_${id}_20`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_20;
 });
+
 
 // Cuenta cuántas canciones de una lista están desbloqueadas en la Sonidex
 // para unas estadísticas de logros dadas (usado por los condicionales de arriba).
@@ -1692,6 +1735,33 @@ function loseLife() {
   }
 }
 
+// Quita una vida del Desafío Infinito. Solo tiene sentido llamarla cuando
+// session.infiniteLives > 0, es decir, cuando el evento Venusaur ya ha
+// concedido alguna vida extra esta partida (por defecto el Desafío
+// Infinito no tiene vidas y cualquier fallo termina la partida
+// directamente, sin pasar por aquí — ver handleAnswer()/electrodeExplode()).
+// A diferencia de loseLife() (Modo Historia), agotar estas vidas NUNCA
+// termina la partida por sí solo: sirven solo para "amortiguar" un fallo
+// puntual, la partida sigue con normalidad tanto si quedan vidas Venusaur
+// como si no.
+function loseInfiniteLife() {
+  if (session.infiniteLives <= 0) return;
+
+  const idx = session.infiniteLives - 1; // corazón que se apaga ahora
+  session.infiniteLives--;
+
+  const el = heartEls[idx];
+  if (el) {
+    el.classList.add('losing');
+    setTimeout(() => {
+      el.classList.remove('losing');
+      el.classList.add('lost');
+      updateNervousState();
+    }, 600);
+  }
+  updateNervousState();
+}
+
 // Fin de la partida por quedarse sin vidas: pantalla de Game Over y vuelta
 // a la primera región (el propio startStoryMode ya reinicia storyRegionIndex).
 function storyGameOver() {
@@ -1764,8 +1834,7 @@ function electrodeExplode() {
 
   if (session.mode === GameMode.INFINITE) {
     if (session.infiniteLives > 0) {
-      session.infiniteLives--;
-      renderLives();
+      loseInfiniteLife();
       setTimeout(() => document.getElementById('next-btn').classList.add('visible'), 750);
     } else {
       setTimeout(() => showResult(), 900);
@@ -1785,14 +1854,21 @@ function electrodeExplode() {
  * @param {string} mode   uno de los valores de GameMode
  * @param {string|null} extra  región (Normal/Historia), categoría de
  *        Minijuego (Other) u otro dato específico del modo
+ * @param {{endless?: boolean}} [opts]  `endless: true` activa, para esta
+ *        partida, el interruptor ♾️ de Fácil/Normal/Difícil/Combate o de
+ *        una categoría de Minijuegos (rondas sin límite, un fallo
+ *        termina la partida) sin cambiar las demás reglas propias del
+ *        modo. No se usa (ni hace falta) para GameMode.INFINITE, que ya
+ *        es infinito por sí mismo — ver `isEndlessSession()`.
  * Prepara el objeto `session` para la partida, reinicia el estado de
  * ronda/puntuación y lanza la primera ronda.
  */
-function startGame(mode, extra=null) {
+function startGame(mode, extra=null, opts={}) {
   // preparar sesión
   session.mode = mode;
   session.normalRegion = null;
   session.otherGame = null;
+  session.endless = !!opts.endless;
 
   if (mode === GameMode.NORMAL) session.normalRegion = extra; // region
   if (mode === GameMode.OTHER) session.otherGame = extra;     // other key
@@ -1841,6 +1917,11 @@ function startGame(mode, extra=null) {
  */
 function startRound() {
   stopHardRoundTimer();
+
+  // Desbloquea goToNextRound(): la ronda ha arrancado de verdad, así que
+  // una futura pulsación de "Siguiente Ronda"/barra espaciadora ya puede
+  // volver a llamar a nextRound() con normalidad (ver goToNextRound()).
+  nextRoundInFlight = false;
 
   // Comprobación de seguridad del sistema de Eventos Pokémon: si esta ronda
   // no viene de un PokeEvents.tryTrigger() recién resuelto, se asegura de
@@ -2085,10 +2166,25 @@ function handleAnswer(btn, isCorrect) {
 
   updateStatsUI();
 
-  // Desafío Infinito: el primer fallo termina la partida
-  if (session.mode === GameMode.INFINITE && !isCorrect) {
-    setTimeout(() => showResult(), 900);
-    return;
+  // Partida con rondas sin límite (Desafío Infinito, o cualquier otro modo
+  // con el interruptor ♾️ activado): un fallo termina la partida, salvo
+  // que el evento Venusaur ya haya concedido alguna vida extra esta
+  // partida (session.infiniteLives > 0 — ver healLife()), en cuyo caso el
+  // fallo solo consume una de esas vidas (loseInfiniteLife()) y la
+  // partida continúa con normalidad, igual que ya hacía electrodeExplode()
+  // para el caso de que Electrode explote sin que el jugador haya
+  // respondido. En la práctica solo GameMode.INFINITE llega a tener
+  // infiniteLives > 0 (los Eventos Pokémon, únicos que las conceden, solo
+  // aparecen en Modo Historia y en el propio Desafío Infinito — ver
+  // pokemon.js), así que en el resto de modos con ♾️ activado el fallo
+  // termina la partida siempre, sin excepción.
+  if (isEndlessSession() && !isCorrect) {
+    if (session.infiniteLives > 0) {
+      loseInfiniteLife();
+    } else {
+      setTimeout(() => showResult(), 900);
+      return;
+    }
   }
 
   // Modo Historia: si esta respuesta ha agotado las 3 vidas, storyGameOver()
@@ -2101,6 +2197,27 @@ function handleAnswer(btn, isCorrect) {
 }
 
 
+// true mientras hay una petición de "pasar de ronda" en curso que todavía
+// no ha llegado a una nueva startRound() (p. ej. porque de por medio se
+// está mostrando la notificación de un Evento Pokémon). Se usa desde
+// goToNextRound() para ignorar pulsaciones repetidas del botón "Siguiente
+// Ronda"/barra espaciadora mientras tanto; sin esto, cada pulsación de
+// más disparaba su propia llamada a nextRound() y hacía que una ronda se
+// saltara entera sin llegar a mostrarse. Se desbloquea en startRound(),
+// que es quien de verdad marca que la ronda siguiente ha arrancado.
+let nextRoundInFlight = false;
+
+/** Punto único de entrada para pasar a la siguiente ronda: lo usan tanto
+ * el click del botón "Siguiente Ronda" como el atajo de la barra
+ * espaciadora (ver más abajo). Ignora la llamada si ya hay una en curso
+ * (ver nextRoundInFlight), de forma que ningún click/pulsación cuente
+ * como válido hasta que la ronda siguiente arranca de verdad. */
+function goToNextRound() {
+  if (nextRoundInFlight) return;
+  nextRoundInFlight = true;
+  nextRound();
+}
+
 /** Corta el audio de la ronda anterior y decide qué toca a continuación:
  * si quedan rondas, arranca la siguiente (startRound); si no, muestra
  * el resultado final o, en Modo Historia, avanza de fase/región. */
@@ -2110,7 +2227,7 @@ function nextRound() {
 
   const roundsTarget = session.roundsTarget;
 
-  if (session.mode !== GameMode.INFINITE && state.round >= roundsTarget) {
+  if (!isEndlessSession() && state.round >= roundsTarget) {
     if (session.mode === GameMode.STORY) { handleStoryStageComplete(); return; }
     showResult();
     return;
@@ -2128,7 +2245,7 @@ function showResult() {
   stopAudioHard();
   const overlay = document.getElementById('result-overlay');
 
-  if (session.mode === GameMode.INFINITE) {
+  if (isEndlessSession()) {
     let emoji = '😅', title = t("result.attempt");
     if (state.correct >= 30) { emoji = '🏆'; title = t("result.master"); }
     else if (state.correct >= 15) { emoji = '⭐'; title = t("result.great"); }
@@ -2139,7 +2256,14 @@ function showResult() {
     overlay.classList.add('show');
     if (state.correct >= 10) playSFX(SFX.victory);
     trackGameFinished(Math.round(Math.min(state.correct / 20, 1) * 100));
-    if (state.score > (achievementsData.stats.bestInfiniteScore || 0)) {
+
+    // El récord personal y el envío a la clasificación global "infinite"
+    // solo aplican al propio Desafío Infinito (GameMode.INFINITE): el
+    // interruptor ♾️ de los demás modos cambia sus reglas (menos/otras
+    // opciones, región fija, sin Eventos Pokémon...), así que esa
+    // puntuación no es comparable a la del Desafío Infinito y no debe
+    // mezclarse con su clasificación ni con su récord guardado.
+    if (session.mode === GameMode.INFINITE && state.score > (achievementsData.stats.bestInfiniteScore || 0)) {
       achievementsData.stats.bestInfiniteScore = state.score;
       saveAchievements();
       // Solo se envía al backend de clasificaciones cuando se supera el
@@ -2174,12 +2298,15 @@ function showResult() {
  * la misma configuración (modo, región o minijuego) que la anterior. */
 function restartGame() {
   document.getElementById('result-overlay').classList.remove('show');
+  // Si esta partida se jugó con el interruptor ♾️ activado, la siguiente
+  // (misma configuración) se reinicia también con él activado.
+  const wasEndless = session.endless;
   // reiniciar mismo modo
-  if (session.mode === GameMode.NORMAL) startGame(GameMode.NORMAL, session.normalRegion);
-  else if (session.mode === GameMode.OTHER) startGame(GameMode.OTHER, session.otherGame);
+  if (session.mode === GameMode.NORMAL) startGame(GameMode.NORMAL, session.normalRegion, { endless: wasEndless });
+  else if (session.mode === GameMode.OTHER) startGame(GameMode.OTHER, session.otherGame, { endless: wasEndless });
   else if (session.mode === GameMode.INFINITE) startGame(GameMode.INFINITE);
   else if (session.mode === GameMode.STORY) startStoryMode();
-  else startGame(session.mode);
+  else startGame(session.mode, null, { endless: wasEndless });
 }
 
 /** Sale de la partida actual hacia la pantalla de Inicio, parando el
@@ -2202,22 +2329,67 @@ document.getElementById("go-sonidex").addEventListener("click", () => { playSFX(
 document.getElementById("go-leaderboard").addEventListener("click", () => { playSFX(SFX.go); renderLeaderboardScreen(); showScreen("leaderboard"); });
 document.getElementById("go-guide").addEventListener("click", () => { playSFX(SFX.go); showScreen("guide"); });
 
-document.getElementById("mode-easy").addEventListener("click", () => { playSFX(SFX.go); startGame(GameMode.EASY); });
+document.getElementById("mode-easy").addEventListener("click", () => { playSFX(SFX.go); startGame(GameMode.EASY, null, { endless: endlessToggle.easy }); });
 document.getElementById("mode-normal").addEventListener("click", () => { playSFX(SFX.go); showScreen("regionSelect"); });
 document.getElementById("mode-hard").addEventListener("click", () => {
   playSFX(SFX.go);
   if (!isModeUnlocked("hard")) { showLockedModeMessage("hard"); return; }
-  startGame(GameMode.HARD);
+  startGame(GameMode.HARD, null, { endless: endlessToggle.hard });
 });
 document.getElementById("mode-combat").addEventListener("click", () => {
   playSFX(SFX.go);
   if (!isModeUnlocked("combat")) { showLockedModeMessage("combat"); return; }
-  startGame(GameMode.NORMAL, "Combate");
+  startGame(GameMode.NORMAL, "Combate", { endless: endlessToggle.combat });
 });
 document.getElementById("mode-infinite").addEventListener("click", () => {
   playSFX(SFX.go);
   if (!isModeUnlocked("infinite")) { showLockedModeMessage("infinite"); return; }
   startGame(GameMode.INFINITE);
+});
+
+/** Engancha el pequeño interruptor ♾️ de un botón de modo (Fácil/Normal/
+ * Difícil/Combate) o de una categoría de Minijuegos (Modo OTHER):
+ * alterna `toggleState[key]` (uno de `endlessToggle`/`otherEndlessToggle`)
+ * y refresca su aspecto (ver `renderEndlessTogglesUI()` en ui.js), sin
+ * dejar que el click/tecla "cuele" hacia el botón grande que lo contiene
+ * y arranque la partida de golpe (stopPropagation/preventDefault).
+ * Responde tanto a click como a Enter/Espacio, ya que es un
+ * <span role="button"> (no un <button> real, porque no puede anidarse
+ * dentro de otro <button>). Cada vez que el interruptor pasa a quedar
+ * ACTIVADO (no al desactivarlo) se muestra además el aviso de "modo
+ * infinito activado" (`showEndlessInfoModal()` en ui.js), que ya se
+ * encarga de no mostrarse si el jugador marcó "No volver a mostrar" en
+ * una partida anterior.
+ * @param {Object} toggleState  `endlessToggle` u `otherEndlessToggle`
+ * @param {string} key  clave dentro de `toggleState`
+ * @param {string} elId  id del elemento del interruptor en index.html
+ */
+function setupEndlessToggle(toggleState, key, elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const flip = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    toggleState[key] = !toggleState[key];
+    playSFX(SFX.back);
+    renderEndlessTogglesUI();
+    // Solo al ACTIVAR el interruptor (no al desactivarlo) avisamos de
+    // las reglas del modo infinito (ver showEndlessInfoModal() en ui.js),
+    // que además respeta settings.hideEndlessInfo si el jugador ya pidió
+    // no volver a verlo.
+    if (toggleState[key]) showEndlessInfoModal();
+  };
+  el.addEventListener("click", flip);
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") flip(e);
+  });
+}
+setupEndlessToggle(endlessToggle, "easy", "mode-easy-endless");
+setupEndlessToggle(endlessToggle, "normal", "mode-normal-endless");
+setupEndlessToggle(endlessToggle, "hard", "mode-hard-endless");
+setupEndlessToggle(endlessToggle, "combat", "mode-combat-endless");
+Object.keys(otherEndlessToggle).forEach(key => {
+  setupEndlessToggle(otherEndlessToggle, key, `other-${key}-endless`);
 });
 
 document.querySelectorAll("[data-other]").forEach(btn => {
@@ -2236,7 +2408,7 @@ document.querySelectorAll("[data-other]").forEach(btn => {
       showScreen("openingsLangSelect");
       return;
     }
-    startGame(GameMode.OTHER, key);
+    startGame(GameMode.OTHER, key, { endless: otherEndlessToggle[key] });
   });
 });
 
@@ -2245,12 +2417,12 @@ document.querySelectorAll("[data-other]").forEach(btn => {
 document.getElementById("openings-lang-spain").addEventListener("click", () => {
   playSFX(SFX.go);
   session.openingsVariant = null;
-  startGame(GameMode.OTHER, "openings-anime");
+  startGame(GameMode.OTHER, "openings-anime", { endless: otherEndlessToggle["openings-anime"] });
 });
 document.getElementById("openings-lang-latino").addEventListener("click", () => {
   playSFX(SFX.go);
   session.openingsVariant = "latino";
-  startGame(GameMode.OTHER, "openings-anime");
+  startGame(GameMode.OTHER, "openings-anime", { endless: otherEndlessToggle["openings-anime"] });
 });
 
 // Normal: tarjetas de región
@@ -2276,12 +2448,12 @@ REGIONS.forEach(r => {
     <span class="region-card-icon">${meta.icon}</span>
     <span class="region-card-name">${regionDisplayName(r)}</span>
   `;
-  b.onclick = () => { playSFX(SFX.go); startGame(GameMode.NORMAL, r); };
+  b.onclick = () => { playSFX(SFX.go); startGame(GameMode.NORMAL, r, { endless: endlessToggle.normal }); };
   pillsWrap.appendChild(b);
 });
 
 // Quiz: next
-document.getElementById("next-btn").addEventListener("click", nextRound);
+document.getElementById("next-btn").addEventListener("click", goToNextRound);
 document.getElementById("hint-btn").addEventListener("click", useVisualHint);
 document.getElementById("restart-btn").addEventListener("click", () => { playSFX(SFX.go); restartGame(); });
 document.getElementById("exit-btn").addEventListener("click", () => { playSFX(SFX.go); exitGame(); });
@@ -2291,26 +2463,22 @@ document.getElementById("exit-btn").addEventListener("click", () => { playSFX(SF
 // ronda igual que si se hubiera pulsado el botón. Se usa preventDefault()
 // para evitar el scroll de página y, si el botón tuviera el foco, para que
 // el navegador no dispare además su propio evento "click" y se llame a
-// nextRound() dos veces.
+// goToNextRound() dos veces.
 //
-// Cooldown de 2s (`lastNextRoundKeyPress`): comprobar solo la clase
-// "visible" no basta, porque esa clase se quita dentro de startRound(),
-// que puede tardar en llegar (Eventos Pokémon, timeouts...). Si el
-// jugador pulsa la barra espaciadora varias veces seguidas mientras el
-// botón todavía no ha perdido esa clase, cada pulsación dispara su
-// propia llamada a nextRound() y se saltan rondas de golpe. Limitando el
-// atajo a como mucho una vez cada 2 segundos evitamos ese spam sin tener
-// que tocar nextRound() ni el resto del flujo de partida.
-let lastNextRoundKeyPress = 0;
+// Comprobar solo la clase "visible" no basta, porque esa clase se quita
+// dentro de startRound(), que puede tardar en llegar (Eventos Pokémon,
+// timeouts...): si el jugador pulsa la barra espaciadora (o toca el botón)
+// varias veces seguidas mientras el botón todavía no ha perdido esa clase,
+// cada pulsación de más podría disparar su propia llamada a nextRound() y
+// saltarse una ronda entera. goToNextRound() ya ignora esas pulsaciones de
+// más mientras haya una en curso (ver nextRoundInFlight), así que aquí
+// basta con llamarla igual que hace el click del botón.
 document.addEventListener("keydown", (e) => {
   if (e.code !== "Space" && e.key !== " ") return;
   const nextBtn = document.getElementById("next-btn");
   if (!nextBtn || !nextBtn.classList.contains("visible")) return;
   e.preventDefault();
-  const now = Date.now();
-  if (now - lastNextRoundKeyPress < 2000) return;
-  lastNextRoundKeyPress = now;
-  nextRound();
+  goToNextRound();
 });
 
 
@@ -2395,6 +2563,22 @@ function storyFinish() {
   saveAchievements();
   trackGameFinished(pct, { mode: session.mode });
 
+  // El Modo Historia ha terminado (con éxito, a diferencia de
+  // storyGameOver()): se sale de él ya aquí, antes de mostrar la
+  // animación de victoria, para que el indicador de vidas (corazones) y,
+  // sobre todo, el aviso de "nervios" (pulso rojo en toda la pantalla
+  // cuando solo queda 1 vida — ver #nervous-overlay, que es un overlay
+  // fijo que se ve por encima de cualquier pantalla) se apaguen de
+  // inmediato en vez de quedarse "colgados" sobre la pantalla de
+  // victoria y, después, sobre el menú principal. session.storyLives se
+  // resetea a 3 por la misma razón que en storyGameOver(): que no quede
+  // un valor de la partida recién terminada a la espera de la próxima
+  // (aunque startStoryMode() ya lo reinicia igualmente al empezar una
+  // partida nueva).
+  session.storyLives = 3;
+  session.mode = null;
+  renderLives();
+
   storyCompleteTitle.textContent = t("story.completeTitle");
   storyCompleteBall.src = STORY_BALL_COMBAT;
   storyCompleteOverlay.classList.remove('gameover');
@@ -2432,6 +2616,7 @@ updateHomeAchievementSummary();
 updateHomeSonidexSummary();
 updateModeLocksUI();
 updateOtherLocksUI();
+renderEndlessTogglesUI();
 buildBgPokemon();
 musicSlider.value = Math.round(settings.musicVol * 100);
 sfxSlider.value = Math.round(settings.sfxVol * 100);
