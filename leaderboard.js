@@ -3,7 +3,9 @@
    ══════════════════════════════════════════════════════════════════════
    Adaptador hacia Firebase/Firestore, la base de datos donde viven las
    clasificaciones globales (nivel de jugador, Desafío Infinito, Modo
-   Historia y Modo Difícil — ver LEADERBOARD_CATEGORIES más abajo) y, además, el
+   Historia, Modo Difícil, Modo Combate y Modo Normal por región — una
+   clasificación independiente por cada una de las 7 regiones — ver
+   LEADERBOARD_CATEGORIES más abajo) y, además, el
    registro de nombres de entrenador ya elegidos por otros jugadores
    (para que un mismo nickname no pueda usarlo más de una persona a la
    vez — ver `claimUsername()`). Este fichero NO decide nada de las
@@ -71,11 +73,12 @@
 
    Cada documento tiene un campo por categoría (ver
    LEADERBOARD_CATEGORIES: `level`, `infiniteScore`, `storyScore`,
-   `hardScore`), más `username`, `avatarId` y `updatedAt`. Un jugador
-   puede aparecer en las cuatro clasificaciones a la vez con un solo
-   documento: `submitScore()` solo escribe (con `merge: true`) el campo
-   de la categoría que se le pide, sin tocar ni pisar los campos de las
-   otras tres.
+   `hardScore`, `combatScore` y un `regionXScore` por cada una de las 7
+   regiones, p. ej. `regionKantoScore`), más `username`, `avatarId` y
+   `updatedAt`. Un jugador puede aparecer en todas las clasificaciones a
+   la vez con un solo documento: `submitScore()` solo escribe (con
+   `merge: true`) el campo de la categoría que se le pide, sin tocar ni
+   pisar los campos de las demás.
 
    Colección "usernames": UN documento por nombre de entrenador ya
    elegido, con el ID del documento = el nombre normalizado (recortado y
@@ -126,18 +129,34 @@ const USERNAMES_COLLECTION = "usernames";
 // una clasificación nueva en el futuro es tan sencillo como añadir aquí
 // una entrada nueva (y, en el otro extremo, llamar a
 // `Leaderboard.submitScore()`/`fetchTop()` con su id desde game.js/ui.js).
+//
+// Las 7 entradas `region_<Región>` son la clasificación "Regiones" del
+// Modo Normal: una clasificación independiente por región (Kanto, Johto,
+// Hoenn, Sinnoh, Teselia, Kalos, Alola — mismas claves internas que
+// `REGIONS` en game.js), no una sola clasificación mezclada. La de
+// Modo Combate (`combat`) es aparte, ya que el Modo Combate no es una
+// región más dentro de `REGIONS` (usa la clave especial "Combate" en
+// `session.normalRegion`, ver game.js).
 const LEADERBOARD_CATEGORIES = {
   level: "level",
   infinite: "infiniteScore",
   story: "storyScore",
   hard: "hardScore",
+  combat: "combatScore",
+  region_Kanto: "regionKantoScore",
+  region_Johto: "regionJohtoScore",
+  region_Hoenn: "regionHoennScore",
+  region_Sinnoh: "regionSinnohScore",
+  region_Teselia: "regionTeseliaScore",
+  region_Kalos: "regionKalosScore",
+  region_Alola: "regionAlolaScore",
 };
 
 /**
  * Pide a Firestore los N mejores jugadores de una categoría de la
  * clasificación (nivel de jugador, Desafío Infinito o Modo Historia),
  * ordenados de mayor a menor.
- * @param {"level"|"infinite"|"story"|"hard"} category  una de las claves de
+ * @param {"level"|"infinite"|"story"|"hard"|"combat"|"region_Kanto"|"region_Johto"|"region_Hoenn"|"region_Sinnoh"|"region_Teselia"|"region_Kalos"|"region_Alola"} category  una de las claves de
  *   LEADERBOARD_CATEGORIES.
  * @param {number} n
  * @returns {Promise<Array|null>}
@@ -175,7 +194,7 @@ async function fetchTop(category, n = 50) {
  * Guarda en Firestore, para una categoría concreta, el nuevo récord del
  * jugador actual, actualizando (con `merge: true`) su documento en vez
  * de crear uno nuevo o pisar sus datos de las otras categorías.
- * @param {"level"|"infinite"|"story"|"hard"} category  una de las claves de
+ * @param {"level"|"infinite"|"story"|"hard"|"combat"|"region_Kanto"|"region_Johto"|"region_Hoenn"|"region_Sinnoh"|"region_Teselia"|"region_Kalos"|"region_Alola"} category  una de las claves de
  *   LEADERBOARD_CATEGORIES.
  * @param {string} username
  * @param {string} avatarId

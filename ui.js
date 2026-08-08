@@ -628,9 +628,25 @@ const LEADERBOARD_TABS = {
   infinite: { formatValue: v => `💰 ${v || 0}` },
   story:    { formatValue: v => `💰 ${v || 0}` },
   hard:     { formatValue: v => `💰 ${v || 0}` },
+  combat:   { formatValue: v => `💰 ${v || 0}` },
 };
+// Formato por defecto para categorías que no están explícitas en
+// LEADERBOARD_TABS: las 7 subcategorías "region_<Región>" de la pestaña
+// "Regiones" (una por región de REGIONS, ver renderLeaderboardRegionTabs()
+// más abajo). No tiene sentido listarlas aquí una a una: comparten el
+// mismo formato de puntuación que infinite/story/hard/combat.
+const LEADERBOARD_DEFAULT_TAB = { formatValue: v => `💰 ${v || 0}` };
 // Categoría actualmente seleccionada en la pantalla de Clasificaciones.
+// Para las regiones vale "region_<Región>" (p. ej. "region_Kanto"), igual
+// que las claves de LEADERBOARD_CATEGORIES en leaderboard.js — nunca el
+// id "regions" del botón de pestaña, que es solo un agrupador visual.
 let leaderboardActiveCategory = "level";
+// Región seleccionada la última vez que se abrió la pestaña "Regiones"
+// (una de REGIONS, definida en game.js), para reabrir esa misma región
+// si el jugador vuelve a pulsar "Regiones" tras mirar otra categoría, en
+// vez de resetear siempre a la primera. null hasta la primera vez que se
+// entra en "Regiones".
+let leaderboardActiveRegion = null;
 
 // Se incrementa en cada llamada a renderLeaderboardScreen() para poder
 // descartar una respuesta de Leaderboard.fetchTop() que llega tarde (p.
@@ -650,8 +666,9 @@ function leaderboardRankIcon(rank) {
 }
 
 /** Pinta en la tarjeta "Tus récords" los récords personales (nivel de
- * jugador, Desafío Infinito, Modo Historia, Modo Difícil), que ya se
- * tienen en local y no requieren pedirlos al backend. */
+ * jugador, Desafío Infinito, Modo Historia, Modo Difícil, Modo Combate y
+ * uno por cada región del Modo Normal), que ya se tienen en local y no
+ * requieren pedirlos al backend. */
 function renderLeaderboardPersonalBests() {
   const levelEl = document.getElementById("leaderboard-personal-level");
   if (levelEl) levelEl.textContent = computeLevelInfo(profile.xp).level;
@@ -661,6 +678,56 @@ function renderLeaderboardPersonalBests() {
   if (storyEl) storyEl.textContent = achievementsData.stats.bestStoryScore || 0;
   const hardEl = document.getElementById("leaderboard-personal-hard");
   if (hardEl) hardEl.textContent = achievementsData.stats.bestHardScore || 0;
+  const combatEl = document.getElementById("leaderboard-personal-combat");
+  if (combatEl) combatEl.textContent = achievementsData.stats.bestCombatScore || 0;
+
+  // Un récord por región (Modo Normal): se genera aquí, no como filas
+  // fijas en index.html, porque depende de REGIONS/regionDisplayName
+  // (game.js/i18n.js, que cargan después que ui.js) — seguro porque esta
+  // función solo se ejecuta al abrir la pantalla de Clasificaciones,
+  // nunca durante la carga inicial de la página. Mismo criterio de fila
+  // (streak-row) que renderStreaksCard().
+  const regionsWrap = document.getElementById("leaderboard-personal-regions");
+  if (regionsWrap) {
+    const bestByRegion = achievementsData.stats.bestRegionScore || {};
+    regionsWrap.innerHTML = REGIONS.map(r => `
+      <div class="streak-row">
+        <div class="streak-name">🗺️ ${regionDisplayName(r)}</div>
+        <div class="streak-value">💰 ${bestByRegion[r] || 0}</div>
+      </div>
+    `).join("");
+  }
+}
+
+/** Genera los 7 botones de subcategoría (uno por región) que se
+ * muestran al pulsar la pestaña "Regiones" de Clasificaciones. Va en su
+ * propia función (no como marcado fijo en index.html) por lo mismo que
+ * la lista de récords por región de renderLeaderboardPersonalBests():
+ * depende de REGIONS/REGION_META/regionDisplayName, de game.js, que
+ * carga después que ui.js — seguro porque solo se llama al entrar en la
+ * pantalla de Clasificaciones. */
+function renderLeaderboardRegionTabs() {
+  const wrap = document.getElementById("leaderboard-region-tabs");
+  // Se reconstruye en cada llamada (no solo la primera vez): son solo 7
+  // botones, y así sus etiquetas (regionDisplayName) se mantienen
+  // correctas si el jugador cambia de idioma con esta pantalla abierta
+  // (ver refreshLanguageDependentUI(), que vuelve a llamar a
+  // renderLeaderboardScreen() en ese caso).
+  if (!wrap) return;
+  wrap.innerHTML = REGIONS.map(r => {
+    const meta = REGION_META[r] || { icon: "🎮" };
+    return `<button class="leaderboard-tab" data-region="${r}">${meta.icon} ${regionDisplayName(r)}</button>`;
+  }).join("");
+  wrap.querySelectorAll(".leaderboard-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const category = "region_" + btn.dataset.region;
+      if (category === leaderboardActiveCategory) return;
+      playSFX(SFX.go);
+      leaderboardActiveRegion = btn.dataset.region;
+      leaderboardActiveCategory = category;
+      renderLeaderboardScreen();
+    });
+  });
 }
 
 /** Reconstruye la pantalla de Clasificaciones para la categoría
@@ -671,19 +738,33 @@ function renderLeaderboardPersonalBests() {
  * datos/backend todavía (ver leaderboard.js). */
 function renderLeaderboardScreen() {
   renderLeaderboardPersonalBests();
+  renderLeaderboardRegionTabs();
 
   const tabsEl = document.getElementById("leaderboard-tabs");
+  const regionTabsEl = document.getElementById("leaderboard-region-tabs");
   const statusEl = document.getElementById("leaderboard-status");
   const listEl = document.getElementById("leaderboard-list");
   if (!statusEl || !listEl) return;
 
+  // true si la subcategoría activa es una de las 7 regiones (nunca el
+  // id "regions" en sí, que es solo el botón agrupador — ver comentario
+  // de leaderboardActiveCategory más arriba).
+  const isRegionCategory = leaderboardActiveCategory.indexOf("region_") === 0;
+
   if (tabsEl) {
     tabsEl.querySelectorAll(".leaderboard-tab").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.category === leaderboardActiveCategory);
+      const active = btn.dataset.category === "regions" ? isRegionCategory : btn.dataset.category === leaderboardActiveCategory;
+      btn.classList.toggle("active", active);
+    });
+  }
+  if (regionTabsEl) {
+    regionTabsEl.style.display = isRegionCategory ? "flex" : "none";
+    regionTabsEl.querySelectorAll(".leaderboard-tab").forEach(btn => {
+      btn.classList.toggle("active", ("region_" + btn.dataset.region) === leaderboardActiveCategory);
     });
   }
 
-  const tab = LEADERBOARD_TABS[leaderboardActiveCategory];
+  const tab = LEADERBOARD_TABS[leaderboardActiveCategory] || LEADERBOARD_DEFAULT_TAB;
   statusEl.textContent = t("leaderboard.loading");
   listEl.innerHTML = "";
 
@@ -714,9 +795,17 @@ function renderLeaderboardScreen() {
 // Cambiar de pestaña vuelve a pintar la pantalla con la categoría elegida.
 document.getElementById("leaderboard-tabs")?.querySelectorAll(".leaderboard-tab").forEach(btn => {
   btn.addEventListener("click", () => {
-    if (btn.dataset.category === leaderboardActiveCategory) return;
+    // El botón "Regiones" no es una categoría real de LEADERBOARD_CATEGORIES
+    // (leaderboard.js): agrupa las 7 subcategorías "region_<Región>" y, al
+    // pulsarlo, abre la última región vista (leaderboardActiveRegion) o,
+    // la primera vez, la primera de REGIONS (game.js — seguro referenciarla
+    // aquí porque este listener solo se dispara con la página ya cargada).
+    const isRegionsBtn = btn.dataset.category === "regions";
+    const targetCategory = isRegionsBtn ? ("region_" + (leaderboardActiveRegion || REGIONS[0])) : btn.dataset.category;
+    if (targetCategory === leaderboardActiveCategory) return;
     playSFX(SFX.go);
-    leaderboardActiveCategory = btn.dataset.category;
+    if (isRegionsBtn) leaderboardActiveRegion = leaderboardActiveRegion || REGIONS[0];
+    leaderboardActiveCategory = targetCategory;
     renderLeaderboardScreen();
   });
 });

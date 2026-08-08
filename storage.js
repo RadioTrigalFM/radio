@@ -382,6 +382,8 @@ function defaultAchStats() {
     bestInfiniteScore: 0,    // récord de puntuación en Modo Desafío Infinito
     bestStoryScore: 0,       // récord de puntuación en Modo Historia
     bestHardScore: 0,        // récord de puntuación en Modo Difícil
+    bestCombatScore: 0,      // récord de puntuación en Modo Combate
+    bestRegionScore: {},     // récord de puntuación en Modo Normal, por región: { "Kanto": 640, "Johto": 480, ... }
     perfectEasyGame: false,   // true si se ha terminado alguna partida perfecta en Modo Fácil
     perfectHardGame: false,   // true si se ha terminado alguna partida perfecta en Modo Difícil
     perfectCombatGame: false, // true si se ha terminado alguna partida perfecta en Modo Combate

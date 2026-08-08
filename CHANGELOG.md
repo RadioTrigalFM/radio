@@ -17,6 +17,63 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Dos clasificaciones globales nuevas: "Combate" y "Regiones"**: junto
+  a Nivel/Infinito/Historia/Difícil, la pantalla de Clasificaciones
+  incorpora ahora una pestaña "⚔️ Combate" (récord de puntuación del
+  Modo Combate) y una pestaña "🗺️ Regiones" que, al pulsarla, despliega
+  7 subcategorías (una por región: Kanto, Johto, Hoenn, Sinnoh, Teselia,
+  Kalos, Alola), cada una con su propio Top 50 global y su propio récord
+  personal — el de una región no compite con el de otra, ni con el de
+  Combate. Igual que ya pasaba con Difícil, el récord/envío al backend
+  solo se actualiza en partidas jugadas sin el interruptor ♾️ activado
+  (una partida con ♾️ no es comparable a una partida normal de esa
+  región/Combate).
+  - `leaderboard.js`: `LEADERBOARD_CATEGORIES` pasa de 4 a 12 entradas —
+    añade `combat` (campo `combatScore`) y `region_Kanto`…`region_Alola`
+    (campos `regionKantoScore`…`regionAlolaScore`), un campo más en el
+    mismo documento por jugador de la colección `leaderboard`
+    (`fetchTop()`/`submitScore()` no cambian, ya eran genéricos respecto
+    a la categoría).
+  - `storage.js`: `defaultAchStats()` añade `bestCombatScore` (número,
+    igual que `bestHardScore`) y `bestRegionScore` (objeto por región,
+    igual que `bestStreakByRegion`).
+  - `game.js`: en `showResult()`, junto al bloque ya existente de
+    `bestHardScore`, un bloque nuevo que distingue Modo Combate
+    (`session.normalRegion === "Combate"`) del resto de regiones del
+    Modo Normal para actualizar `bestCombatScore`/`bestRegionScore[región]`
+    y enviar a `Leaderboard.submitScore("combat", ...)` /
+    `Leaderboard.submitScore("region_" + región, ...)` solo al superar el
+    récord personal correspondiente.
+  - `ui.js`: `LEADERBOARD_TABS` añade `combat`; nuevo
+    `LEADERBOARD_DEFAULT_TAB` para formatear las 7 categorías de región
+    sin tener que listarlas una a una. Nuevo estado
+    `leaderboardActiveRegion` (recuerda la última región vista al volver
+    a pulsar "Regiones"). `renderLeaderboardPersonalBests()` pinta ahora
+    también el récord de Combate y uno por región (generado con
+    `REGIONS`/`regionDisplayName`, ver `#leaderboard-personal-regions`).
+    Nueva `renderLeaderboardRegionTabs()`, que construye los 7 botones de
+    subcategoría de región (icono + nombre traducido, vía
+    `REGION_META`/`regionDisplayName`) dentro de
+    `#leaderboard-region-tabs` y engancha su click. `renderLeaderboardScreen()`
+    muestra/oculta esa fila de subcategorías y resalta como activa la
+    pestaña "Regiones" mientras la categoría activa sea cualquiera de las
+    7 `region_*`; el listener de las pestañas fijas traduce un click en
+    "Regiones" a la última región vista (o la primera de `REGIONS` la
+    primera vez).
+  - `index.html`: pestañas `data-category="combat"` y
+    `data-category="regions"` en `#leaderboard-tabs`; nuevo contenedor
+    `#leaderboard-region-tabs` (relleno por JS) para las 7 subcategorías;
+    en la tarjeta "Tus récords", fila de Combate y contenedor
+    `#leaderboard-personal-regions` (relleno por JS) para los 7 récords
+    por región.
+  - `i18n.js`: claves nuevas `leaderboard.combat`, `leaderboard.regionsGroup`,
+    `leaderboard.tab.combat` y `leaderboard.tab.regions` (ES/EN); los
+    nombres de cada región reutilizan las claves `region.*` ya existentes
+    (vía `regionDisplayName()`).
+  - `styles.css`: `.leaderboard-tabs` pasa a `flex-wrap: wrap` (ya son 6
+    pestañas en la fila principal) y nueva `.leaderboard-subtabs` para el
+    pequeño ajuste de margen de la fila de regiones.
+
 - **Interruptor ♾️ de "modo infinito" en Fácil/Normal/Difícil/Combate y en
   las nueve categorías de Minijuegos**: cada uno de los cuatro botones
   grandes del menú de Jugar, y también cada uno de los botones de

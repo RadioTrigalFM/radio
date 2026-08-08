@@ -1704,8 +1704,10 @@
     flex-shrink: 0;
   }
   .leaderboard-tabs {
-    display: flex; gap: 8px; margin-bottom: 12px;
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
   }
+  .leaderboard-tabs .leaderboard-tab { min-width: 80px; }
+  .leaderboard-subtabs { margin-top: -4px; }
   .leaderboard-tab {
     flex: 1;
     padding: 8px 4px;

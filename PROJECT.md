@@ -71,8 +71,9 @@ Este orden **no es arbitrario** y no debe cambiarse sin entender por qué:
    bloque INIT final (`loadSettings()`, `applyTranslations()`,
    `applyLanguageSwitchUI()`, `buildBgPokemon()`,
    `renderProfileBar()`...) y en toda su lógica de partida (incluye
-   `Leaderboard.submitScore()` al superar un récord de nivel de
-   jugador, Desafío Infinito o Modo Historia).
+   `Leaderboard.submitScore()` al superar un récord personal en
+   cualquiera de las categorías — ver la sección de `leaderboard.js` más
+   abajo para la lista completa).
 
 Las referencias "hacia adelante" (p. ej. `ui.js` llamando a `startGame`
 o `session`, que se definen en `game.js`, cargado después) son seguras
@@ -147,9 +148,14 @@ justo después de `loadSettings()`.
 
 ### `leaderboard.js` — adaptador de clasificación global
 Única fuente de verdad sobre **cómo se habla con Firebase/Firestore**,
-donde viven las clasificaciones globales. Hay tres categorías (constante
+donde viven las clasificaciones globales. Hay doce categorías (constante
 `LEADERBOARD_CATEGORIES`): nivel de jugador (`level`), Desafío Infinito
-(`infinite`) y Modo Historia (`story`). Expone únicamente
+(`infinite`), Modo Historia (`story`), Modo Difícil (`hard`), Modo
+Combate (`combat`) y una por cada una de las 7 regiones del Modo Normal
+(`region_Kanto`, `region_Johto`, `region_Hoenn`, `region_Sinnoh`,
+`region_Teselia`, `region_Kalos`, `region_Alola` — independientes entre
+sí, para que el récord de una región no compita con el de otra). Expone
+únicamente
 `Leaderboard.fetchTop(category, n)` (pide los N mejores de esa
 categoría, cada fila como `{ username, avatarId, value }`) y
 `Leaderboard.submitScore(category, username, avatarId, value, playerId)`
@@ -171,11 +177,12 @@ Firebase (ver `firestore.rules` como referencia de qué pegar ahí).
 Cada jugador tiene un ÚNICO documento en Firestore (ID =
 `profile.playerId`, un identificador anónimo generado por
 `ensurePlayerId()` en `storage.js` la primera vez que hace falta), con
-un campo por categoría (`level`/`infiniteScore`/`storyScore`).
-`submitScore()` actualiza (`merge: true`) solo el campo de la categoría
-que se le pide, sin crear una fila nueva ni pisar las otras dos, de
-forma que un mismo jugador puede aparecer en las tres clasificaciones a
-la vez.
+un campo por categoría (`level`/`infiniteScore`/`storyScore`/
+`hardScore`/`combatScore` y un `regionXScore` por cada región, p. ej.
+`regionKantoScore`). `submitScore()` actualiza (`merge: true`) solo el
+campo de la categoría que se le pide, sin crear una fila nueva ni pisar
+las demás, de forma que un mismo jugador puede aparecer en todas las
+clasificaciones a la vez.
 
 ### `audio.js` — motor de audio
 Catálogo de sonidos (`SFX`, `AMBIENT_SFX`) y todo lo relacionado con

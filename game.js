@@ -2292,6 +2292,28 @@ function showResult() {
     // récord personal (no en cada partida): ver leaderboard.js.
     Leaderboard.submitScore("hard", profile.username, profile.avatarId, state.score, ensurePlayerId());
   }
+
+  // Modo Normal: dos clasificaciones distintas según session.normalRegion
+  // (mismo criterio que isCombat en generateOptionsForCurrent) — Modo
+  // Combate ("Combate") tiene su propio récord/clasificación global
+  // ("combat"), y cada región de verdad tiene la suya, independiente de
+  // las demás ("region_<Región>" — ver LEADERBOARD_CATEGORIES en
+  // leaderboard.js), para que jugar Kanto no compita con jugar Alola.
+  if (session.mode === GameMode.NORMAL && session.normalRegion === "Combate") {
+    if (state.score > (achievementsData.stats.bestCombatScore || 0)) {
+      achievementsData.stats.bestCombatScore = state.score;
+      saveAchievements();
+      Leaderboard.submitScore("combat", profile.username, profile.avatarId, state.score, ensurePlayerId());
+    }
+  } else if (session.mode === GameMode.NORMAL && session.normalRegion) {
+    const region = session.normalRegion;
+    if (!achievementsData.stats.bestRegionScore) achievementsData.stats.bestRegionScore = {};
+    if (state.score > (achievementsData.stats.bestRegionScore[region] || 0)) {
+      achievementsData.stats.bestRegionScore[region] = state.score;
+      saveAchievements();
+      Leaderboard.submitScore("region_" + region, profile.username, profile.avatarId, state.score, ensurePlayerId());
+    }
+  }
 }
 
 /** Cierra la pantalla de resultado y vuelve a arrancar una partida con

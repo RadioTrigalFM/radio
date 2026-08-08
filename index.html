@@ -771,6 +771,14 @@
         <div class="streak-name" data-i18n="leaderboard.hard">🔴 Modo Difícil</div>
         <div class="streak-value">💰 <span id="leaderboard-personal-hard">0</span> pts</div>
       </div>
+      <div class="streak-row">
+        <div class="streak-name" data-i18n="leaderboard.combat">⚔️ Modo Combate</div>
+        <div class="streak-value">💰 <span id="leaderboard-personal-combat">0</span> pts</div>
+      </div>
+      <div class="streak-group-title" data-i18n="leaderboard.regionsGroup">🗺️ Modo Normal, por región</div>
+      <!-- Rellenado por renderLeaderboardPersonalBests() (ui.js): una fila
+           por región (REGIONS, de game.js), no se puede fijar aquí a mano. -->
+      <div id="leaderboard-personal-regions"></div>
     </div>
 
     <div class="card">
@@ -780,7 +788,13 @@
         <button class="leaderboard-tab" data-category="infinite" data-i18n="leaderboard.tab.infinite">♾️ Infinito</button>
         <button class="leaderboard-tab" data-category="story" data-i18n="leaderboard.tab.story">📖 Historia</button>
         <button class="leaderboard-tab" data-category="hard" data-i18n="leaderboard.tab.hard">🔴 Difícil</button>
+        <button class="leaderboard-tab" data-category="combat" data-i18n="leaderboard.tab.combat">⚔️ Combate</button>
+        <button class="leaderboard-tab" data-category="regions" data-i18n="leaderboard.tab.regions">🗺️ Regiones</button>
       </div>
+      <!-- Subcategorías de "Regiones": 7 botones (uno por región), generados
+           por renderLeaderboardRegionTabs() (ui.js) — solo visible mientras
+           la subcategoría activa es una región. -->
+      <div class="leaderboard-tabs leaderboard-subtabs" id="leaderboard-region-tabs" style="display:none;"></div>
       <div class="small" id="leaderboard-status" style="margin-bottom:8px;"></div>
       <div class="leaderboard-list" id="leaderboard-list"></div>
     </div>
