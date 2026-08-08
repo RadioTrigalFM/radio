@@ -364,6 +364,7 @@ const CURSOR_CATALOG = [
   { id: "charizard_y",  name: "Charizard Y",  url: "images/cursor-charizard-y.png",  scale: 1/3 },
   { id: "charizard_x",  name: "Charizard X",  url: "images/cursor-charizard-x.png",  scale: 1/3 },
   { id: "pikachu",      name: "Pikachu",      url: "images/cursor-pikachu.png",      scale: 1/3 },
+  { id: "spinda",       name: "Spinda",       url: "images/cursor-spinda.png",       scale: 1/3 },
 ];
 
 // Id del avatar preseleccionado para un jugador nuevo: tanto en `profile`

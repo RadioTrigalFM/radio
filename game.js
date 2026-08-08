@@ -1263,6 +1263,7 @@ const CURSOR_UNLOCKS = {
   charizard_y: { achId: "games_30" },               // logro "Entrenador dedicado"
   charizard_x: { achId: "games_30" },               // logro "Entrenador dedicado"
   pikachu:     { achId: "sonidex_kanto" },          // logro "Sonidex de Kanto"
+  spinda:      { achId: "streak_5" },               // logro "En racha"
 };
 
 /** Indica si un estilo de puntero (id de CURSOR_CATALOG, o "normal")

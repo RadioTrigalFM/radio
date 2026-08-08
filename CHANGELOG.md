@@ -17,6 +17,19 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Nuevo puntero con forma de Pokémon: Spinda**, desbloqueado por el
+  logro `streak_5` ("En racha"). Mismo patrón que el resto de punteros
+  de Pokémon (sprite local, `scale: 1/3`, sin cursor de objeto nativo).
+  - `storage.js`: nueva entrada `spinda` en `CURSOR_CATALOG`.
+  - `game.js`: nueva entrada `spinda: { achId: "streak_5" }` en
+    `CURSOR_UNLOCKS`.
+  - `i18n.js`: `cursorStyle.spinda.name` en español e inglés.
+
+  (El otro puntero pedido junto a este, Charizard Y desbloqueado por
+  "Entrenador dedicado", ya existía: `charizard_y` en `CURSOR_CATALOG`
+  ya estaba enlazado a `games_30` — no ha hecho falta ningún cambio
+  para él.)
+
 - **Estilos de puntero del ratón desbloqueables por logro**: cuatro
   logros desbloquean, además de su insignia, un estilo de puntero
   alternativo que sustituye la flecha del ratón por el sprite de un
