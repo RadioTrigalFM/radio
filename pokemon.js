@@ -715,29 +715,20 @@ PokeEvents.register({
 // eventos cambia, el fondo se actualiza solo, sin tocar nada aquí.
 const bgPokeLayer = document.getElementById("bg-pokemon-layer");
 
-// Un Pokémon de las colinas "brilla" (usa su sprite shiny) si el jugador ya
-// ha conseguido el logro de 20 apariciones de su evento
-// («encounter_<id>_20»). Es un desbloqueo puramente visual: no afecta a
-// isHillPokemonUnlocked() (que sigue dependiendo solo del logro de 10), así
-// que el Pokémon lleva paseando desde antes y esto solo cambia su sprite.
-function isHillPokemonShinyUnlocked(ev) {
-  const achId = "encounter_" + ev.id + "_20";
-  return typeof achievementsData !== "undefined" && !!(achievementsData.unlocked && achievementsData.unlocked[achId]);
-}
-
 /** Nº de Pokédex y variante (normal/shiny) que corresponde usar para el
- * sprite de las colinas de un evento, teniendo en cuenta si ya se
- * consiguió su logro de 20 apariciones. Caso especial: el propio evento
- * Caterpie Shiny (`id: "shiny"`) ya usa de por sí el sprite shiny de
- * Caterpie (ev.shiny === true), así que su logro de 20 apariciones no lo
- * "vuelve a hacer shiny" (ya lo es) sino que lo hace evolucionar: su
- * Pokémon de las colinas pasa a ser un Metapod Shiny (nº de Pokédex 11).
- */
+ * sprite de las colinas de un evento: siempre el propio pokemonId del
+ * evento, en su variante shiny solo si el evento ya es shiny de por sí
+ * (p. ej. el Caterpie Shiny, ev.shiny === true).
+ * EXCEPCIÓN: Caterpie (nº de Pokédex 10) nunca usa aquí su variante
+ * shiny, aunque su evento sí lo sea (ev.shiny === true): en las colinas
+ * siempre se muestra como el Caterpie normal, con su sprite animado PMD
+ * (ver usesPmdWalkSprite), igual que el resto de Pokémon de las
+ * colinas. El overlay de colores y el resto de efectos de "Caterpie
+ * Shiny" (ver onAnswers en su registro) no se ven afectados: siguen
+ * disparándose igual durante la partida; esto solo cambia su paseo
+ * decorativo por el fondo. */
 function hillPokemonSpriteInfo(ev) {
-  if (ev.id === "shiny" && isHillPokemonShinyUnlocked(ev)) {
-    return { pokemonId: 11, shiny: true }; // Metapod Shiny
-  }
-  return { pokemonId: ev.pokemonId, shiny: ev.shiny || isHillPokemonShinyUnlocked(ev) };
+  return { pokemonId: ev.pokemonId, shiny: !!ev.shiny && ev.pokemonId !== 10 };
 }
 
 /** URL del sprite (normal o shiny) de un Pokémon de evento, usado para
@@ -746,6 +737,274 @@ function bgPokeSpriteUrl(ev) {
   const { pokemonId, shiny } = hillPokemonSpriteInfo(ev);
   const path = shiny ? `shiny/${pokemonId}` : `${pokemonId}`;
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${path}.png`;
+}
+
+// ═══════════════════════════════════════════════
+//  🚶 SPRITE ANIMADO PMD (colinas: caminar y dormir)
+// ═══════════════════════════════════════════════
+// Sustituye, únicamente para la versión NORMAL (no shiny) de un Pokémon de
+// las colinas, el PNG estático de PokeAPI (bgPokeSpriteUrl) por el
+// spritesheet de su animación "Walk" (caminar) del repositorio
+// PMDCollab/SpriteCollab — el mismo que ya usa este proyecto para los
+// retratos de AVATAR_CATALOG en storage.js, visible también en
+// https://sprites.pmdcollab.org/. La versión shiny NO se toca: sigue
+// usando bgPokeSpriteUrl tal cual, igual que antes de este bloque.
+// Caterpie (nº de Pokédex 10) SÍ usa este sistema: aunque su único
+// evento de colinas (`id: "shiny"`, ver más arriba) es shiny de por sí
+// (ev.shiny === true), hillPokemonSpriteInfo() lo trata como no-shiny
+// específicamente para Caterpie, así que en las colinas siempre luce su
+// sprite animado PMD normal, no el PNG shiny estático.
+//
+// Además, cada Pokémon que consigue cargar su animación "Walk" se echa
+// siestas por su cuenta (ver el bloque "💤 SIESTAS" más abajo): de vez
+// en cuando se queda dormido, sustituyendo el spritesheet "Walk" por el
+// de su animación "Sleep" (mismo repositorio) durante un rato, y luego
+// retoma su paseo donde lo dejó.
+
+const PMD_SPRITE_BASE = "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite";
+
+// Fila (de 8, 0-indexada) que ocupa la dirección "Izquierda" dentro del
+// spritesheet de una animación de 8 direcciones en este repositorio;
+// orden comprobado a mano sobre el spritesheet real de Pikachu:
+// 0 Abajo, 1 AbajoDcha, 2 Dcha, 3 ArribaDcha, 4 Arriba, 5 ArribaIzq,
+// 6 Izquierda, 7 AbajoIzq. La usamos como base sin espejar porque
+// initBgPokeWalk() añade la clase `flip` (transform: scaleX(-1), ver
+// styles.css) precisamente cuando el Pokémon camina hacia la derecha, así
+// que partir de la dirección "Izquierda" hace que el espejado existente
+// ya deje al Pokémon mirando hacia donde camina en ambos sentidos. Se
+// reutiliza igual para la animación "Sleep": si su spritesheet también
+// tiene 8 filas de dirección, se recorta la misma fila; si no llega a
+// tenerla (algunas animaciones "Sleep" solo traen 1 fila), el propio
+// cálculo de fila en applyPmdAnim() cae automáticamente a la fila 0.
+const PMD_WALK_LEFT_ROW = 6;
+
+// Un Pokémon de las colinas usa el sprite animado PMD solo si NO es su
+// versión shiny (esa se deja como estaba). Caterpie ya no es una
+// excepción aquí: como hillPokemonSpriteInfo() nunca le da `shiny: true`
+// en las colinas, este `!shiny` ya basta para que también use el
+// sprite animado PMD normal, igual que el resto de Pokémon.
+function usesPmdWalkSprite(pokemonId, shiny) {
+  return !shiny;
+}
+
+// Caché de animaciones PMD ya pedidas, una promesa por combinación
+// "pokemonId:nombreAnim" (p. ej. "25:Walk", "25:Sleep"), para no volver
+// a pedir su AnimData.xml cada vez que se reconstruyen las colinas (ver
+// buildBgPokemon()) ni cada vez que un Pokémon se queda dormido.
+const _pmdAnimCache = {};
+
+/** Pide y analiza el AnimData.xml de un Pokémon en PMDCollab/SpriteCollab
+ * para averiguar el tamaño de fotograma y nº de fotogramas de una de sus
+ * animaciones con nombre `animName` (p. ej. "Walk" o "Sleep"), y precarga
+ * el spritesheet para saber su tamaño real (con cuántas direcciones/filas
+ * cuenta). Devuelve `null` si algo falla (sin conexión, Pokémon sin esa
+ * animación en el repositorio...) para que quien llama pueda decidir una
+ * alternativa: el PNG estático de PokeAPI para "Walk" (ver el
+ * `img.onerror` de buildBgPokeElement), o simplemente no dormirse nunca
+ * para "Sleep" (ver el bloque "💤 SIESTAS" más abajo).
+ * @param {number} pokemonId
+ * @param {string} animName
+ * @returns {Promise<{sheetUrl:string, frameWidth:number, frameHeight:number,
+ *   frameCount:number, sheetWidth:number, sheetHeight:number}|null>}
+ */
+function loadPmdAnim(pokemonId, animName) {
+  const cacheKey = `${pokemonId}:${animName}`;
+  if (_pmdAnimCache[cacheKey]) return _pmdAnimCache[cacheKey];
+  const folder = String(pokemonId).padStart(4, "0");
+  const sheetUrl = `${PMD_SPRITE_BASE}/${folder}/${animName}-Anim.png`;
+  const promise = fetch(`${PMD_SPRITE_BASE}/${folder}/AnimData.xml`)
+    .then(res => {
+      if (!res.ok) throw new Error("AnimData.xml no disponible");
+      return res.text();
+    })
+    .then(xmlText => {
+      const xml = new DOMParser().parseFromString(xmlText, "application/xml");
+      if (xml.querySelector("parsererror")) throw new Error("AnimData.xml inválido");
+      const targetAnim = [...xml.querySelectorAll("Anim")].find(
+        a => a.querySelector("Name")?.textContent === animName
+      );
+      const frameWidth = parseInt(targetAnim?.querySelector("FrameWidth")?.textContent, 10);
+      const frameHeight = parseInt(targetAnim?.querySelector("FrameHeight")?.textContent, 10);
+      const frameCount = targetAnim?.querySelectorAll("Durations > Duration").length;
+      if (!frameWidth || !frameHeight || !frameCount) {
+        throw new Error(`Animación ${animName} no disponible para este Pokémon`);
+      }
+      return new Promise((resolve, reject) => {
+        const probe = new Image();
+        probe.onload = () => resolve({
+          sheetUrl, frameWidth, frameHeight, frameCount,
+          sheetWidth: probe.naturalWidth, sheetHeight: probe.naturalHeight,
+        });
+        probe.onerror = () => reject(new Error(`${animName}-Anim.png no disponible`));
+        probe.src = sheetUrl;
+      });
+    })
+    .catch(() => null);
+  _pmdAnimCache[cacheKey] = promise;
+  return promise;
+}
+
+/** Aplica una animación PMD ya cargada (Walk o Sleep, ver loadPmdAnim) al
+ * `<div>` de sprite animado de un Pokémon de las colinas: fija el tamaño
+ * real de fotograma y recorta la fila de la dirección "Izquierda"
+ * (PMD_WALK_LEFT_ROW) de su spritesheet. No toca el temporizador de
+ * fotogramas (ver tickPmdSprite): este simplemente lee en el siguiente
+ * tic los datos que se acaban de dejar en `sprite._pmdAnim`, así que
+ * cambiar de animación (p. ej. al dormirse o despertar) no necesita
+ * arrancar ni parar ningún temporizador nuevo. */
+function applyPmdAnim(sprite, anim, size) {
+  const scale = size / anim.frameWidth;
+  const hasLeftRow = anim.sheetHeight >= anim.frameHeight * (PMD_WALK_LEFT_ROW + 1);
+  const dirRow = hasLeftRow ? PMD_WALK_LEFT_ROW : 0;
+  sprite.style.height = (anim.frameHeight * scale).toFixed(1) + "px";
+  sprite.style.backgroundImage = `url("${anim.sheetUrl}")`;
+  sprite.style.backgroundSize = `${(anim.sheetWidth * scale).toFixed(1)}px ${(anim.sheetHeight * scale).toFixed(1)}px`;
+  sprite.style.backgroundPositionY = `-${(dirRow * anim.frameHeight * scale).toFixed(1)}px`;
+  sprite._pmdAnim = anim;
+  sprite._pmdScale = scale;
+  sprite._pmdFrame = 0;
+}
+
+/** Avanza, cada 140ms, el fotograma de la animación PMD actualmente
+ * activa en `sprite` (la que haya dejado applyPmdAnim() en
+ * `sprite._pmdAnim` — Walk o Sleep). Un único temporizador por Pokémon,
+ * arrancado una vez desde applyPmdWalkSprite() y que sigue corriendo
+ * mientras esté en las colinas: no hace falta un temporizador aparte
+ * para la animación "Sleep", ya que solo cambia qué spritesheet lee. Si
+ * el elemento ya no está en el DOM (el Pokémon fue quitado de las
+ * colinas), para el temporizador. */
+function tickPmdSprite(wrap, sprite) {
+  if (!wrap.isConnected) return;
+  const anim = sprite._pmdAnim;
+  if (anim) {
+    sprite.style.backgroundPositionX =
+      `-${(sprite._pmdFrame * anim.frameWidth * sprite._pmdScale).toFixed(1)}px`;
+    sprite._pmdFrame = (sprite._pmdFrame + 1) % anim.frameCount;
+  }
+  setTimeout(() => tickPmdSprite(wrap, sprite), 140);
+}
+
+/** Sustituye el `<img>` estático (ya en el DOM, con el PNG de PokeAPI
+ * como respaldo) de un Pokémon de las colinas por un `<div>` animado con
+ * el spritesheet PMD "Walk" ya cargado por loadPmdAnim(pokemonId,
+ * "Walk"), y arranca su temporizador de fotogramas (tickPmdSprite). Si
+ * el elemento ya no está en el DOM (el Pokémon fue quitado de las
+ * colinas mientras se cargaba su animación), no hace nada.
+ * @returns {HTMLDivElement|undefined} el `<div>` de sprite creado, que
+ *   quien llama necesita guardar para poder dormir a este Pokémon más
+ *   adelante (ver initBgPokeSleep); `undefined` si `wrap` ya no estaba
+ *   en el DOM. */
+function applyPmdWalkSprite(wrap, img, anim) {
+  if (!wrap.isConnected) return;
+  // Por si el PNG de PokeAPI ya había fallado (ver img.onerror en
+  // buildBgPokeElement) antes de que este sprite animado terminara de
+  // cargar: al lograrlo, el Pokémon vuelve a mostrarse.
+  wrap.style.display = "";
+  const size = parseFloat(img.style.width) || img.width;
+
+  const sprite = document.createElement("div");
+  sprite.className = img.className; // conserva "bg-poke-sprite" (bounce, aparición... en styles.css)
+  sprite.style.width = size.toFixed(1) + "px";
+  sprite.style.backgroundRepeat = "no-repeat";
+  sprite.style.imageRendering = "pixelated";
+  applyPmdAnim(sprite, anim, size);
+  img.replaceWith(sprite);
+
+  tickPmdSprite(wrap, sprite);
+  return sprite;
+}
+
+// ═══════════════════════════════════════════════
+//  💤 SIESTAS (colinas, solo Pokémon con sprite animado PMD)
+// ═══════════════════════════════════════════════
+// De vez en cuando, cada Pokémon de las colinas con sprite animado PMD
+// (ver applyPmdWalkSprite) se echa una siesta por su cuenta: deja de
+// pasear y luce su animación "Sleep" (mismo repositorio PMDCollab que
+// "Walk") durante un rato, para luego despertar y retomar el paseo. Cada
+// Pokémon tira sus propios dados de forma independiente —su propio
+// temporizador, su propia probabilidad en cada tirada—: no hay ningún
+// reloj ni contador compartido entre ellos, así que nunca se duermen ni
+// se despiertan todos a la vez.
+
+// Cada cuánto "tira los dados" un Pokémon despierto para decidir si se
+// queda dormido (segundos; rango aleatorio distinto en cada tirada).
+const PMD_SLEEP_CHECK_MIN_S = 5;
+const PMD_SLEEP_CHECK_MAX_S = 12;
+
+// Probabilidad de quedarse dormido en cada una de esas tiradas.
+const PMD_SLEEP_CHANCE = 0.07;
+
+// Cuánto dura la siesta una vez empieza (segundos).
+const PMD_SLEEP_MIN_S = 15;
+const PMD_SLEEP_MAX_S = 120;
+
+/** Pone en marcha el ciclo de siestas de un Pokémon de las colinas que ya
+ * está paseando con su sprite animado PMD (ver applyPmdWalkSprite): a
+ * intervalos aleatorios, tira una probabilidad de quedarse dormido; si le
+ * toca, pide su animación "Sleep" (loadPmdAnim) y, si existe en el
+ * repositorio, cancela su próximo paso de paseo pendiente (ver
+ * `wrap._bgPokeStepTimer`, guardado por initBgPokeWalk), cambia su
+ * sprite a la animación "Sleep" y programa que se despierte pasado un
+ * rato aleatorio (PMD_SLEEP_MIN_S–PMD_SLEEP_MAX_S), guardando ese
+ * temporizador en `wrap._bgPokeSleepTimer` para poder cancelarlo si se
+ * despierta antes de tiempo (ver `wrap._bgPokeWakeNow` más abajo). Al
+ * despertar, retoma su animación "Walk" y su paseo (llamando a
+ * `wrap._bgPokeResumeWalk`, también guardado por initBgPokeWalk) y
+ * vuelve a tirar dados para la próxima siesta. Si la animación "Sleep"
+ * no existe para este Pokémon en el repositorio, retoma el paseo sin
+ * dormirse y lo sigue intentando en cada tirada (por si solo fuera un
+ * corte de red puntual).
+ *
+ * Además cuelga en `wrap._bgPokeWakeNow` una función que despierta al
+ * Pokémon al instante si está dormido (no hace nada si ya está
+ * despierto): cancela el temporizador de la siesta pendiente y llama a
+ * `wakeUp()` directamente, para que tocar un Pokémon dormido (ver el
+ * listener de "click"/"keydown" en buildBgPokeElement) lo despierte en
+ * vez de esperar a que termine su siesta por su cuenta. También avisa a
+ * `trackPokeWoken()` (game.js, logro "poke_flute") de que el jugador ha
+ * despertado a un Pokémon, cosa que NO ocurre cuando despierta por su
+ * cuenta al expirar el temporizador. */
+function initBgPokeSleep(wrap, sprite, walkAnim, pokemonId, size) {
+  function scheduleCheck() {
+    setTimeout(roll, rand(PMD_SLEEP_CHECK_MIN_S, PMD_SLEEP_CHECK_MAX_S) * 1000);
+  }
+  function roll() {
+    if (!wrap.isConnected) return;
+    if (Math.random() < PMD_SLEEP_CHANCE) goToSleep();
+    else scheduleCheck();
+  }
+  function goToSleep() {
+    if (wrap._bgPokeStepTimer) clearTimeout(wrap._bgPokeStepTimer);
+    loadPmdAnim(pokemonId, "Sleep").then(sleepAnim => {
+      if (!wrap.isConnected) return;
+      if (!sleepAnim) {
+        // Sin animación "Sleep" en el repositorio para este Pokémon:
+        // retoma el paso que se canceló arriba y prueba suerte de nuevo
+        // en la próxima tirada.
+        if (wrap._bgPokeResumeWalk) wrap._bgPokeResumeWalk();
+        scheduleCheck();
+        return;
+      }
+      wrap.classList.add("asleep");
+      applyPmdAnim(sprite, sleepAnim, size);
+      wrap._bgPokeSleepTimer = setTimeout(wakeUp, rand(PMD_SLEEP_MIN_S, PMD_SLEEP_MAX_S) * 1000);
+    });
+  }
+  function wakeUp() {
+    wrap._bgPokeSleepTimer = null;
+    if (!wrap.isConnected || !wrap.classList.contains("asleep")) return;
+    wrap.classList.remove("asleep");
+    applyPmdAnim(sprite, walkAnim, size);
+    if (wrap._bgPokeResumeWalk) wrap._bgPokeResumeWalk();
+    scheduleCheck();
+  }
+  wrap._bgPokeWakeNow = function () {
+    if (!wrap.classList.contains("asleep")) return;
+    if (wrap._bgPokeSleepTimer) clearTimeout(wrap._bgPokeSleepTimer);
+    wakeUp();
+    if (typeof trackPokeWoken === "function") trackPokeWoken();
+  };
+  scheduleCheck();
 }
 
 // Un Pokémon de las colinas está desbloqueado si el logro «Haz que aparezca
@@ -763,6 +1022,12 @@ function isHillPokemonUnlocked(ev) {
 // azar dentro de su corredor, camina hasta él a velocidad variable, hace
 // una pausa aleatoria y vuelve a elegir otro destino. Así cada Pokémon
 // sigue un recorrido distinto e impredecible.
+//
+// El temporizador de cada paso se guarda en `wrap._bgPokeStepTimer` y la
+// propia función `step` en `wrap._bgPokeResumeWalk`: initBgPokeSleep()
+// (ver el bloque "💤 SIESTAS" más arriba) los usa para cancelar el
+// próximo paso cuando el Pokémon se queda dormido, y para retomar el
+// paseo justo donde lo dejó al despertar.
 function initBgPokeWalk(wrap, bandCls) {
   const startLeft = parseFloat(wrap.style.left) || 50;
   const roam = bandCls === "band-far" ? 14 : bandCls === "band-mid" ? 20 : 26;
@@ -786,10 +1051,11 @@ function initBgPokeWalk(wrap, bandCls) {
       wrap.style.left = target.toFixed(2) + "%";
     });
     const pause = rand(0.8, 3.5);
-    setTimeout(step, (dur + pause) * 1000);
+    wrap._bgPokeStepTimer = setTimeout(step, (dur + pause) * 1000);
   }
 
-  setTimeout(step, rand(0.3, 2.5) * 1000);
+  wrap._bgPokeResumeWalk = step;
+  wrap._bgPokeStepTimer = setTimeout(step, rand(0.3, 2.5) * 1000);
 }
 
 // Crea el elemento DOM de un Pokémon de fondo (banda de profundidad, tamaño,
@@ -801,6 +1067,22 @@ const BG_POKE_BAND_RANGES = {
   "band-near": { bottom: [2, 8],   size: [52, 62] },
 };
 
+// Ids de evento (ver PokeEvents.register más arriba) cuyo Pokémon de las
+// colinas SÍ conserva la animación de flotar/rebote (bg-poke-bounce, ver
+// styles.css). El resto camina sin ese balanceo vertical: solo se
+// desplaza por el suelo (initBgPokeWalk) y aparece con bg-poke-appear.
+const BG_POKE_BOUNCE_IDS = new Set(["inkay", "mew", "mewtwo"]);
+
+// Ids de evento cuya sombra de las colinas se deja en su posición
+// original (bg-poke-shadow, `bottom: -3px`): en el spritesheet "Walk"
+// de PMDCollab de estos Pokémon el personaje ya llega prácticamente
+// hasta el borde inferior del fotograma, así que esa posición ya
+// encaja bien bajo sus pies. En el resto, el fotograma deja bastante
+// margen vacío por debajo del personaje, y esa misma posición deja la
+// sombra demasiado separada del cuerpo — de ahí la clase `shadow-fix`
+// (ver styles.css) que se les añade para subirla.
+const BG_POKE_SHADOW_DEFAULT_IDS = new Set(["porygon", "mew", "mewtwo", "inkay"]);
+
 /** Crea el elemento DOM de un Pokémon de fondo dentro de una banda de
  * profundidad concreta (posición y tamaño aleatorios dentro del rango
  * de esa banda). */
@@ -811,8 +1093,7 @@ function buildBgPokeElement(ev, bandCls, leftPct) {
   const flip = Math.random() < 0.5;
 
   const wrap = document.createElement("div");
-  wrap.className = `bg-poke ${bandCls}${flip ? " flip" : ""}${hillPokemonSpriteInfo(ev).shiny ? " is-shiny" : ""}`;
-  wrap.dataset.eventId = ev.id; // permite localizarlo luego (ver refreshBgPokemonSprite)
+  wrap.className = `bg-poke ${bandCls}${flip ? " flip" : ""}${hillPokemonSpriteInfo(ev).shiny ? " is-shiny" : ""}${BG_POKE_BOUNCE_IDS.has(ev.id) ? "" : " no-bounce"}${BG_POKE_SHADOW_DEFAULT_IDS.has(ev.id) ? "" : " shadow-fix"}`;
   wrap.style.left = leftPct.toFixed(2) + "%";
   wrap.style.bottom = bottom.toFixed(1) + "vh";
   wrap.style.setProperty("--delay", rand(0, 2.4).toFixed(2) + "s");
@@ -821,6 +1102,14 @@ function buildBgPokeElement(ev, bandCls, leftPct) {
 
   const shadow = document.createElement("span");
   shadow.className = "bg-poke-shadow";
+
+  // Emoticonos "Z" que solo se muestran mientras el Pokémon está dormido
+  // (ver initBgPokeSleep más abajo, que añade/quita la clase "asleep" en
+  // `wrap`): ocultos por defecto y animados vía CSS, mismo patrón que
+  // `.snorlax-zzz-particle` (ver styles.css) para el evento de Snorlax.
+  const zzz = document.createElement("div");
+  zzz.className = "bg-poke-zzz-wrap";
+  zzz.innerHTML = `<span class="bg-poke-zzz-particle">💤</span><span class="bg-poke-zzz-particle">💤</span><span class="bg-poke-zzz-particle">💤</span>`;
 
   const img = document.createElement("img");
   img.className = "bg-poke-sprite";
@@ -834,13 +1123,36 @@ function buildBgPokeElement(ev, bandCls, leftPct) {
 
   wrap.appendChild(shadow);
   wrap.appendChild(img);
+  wrap.appendChild(zzz);
+
+  // Versión normal (no shiny, no Caterpie): intenta sustituir este PNG
+  // estático por el sprite animado PMD (ver applyPmdWalkSprite). Si falla
+  // (sin conexión, Pokémon sin animación "Walk" en el repositorio...), el
+  // PNG de PokeAPI de arriba se queda tal cual, y este Pokémon tampoco
+  // se echa siestas (initBgPokeSleep necesita el sprite animado).
+  const spriteInfo = hillPokemonSpriteInfo(ev);
+  if (usesPmdWalkSprite(spriteInfo.pokemonId, spriteInfo.shiny)) {
+    loadPmdAnim(spriteInfo.pokemonId, "Walk").then(anim => {
+      if (!anim) return;
+      const sprite = applyPmdWalkSprite(wrap, img, anim);
+      if (sprite) initBgPokeSleep(wrap, sprite, anim, spriteInfo.pokemonId, size);
+    });
+  }
   wrap.setAttribute("role", "button");
   wrap.setAttribute("aria-label", ev.name);
   wrap.tabIndex = 0;
-  wrap.addEventListener("click", () => reactBgPoke(wrap));
+  // Si el Pokémon está dormido (ver initBgPokeSleep), tocarlo lo despierta
+  // al instante (wrap._bgPokeWakeNow) en vez de esperar a que termine su
+  // siesta por su cuenta; en cualquier caso, se dispara también la
+  // reacción visual habitual (saltito + partículas).
+  wrap.addEventListener("click", () => {
+    if (wrap._bgPokeWakeNow) wrap._bgPokeWakeNow();
+    reactBgPoke(wrap);
+  });
   wrap.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
+      if (wrap._bgPokeWakeNow) wrap._bgPokeWakeNow();
       reactBgPoke(wrap);
     }
   });
@@ -898,20 +1210,6 @@ function addBgPokemon(ev) {
   const wrap = buildBgPokeElement(ev, bandCls, left);
   bgPokeLayer.appendChild(wrap);
   initBgPokeWalk(wrap, bandCls);
-}
-
-// Actualiza el sprite de un Pokémon que YA está paseando por las colinas
-// cuando se desbloquea su logro de 20 apariciones («encounter_<id>_20»),
-// sin reconstruir el resto del fondo ni interrumpir su paseo en curso (a
-// diferencia de addBgPokemon(), que añade un Pokémon nuevo que antes no
-// estaba: aquí el Pokémon ya estaba, solo cambia su imagen a shiny).
-function refreshBgPokemonSprite(ev) {
-  if (!bgPokeLayer || !ev) return;
-  const wrap = bgPokeLayer.querySelector(`.bg-poke[data-event-id="${ev.id}"]`);
-  if (!wrap) return;
-  const img = wrap.querySelector(".bg-poke-sprite");
-  if (img) img.src = bgPokeSpriteUrl(ev);
-  wrap.classList.add("is-shiny");
 }
 
 // Reacción visual al tocar un Pokémon de las colinas: un saltito con

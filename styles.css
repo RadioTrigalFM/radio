@@ -148,6 +148,16 @@
     border-radius: 50%;
     filter: blur(1px);
   }
+  /* La mayoría de sprites "Walk" de PMDCollab dejan bastante margen
+     vacío por debajo del propio personaje dentro del fotograma, así
+     que la sombra (anclada al borde inferior real del sprite) queda
+     demasiado separada del cuerpo. Se sube para compensar en todos
+     los Pokémon de las colinas EXCEPTO Porygon, Mew, Mewtwo e Inkay
+     (ver BG_POKE_SHADOW_DEFAULT_IDS en pokemon.js), cuyo fotograma ya
+     llega casi hasta el borde y no necesitan este ajuste. */
+  .bg-poke.shadow-fix .bg-poke-shadow {
+    bottom: 14%;
+  }
   .bg-poke-sprite {
     --flip: 1;
     display: block;
@@ -163,6 +173,13 @@
   .bg-poke.poked .bg-poke-sprite {
     filter: brightness(1.4) drop-shadow(0 0 10px #ffffffaa) drop-shadow(0 3px 5px rgba(0,0,0,.35));
   }
+  /* Sin flotar: solo Inkay, Mew y Mewtwo (ver BG_POKE_BOUNCE_IDS en
+     pokemon.js) conservan bg-poke-bounce; el resto se queda solo con la
+     animación de aparición, caminando raso sobre las colinas. */
+  .bg-poke.no-bounce .bg-poke-sprite {
+    animation: bg-poke-appear .6s ease backwards;
+    animation-delay: var(--delay, 0s);
+  }
   @keyframes bg-poke-appear {
     from { opacity: 0; transform: scaleX(var(--flip)) translateY(8px); }
     to   { opacity: 1; transform: scaleX(var(--flip)) translateY(0); }
@@ -171,6 +188,36 @@
     0%, 100% { transform: scaleX(var(--flip)) translateY(0) scaleY(1); }
     45%      { transform: scaleX(var(--flip)) translateY(-10%) scaleY(1.035); }
   }
+  /* Mientras duerme (ver initBgPokeSleep en pokemon.js), el Pokémon deja
+     de flotar/rebotar aunque sea de los que normalmente lo hacen (Inkay,
+     Mew, Mewtwo — ver BG_POKE_BOUNCE_IDS): su propia animación "Sleep"
+     ya transmite que está quieto. */
+  .bg-poke.asleep .bg-poke-sprite { animation-play-state: paused; }
+  /* Emoticonos "Z" flotantes sobre el Pokémon mientras duerme (ver
+     initBgPokeSleep en pokemon.js, que añade/quita la clase "asleep").
+     Ocultos por defecto; solo se animan con .asleep. Reutiliza la misma
+     animación de flotado que .snorlax-zzz-particle (ver más abajo en
+     este archivo), ya que es el mismo efecto visual. */
+  .bg-poke-zzz-wrap {
+    position: absolute;
+    top: -6%; right: 6%;
+    width: 30px; height: 30px;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .bg-poke.asleep .bg-poke-zzz-wrap { opacity: 1; }
+  .bg-poke-zzz-particle {
+    position: absolute;
+    left: 0; top: 0;
+    font-size: 1rem;
+    opacity: 0;
+    text-shadow: 0 2px 6px #000a;
+  }
+  .bg-poke.asleep .bg-poke-zzz-particle { animation: snorlax-zzz-float 3.2s ease-in infinite; }
+  .bg-poke-zzz-particle:nth-child(2) { font-size: .8rem; left: 10px; top: 6px; }
+  .bg-poke-zzz-particle:nth-child(3) { font-size: .65rem; left: 18px; top: 12px; }
+  .bg-poke.asleep .bg-poke-zzz-particle:nth-child(2) { animation-delay: 1.05s; }
+  .bg-poke.asleep .bg-poke-zzz-particle:nth-child(3) { animation-delay: 2.1s; }
   .bg-poke.band-far .bg-poke-sprite  { filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)) brightness(.92) saturate(.88); }
   .bg-poke.band-far .bg-poke-shadow  { opacity: .7; }
   .bg-poke.band-mid .bg-poke-sprite  { filter: drop-shadow(0 3px 5px rgba(0,0,0,.32)) brightness(.97); }
@@ -189,6 +236,11 @@
   @keyframes bg-poke-shiny-glow {
     0%, 100% { filter: drop-shadow(0 0 4px #ffe066aa) drop-shadow(0 3px 5px rgba(0,0,0,.35)); }
     50%      { filter: drop-shadow(0 0 13px #fff3b0ee) drop-shadow(0 3px 5px rgba(0,0,0,.35)); }
+  }
+  .bg-poke.no-bounce.is-shiny .bg-poke-sprite {
+    animation: bg-poke-appear .6s ease backwards,
+               bg-poke-shiny-glow 1.9s ease-in-out infinite;
+    animation-delay: var(--delay, 0s), 0s;
   }
   .bg-poke.is-shiny::after {
     content: "✨";

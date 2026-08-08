@@ -17,6 +17,168 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Tres logros nuevos**: `streak_50` ("Racha legendaria", sección
+  Progreso y rachas — alcanzar una racha de 50 aciertos consecutivos),
+  `sonidex_1` ("Primera ficha", sección Sonidex — desbloquear la primera
+  ficha de la Sonidex) y `poke_flute` ("Poké Flauta", sección Eventos
+  Pokémon — despertar a un Pokémon dormido de las colinas tocándolo).
+  `streak_50` desbloquea además el avatar de Melmetal (nueva entrada en
+  `AVATAR_CATALOG`, justo tras la de Meltan).
+  - `storage.js`: nueva entrada `melmetal` en `AVATAR_CATALOG`; nuevo
+    campo `pokeWoken` en `defaultAchStats()`.
+  - `game.js`: las tres entradas en `ACHIEVEMENTS` y sus condiciones en
+    `ACHIEVEMENT_CONDITIONS`; `melmetal: { achId: "streak_50" }` en
+    `AVATAR_UNLOCKS`; nueva `trackPokeWoken()` (mismo patrón que
+    `trackEncounter()`), que incrementa `stats.pokeWoken`.
+  - `pokemon.js`: `wrap._bgPokeWakeNow()` (ver la entrada de "Emoticonos
+    'Z'..." más abajo) llama a `trackPokeWoken()` tras despertar al
+    Pokémon manualmente, solo cuando el despertar lo provoca el
+    jugador (no cuando despierta por su cuenta al terminar la siesta).
+  - `i18n.js`: traducción al inglés de los tres logros nuevos
+    (`achv.streak_50.*`, `achv.sonidex_1.*`, `achv.poke_flute.*`).
+- **Siestas para los Pokémon de las colinas con sprite animado PMD**: de
+  vez en cuando, cada uno se queda dormido por su cuenta —sustituyendo su
+  spritesheet "Walk" por el de su animación "Sleep" (mismo repositorio
+  PMDCollab/SpriteCollab) y dejando de pasear— durante un rato de entre
+  15 segundos y 2 minutos, tras el cual despierta y retoma el paseo
+  donde lo dejó. La probabilidad de dormirse se tira de forma
+  independiente para cada Pokémon (su propio temporizador, su propia
+  tirada), así que nunca se duermen ni se despiertan todos a la vez. Un
+  Pokémon sin animación "Sleep" en el repositorio simplemente no se
+  duerme nunca (sigue paseando con normalidad).
+  - `pokemon.js`: `loadPmdWalkAnim()` se generaliza a `loadPmdAnim(pokemonId,
+    animName)` (ya sirve tanto para "Walk" como para "Sleep", con su
+    caché `_pmdAnimCache` indexada por ambos); de `applyPmdWalkSprite()`
+    se extrae `applyPmdAnim()` (aplica una animación ya cargada al
+    `<div>` de sprite existente, sin recrearlo) y `tickPmdSprite()` (un
+    único temporizador de fotogramas por Pokémon, que lee en cada tic
+    la animación activa en `sprite._pmdAnim`, sea Walk o Sleep).
+    `applyPmdWalkSprite()` ahora devuelve el `<div>` creado.
+    `initBgPokeWalk()` guarda su temporizador de paseo en
+    `wrap._bgPokeStepTimer` y su función `step` en
+    `wrap._bgPokeResumeWalk`, para que la nueva `initBgPokeSleep()`
+    pueda cancelar el próximo paso al dormirse y retomarlo al
+    despertar. `buildBgPokeElement()` arranca `initBgPokeSleep()` tras
+    aplicar el sprite animado con éxito.
+  - `styles.css`: nueva `.bg-poke.asleep .bg-poke-sprite` que pausa la
+    animación de flotar (`bg-poke-bounce`) mientras el Pokémon duerme,
+    incluso en los que normalmente flotan (Inkay, Mew, Mewtwo).
+- **Emoticonos "Z" sobre los Pokémon de las colinas mientras duermen, y
+  despertarlos al tocarlos**: mientras un Pokémon de las colinas está
+  en su siesta (ver punto anterior), le flotan tres emoticonos 💤 por
+  encima, con la misma animación de flotado que ya usaban las
+  partículas del evento de Snorlax. Además, tocar (o pulsar Intro/
+  Espacio sobre) un Pokémon dormido ahora lo despierta al instante en
+  vez de esperar a que termine su siesta por su cuenta.
+  - `pokemon.js`: `initBgPokeSleep()` guarda el temporizador del
+    despertar programado en `wrap._bgPokeSleepTimer` y cuelga
+    `wrap._bgPokeWakeNow()` (cancela ese temporizador y despierta ya);
+    `wakeUp()` se protege para no hacer nada si ya está despierto.
+    `buildBgPokeElement()` añade el `<div class="bg-poke-zzz-wrap">`
+    (tres `<span class="bg-poke-zzz-particle">💤</span>`, mismo patrón
+    que `.snorlax-zzz-particle`) y sus listeners de "click"/"keydown"
+    llaman a `wrap._bgPokeWakeNow()` antes de la reacción visual
+    habitual (`reactBgPoke()`).
+  - `styles.css`: `.bg-poke-zzz-wrap`/`.bg-poke-zzz-particle`
+    (ocultos salvo con `.bg-poke.asleep`), reutilizando el `@keyframes
+    snorlax-zzz-float` ya existente en vez de duplicarlo.
+
+### Cambiado
+- **Sombra de los Pokémon de las colinas, más pegada al cuerpo (excepto
+  Porygon, Mew, Mewtwo e Inkay)**: en la mayoría de sprites "Walk" de
+  PMDCollab el personaje deja bastante margen vacío por debajo dentro
+  del fotograma, así que la sombra (anclada al borde inferior real del
+  sprite) quedaba demasiado separada de los pies. Se sube para
+  compensarlo en todos los Pokémon de las colinas salvo esos cuatro,
+  cuyo fotograma ya llegaba casi hasta el borde y se veían bien tal
+  cual.
+  - `pokemon.js`: nueva `BG_POKE_SHADOW_DEFAULT_IDS` (ids que NO llevan
+    el ajuste); `buildBgPokeElement()` añade la clase `shadow-fix` al
+    resto.
+  - `styles.css`: nueva regla `.bg-poke.shadow-fix .bg-poke-shadow`
+    que sube `bottom` de `-3px` a `14%`.
+
+### Cambiado
+- **Animación de flotar de los Pokémon de las colinas, limitada a
+  Inkay, Mew y Mewtwo**: el resto de Pokémon de las colinas ya no se
+  balancea verticalmente de forma continua (`bg-poke-bounce`); siguen
+  caminando por el suelo (`initBgPokeWalk`) y apareciendo con el mismo
+  fundido de entrada (`bg-poke-appear`) que antes, solo sin el rebote.
+  - `pokemon.js`: nueva `BG_POKE_BOUNCE_IDS` (set con los ids de evento
+    `inkay`, `mew` y `mewtwo`); `buildBgPokeElement()` añade la clase
+    `no-bounce` al resto.
+  - `styles.css`: nueva regla `.bg-poke.no-bounce .bg-poke-sprite` (y su
+    equivalente `.bg-poke.no-bounce.is-shiny .bg-poke-sprite`) que deja
+    solo `bg-poke-appear` (más el brillo shiny cuando aplique), sin
+    `bg-poke-bounce`.
+
+### Cambiado
+- **Caterpie ya no usa su sprite shiny estático en las colinas del
+  fondo**: aunque su único evento de colinas (`id: "shiny"`, en
+  `PokeEvents`) sigue siendo shiny de por sí durante la partida (overlay
+  de colores al acertar, x5 puntos...), en las colinas ahora se muestra
+  siempre como el Caterpie normal, con su sprite animado PMD (el mismo
+  sistema de animación "Walk" que ya usan el resto de Pokémon de las
+  colinas), en vez del PNG estático shiny de PokeAPI.
+  - `pokemon.js`: `hillPokemonSpriteInfo()` añade una excepción para
+    Caterpie (nº de Pokédex 10), devolviendo siempre `shiny: false` para
+    él pase lo que pase en `ev.shiny`; `usesPmdWalkSprite()` pierde la
+    exclusión explícita que tenía para Caterpie (ya no hace falta: al no
+    llegarle nunca `shiny: true` desde `hillPokemonSpriteInfo()`, el
+    `!shiny` de siempre ya basta).
+
+### Corregido
+- **Texto de la Guía sobre "Eventos Pokémon" (`guide.achievements.events.desc`)
+  desactualizado en `index.html`**: el fallback en español escrito
+  directamente en el HTML seguía mencionando que, a las 20 apariciones,
+  el Pokémon de las colinas luce su sprite shiny (y que el Caterpie
+  Shiny evoluciona ahí a un Metapod Shiny) — una función ya eliminada
+  (ver más abajo, "Eliminado"). La clave equivalente en `i18n.js`
+  (ES/EN) ya no mencionaba esto; solo faltaba igualar el texto fijo del
+  HTML, que es el que se ve un instante antes de que `data-i18n`
+  aplique la traducción.
+  - `index.html`: se quita esa última frase del `<div class="guide-item-desc"
+    data-i18n="guide.achievements.events.desc">`, igualándolo al texto
+    ya vigente en `i18n.js`.
+
+### Eliminado
+- **Los logros de "brillo" que exigían 20 apariciones de un Pokémon/
+  evento para que su Pokémon de las colinas luciera su sprite shiny**
+  (`encounter_charizard_20`, `encounter_slowpoke_20`,
+  `encounter_rapidash_20`, `encounter_ditto_20`, `encounter_inkay_20`,
+  `encounter_hypno_20`, `encounter_chansey_20`, `encounter_gengar_20`,
+  `encounter_pikachu_20`, `encounter_blastoise_20`,
+  `encounter_venusaur_20`, `encounter_electrode_20`,
+  `encounter_porygon_20`, `encounter_snorlax_20`,
+  `encounter_jigglypuff_20`, `encounter_shiny_20`, `encounter_mewtwo_20`
+  y `encounter_mew_20`), junto con los sprites shiny que desbloqueaban
+  para esos Pokémon de las colinas (incluida la evolución especial de
+  Caterpie Shiny a Metapod Shiny). El logro "de las colinas" a 5
+  apariciones y el de avatar a 10 apariciones de cada Pokémon/evento no
+  se ven afectados.
+  - `game.js`: se quitan las 18 entradas de `ACHIEVEMENTS`, la
+    constante `ENCOUNTER_THRESHOLD_20` y su generación de condiciones
+    en el bucle sobre `ENCOUNTER_CONDITION_IDS`, la rama de
+    `achievementFeaturesFor()` (o equivalente) que anunciaba el sprite
+    shiny desbloqueado, y el bloque de `hillShinyToasts`/
+    `shinyHillPokemon` (junto a su llamada a `refreshBgPokemonSprite`)
+    en el manejo de logros recién desbloqueados.
+  - `pokemon.js`: se quita `isHillPokemonShinyUnlocked()` y
+    `refreshBgPokemonSprite()`; `hillPokemonSpriteInfo()` se simplifica
+    para devolver siempre el `pokemonId`/`shiny` propios del evento
+    (sin el caso especial de Metapod Shiny), y se quita la
+    comprobación de `is-shiny` en `applyPmdWalkSprite()` (el sprite ya
+    no cambia en caliente). También se quita el `dataset.eventId` que
+    solo servía para localizar el Pokémon al refrescar su sprite.
+  - `i18n.js`: se quitan las traducciones al inglés
+    `achv.encounter_<id>_20.title/desc` (18 logros), las claves
+    `toast.newHillShinyLabel/Title`, `toast.metapodShinyTitle`,
+    `feature.hillPokemonShinyName` y `feature.metapodShinyName` (en
+    español e inglés), y se actualiza `guide.achievements.events.desc`
+    (en ambos idiomas) para no mencionar ya el sprite shiny a las 20
+    apariciones.
+
+### Añadido
 - **21 avatares nuevos en el catálogo de perfil**: Cobalion, Terrakion,
   Virizion, Tornadus, Thundurus, Landorus, Volcanion, Necrozma,
   Magearna, Zeraora, Meltan, Dragapult, Zacian, Zamazenta, Eternatus,
@@ -44,6 +206,33 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `{ achId: "..." }` apuntando al logro correspondiente de
     `ACHIEVEMENTS` (varios avatares pueden compartir el mismo logro,
     igual que ya ocurría con Espeon/Umbreon → `perfect_colosseum_xd`).
+
+### Cambiado
+- **Sprite de los Pokémon de las colinas (fondo del menú), animado en su
+  versión normal**: el PNG estático de PokeAPI se sustituye por el
+  spritesheet de la animación "Walk" de PMDCollab/SpriteCollab (el mismo
+  repositorio que ya usan los retratos de `AVATAR_CATALOG`, ver
+  https://sprites.pmdcollab.org/), así que ahora se les ve caminar en vez
+  de solo deslizarse por la pantalla. Solo afecta a la versión NORMAL: la
+  versión shiny (incluida la que se desbloquea con el logro de 20
+  apariciones) sigue usando el PNG estático de PokeAPI tal cual, y
+  Caterpie tampoco usa este sistema (queda excluido explícitamente,
+  aunque su único evento de colinas ya era shiny de por sí y nunca habría
+  entrado en este camino). Si el spritesheet o su `AnimData.xml` no
+  llegan a cargar (sin conexión, Pokémon sin animación "Walk" en el
+  repositorio...), el Pokémon se queda con el PNG estático de siempre.
+  - `pokemon.js`: nuevas `usesPmdWalkSprite()`, `loadPmdWalkAnim()`
+    (pide y analiza `AnimData.xml` para el tamaño de fotograma y nº de
+    fotogramas de "Walk", con caché por nº de Pokédex) y
+    `applyPmdWalkSprite()` (sustituye el `<img>` por un `<div>` con el
+    spritesheet como fondo y un temporizador que avanza el fotograma),
+    llamadas desde `buildBgPokeElement()`. `refreshBgPokemonSprite()`
+    (logro de 20 apariciones) ahora también sabe volver a crear el
+    `<img>` estático si el sprite actual era el `<div>` animado.
+  - `styles.css`: sin cambios — el `<div>` animado reutiliza la misma
+    clase `bg-poke-sprite` que ya tenía el `<img>`, así que hereda sus
+    animaciones (rebote, aparición, espejado al cambiar de sentido...)
+    sin tocar ninguna regla.
 
 ### Cambiado
 - **Fila "Partidas perfectas" del modal de perfil, sustituida por

@@ -221,11 +221,12 @@ Dos cosas independientes entre sí:
 2. **Pokémon de fondo**: construidos automáticamente a partir del mismo
    catálogo (`buildBgPokemon`, `addBgPokemon`, `initBgPokeWalk`,
    `isHillPokemonUnlocked` — se desbloquean vía logros de "encuentro" a
-   las 5 apariciones). Un segundo logro, más difícil, a las 20
-   apariciones (`encounter_<id>_20`) no añade un Pokémon nuevo sino que
-   le cambia el sprite al shiny (`isHillPokemonShinyUnlocked`,
-   `hillPokemonSpriteInfo`, `refreshBgPokemonSprite` — caso especial: el
-   propio Caterpie Shiny evoluciona ahí a un Metapod Shiny).
+   las 5 apariciones), más `EXTRA_HILL_POKEMON`: un catálogo aparte de
+   Pokémon de las colinas puramente decorativos, sin Evento Pokémon
+   propio, que se desbloquean atados al logro de un evento que sí existe
+   (indicado en su propio campo `achId` en vez de derivarlo de su `id`)
+   — p. ej. el Caterpie normal que pasea junto al Caterpie Shiny en
+   cuanto se consigue «Cazabrillos» (`encounter_shiny`).
 
 ### `ui.js` — capa de interfaz
 Todo lo que "pinta cosas en pantalla" sin decidir reglas de juego:

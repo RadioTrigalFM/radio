@@ -636,6 +636,7 @@ const AVATAR_UNLOCKS = {
   eternatus:  { achId: "correct_500"              },
   necrozma:   { achId: "streak_30"                },
   meltan:     { achId: "streak_20"                },
+  melmetal:   { achId: "streak_50"                },
   tornadus:   { achId: "perfect_hard"             },
   thundurus:  { achId: "perfect_hard"             },
   landorus:   { achId: "perfect_hard"             },
@@ -997,6 +998,7 @@ const ACHIEVEMENTS = [
   { id: "streak_5",               icon: "🔥", title: "En racha",               desc: "Alcanza una racha de 5 respuestas correctas consecutivas.", section: "progress" },
   { id: "streak_20",              icon: "👑", title: "Leyenda viviente",       desc: "Alcanza una racha de 20 respuestas correctas consecutivas.", section: "progress" },
   { id: "streak_30",              icon: "🌠", title: "Racha imparable",        desc: "Alcanza una racha de 30 respuestas correctas consecutivas.", section: "progress" },
+  { id: "streak_50",              icon: "💫", title: "Racha legendaria",       desc: "Alcanza una racha de 50 respuestas correctas consecutivas.", section: "progress" },
   { id: "perfect_normal_region",  icon: "🏆", title: "Región perfecta",        desc: "Completa una partida perfecta en cualquier región del modo Normal.", section: "mastery" },
   { id: "perfect_easy",           icon: "🌱", title: "Fácil perfecto",         desc: "Completa una partida perfecta en el modo Fácil.", section: "mastery" },
   { id: "hard_correct_8",         icon: "💪", title: "Reto superado",          desc: "Consigue 8 o más respuestas correctas en una partida del modo Difícil.", section: "mastery" },
@@ -1017,6 +1019,7 @@ const ACHIEVEMENTS = [
   { id: "perfect_combat",         icon: "⚔️", title: "As del combate",         desc: "Completa una partida perfecta en el modo Combate.", section: "mastery" },
   { id: "perfect_colosseum_xd",   icon: "🌑", title: "Sombra perfecta",        desc: "Completa una partida perfecta en el minijuego de Pokémon Colosseum / XD.", section: "mastery" },
   { id: "perfect_mystery_dungeon", icon: "🏰", title: "Mazmorra perfecta",     desc: "Completa una partida perfecta en el minijuego de Pokémon Mundo Misterioso.", section: "mastery" },
+  { id: "sonidex_1",              icon: "🎵", title: "Primera ficha",          desc: "Desbloquea tu primera ficha de la Sonidex.", section: "sonidex" },
   { id: "sonidex_5",              icon: "🎼", title: "Primeras notas",         desc: "Desbloquea 5 fichas de la Sonidex.", section: "sonidex" },
   { id: "sonidex_10",             icon: "📀", title: "Coleccionista de sonidos", desc: "Desbloquea 10 fichas de la Sonidex.", section: "sonidex" },
   { id: "sonidex_20",             icon: "🎷", title: "Oído fino",              desc: "Desbloquea 20 fichas de la Sonidex.", section: "sonidex" },
@@ -1040,58 +1043,41 @@ const ACHIEVEMENTS = [
   { id: "story_complete_100",     icon: "👑", title: "Historia perfecta",      desc: "Completa el modo Historia con un 100 % de aciertos.", section: "story" },
   { id: "encounter_charizard",    icon: "🔥", title: "Cazador de llamas",      desc: "Haz que Charizard aparezca 5 veces.", section: "encounters" },
   { id: "encounter_charizard_5",   icon: "🔥", title: "Avistamiento: Charizard",  desc: "Haz que Charizard aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_charizard_20", icon: "🌟", title: "Brillo de Charizard",    desc: "Haz que Charizard aparezca 20 veces.", section: "encounters" },
   { id: "encounter_slowpoke",     icon: "🐌", title: "Paciencia Slowpoke",     desc: "Haz que Slowpoke aparezca 5 veces.", section: "encounters" },
   { id: "encounter_slowpoke_5",    icon: "🐌", title: "Avistamiento: Slowpoke",   desc: "Haz que Slowpoke aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_slowpoke_20",  icon: "🌟", title: "Brillo de Slowpoke",     desc: "Haz que Slowpoke aparezca 20 veces.", section: "encounters" },
   { id: "encounter_rapidash",     icon: "🐎", title: "Velocidad Rapidash",     desc: "Haz que Rapidash aparezca 5 veces.", section: "encounters" },
   { id: "encounter_rapidash_5",    icon: "🐎", title: "Avistamiento: Rapidash",   desc: "Haz que Rapidash aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_rapidash_20",  icon: "🌟", title: "Brillo de Rapidash",     desc: "Haz que Rapidash aparezca 20 veces.", section: "encounters" },
   { id: "encounter_ditto",        icon: "🟣", title: "Imitador Ditto",         desc: "Haz que Ditto aparezca 5 veces.", section: "encounters" },
   { id: "encounter_ditto_5",       icon: "🟣", title: "Avistamiento: Ditto",      desc: "Haz que Ditto aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_ditto_20",     icon: "🌟", title: "Brillo de Ditto",        desc: "Haz que Ditto aparezca 20 veces.", section: "encounters" },
   { id: "encounter_inkay",        icon: "🔄", title: "Giro Inkay",             desc: "Haz que Inkay aparezca 5 veces.", section: "encounters" },
   { id: "encounter_inkay_5",       icon: "🔄", title: "Avistamiento: Inkay",      desc: "Haz que Inkay aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_inkay_20",     icon: "🌟", title: "Brillo de Inkay",        desc: "Haz que Inkay aparezca 20 veces.", section: "encounters" },
   { id: "encounter_hypno",        icon: "🌙", title: "Hypnosis de Hypno",      desc: "Haz que Hypno aparezca 5 veces.", section: "encounters" },
   { id: "encounter_hypno_5",       icon: "🌙", title: "Avistamiento: Hypno",      desc: "Haz que Hypno aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_hypno_20",     icon: "🌟", title: "Brillo de Hypno",        desc: "Haz que Hypno aparezca 20 veces.", section: "encounters" },
   { id: "encounter_chansey",      icon: "🥚", title: "Segunda oportunidad",    desc: "Haz que Chansey aparezca 5 veces.", section: "encounters" },
   { id: "encounter_chansey_5",     icon: "🥚", title: "Avistamiento: Chansey",    desc: "Haz que Chansey aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_chansey_20",   icon: "🌟", title: "Brillo de Chansey",      desc: "Haz que Chansey aparezca 20 veces.", section: "encounters" },
   { id: "encounter_gengar",       icon: "👻", title: "Sombra de Gengar",       desc: "Haz que Gengar aparezca 5 veces.", section: "encounters" },
   { id: "encounter_gengar_5",      icon: "👻", title: "Avistamiento: Gengar",     desc: "Haz que Gengar aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_gengar_20",    icon: "🌟", title: "Brillo de Gengar",       desc: "Haz que Gengar aparezca 20 veces.", section: "encounters" },
   { id: "encounter_pikachu",      icon: "⚡", title: "Chispa de Pikachu",      desc: "Haz que Pikachu aparezca 5 veces.", section: "encounters" },
   { id: "encounter_pikachu_5",     icon: "⚡", title: "Avistamiento: Pikachu",    desc: "Haz que Pikachu aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_pikachu_20",   icon: "🌟", title: "Brillo de Pikachu",      desc: "Haz que Pikachu aparezca 20 veces.", section: "encounters" },
   { id: "encounter_blastoise",    icon: "💧", title: "Danza lluvia",           desc: "Haz que Blastoise aparezca 5 veces.", section: "encounters" },
   { id: "encounter_blastoise_5",   icon: "💧", title: "Avistamiento: Blastoise",  desc: "Haz que Blastoise aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_blastoise_20", icon: "🌟", title: "Brillo de Blastoise",    desc: "Haz que Blastoise aparezca 20 veces.", section: "encounters" },
   { id: "encounter_venusaur",     icon: "🌿", title: "Aroma de Venusaur",      desc: "Haz que Venusaur aparezca 5 veces.", section: "encounters" },
   { id: "encounter_venusaur_5",    icon: "🌿", title: "Avistamiento: Venusaur",   desc: "Haz que Venusaur aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_venusaur_20",  icon: "🌟", title: "Brillo de Venusaur",     desc: "Haz que Venusaur aparezca 20 veces.", section: "encounters" },
   { id: "encounter_electrode",    icon: "💥", title: "Cuenta atrás",           desc: "Haz que Electrode aparezca 5 veces.", section: "encounters" },
   { id: "encounter_electrode_5",   icon: "💥", title: "Avistamiento: Electrode",  desc: "Haz que Electrode aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_electrode_20", icon: "🌟", title: "Brillo de Electrode",    desc: "Haz que Electrode aparezca 20 veces.", section: "encounters" },
   { id: "encounter_porygon",      icon: "🖥️", title: "Fallo digital",          desc: "Haz que Porygon aparezca 5 veces.", section: "encounters" },
   { id: "encounter_porygon_5",     icon: "🖥️", title: "Avistamiento: Porygon",    desc: "Haz que Porygon aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_porygon_20",   icon: "🌟", title: "Brillo de Porygon",      desc: "Haz que Porygon aparezca 20 veces.", section: "encounters" },
   { id: "encounter_snorlax",      icon: "😴", title: "Siesta de Snorlax",      desc: "Haz que Snorlax aparezca 5 veces.", section: "encounters" },
   { id: "encounter_snorlax_5",     icon: "😴", title: "Avistamiento: Snorlax",    desc: "Haz que Snorlax aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_snorlax_20",   icon: "🌟", title: "Brillo de Snorlax",      desc: "Haz que Snorlax aparezca 20 veces.", section: "encounters" },
   { id: "encounter_jigglypuff",   icon: "🎤", title: "Canción de cuna",        desc: "Haz que Jigglypuff aparezca 5 veces.", section: "encounters" },
   { id: "encounter_jigglypuff_5",  icon: "🎤", title: "Avistamiento: Jigglypuff", desc: "Haz que Jigglypuff aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_jigglypuff_20", icon: "🌟", title: "Brillo de Jigglypuff",  desc: "Haz que Jigglypuff aparezca 20 veces.", section: "encounters" },
   { id: "encounter_shiny",        icon: "✨", title: "Cazabrillos",            desc: "Encuentra 5 veces un Pokémon shiny.", section: "encounters" },
   { id: "encounter_shiny_5",       icon: "✨", title: "Avistamiento brillante",  desc: "Encuentra 10 veces un Pokémon shiny.", section: "encounters" },
-  { id: "encounter_shiny_20",     icon: "🌟", title: "Evolución brillante",    desc: "Encuentra 20 veces un Pokémon shiny.", section: "encounters" },
   { id: "encounter_mewtwo",       icon: "🧬", title: "Clon psíquico",          desc: "Haz que Mewtwo aparezca 5 veces.", section: "encounters" },
   { id: "encounter_mewtwo_5",      icon: "🧬", title: "Avistamiento: Mewtwo",     desc: "Haz que Mewtwo aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_mewtwo_20",    icon: "🌟", title: "Brillo de Mewtwo",       desc: "Haz que Mewtwo aparezca 20 veces.", section: "encounters" },
   { id: "encounter_mew",          icon: "🎭", title: "Transformista",          desc: "Haz que Mew aparezca 5 veces.", section: "encounters" },
   { id: "encounter_mew_5",         icon: "🎭", title: "Avistamiento: Mew",        desc: "Haz que Mew aparezca 10 veces.", section: "encounters" },
-  { id: "encounter_mew_20",       icon: "🌟", title: "Brillo de Mew",          desc: "Haz que Mew aparezca 20 veces.", section: "encounters" },
+  { id: "poke_flute",             icon: "🪈", title: "Poké Flauta",            desc: "Despierta a un Pokémon dormido de las colinas tocándolo.", section: "encounters" },
 ];
 
 // Secciones en las que se agrupan los logros en la pantalla de Logros (ver
@@ -1122,6 +1108,7 @@ const ACHIEVEMENT_CONDITIONS = {
   streak_5:                 s => s.bestStreak >= 5,
   streak_20:                s => s.bestStreak >= 20,
   streak_30:                s => s.bestStreak >= 30,
+  streak_50:                s => s.bestStreak >= 50,
   perfect_normal_region:    s => (s.perfectRegionsNormal || []).length >= 1,
   perfect_easy:             s => s.perfectEasyGame === true,
   hard_correct_8:           s => (s.bestHardCorrectInGame || 0) >= 8,
@@ -1142,6 +1129,7 @@ const ACHIEVEMENT_CONDITIONS = {
   perfect_combat:            s => s.perfectCombatGame === true,
   perfect_colosseum_xd:      s => s.perfectColosseumGame === true,
   perfect_mystery_dungeon:   s => s.perfectMysteryDungeonGame === true,
+  sonidex_1:                 s => sonidexUnlockedCountForList(s, songs) >= 1,
   sonidex_5:                 s => sonidexUnlockedCountForList(s, songs) >= 5,
   sonidex_10:                s => sonidexUnlockedCountForList(s, songs) >= 10,
   sonidex_20:                s => sonidexUnlockedCountForList(s, songs) >= 20,
@@ -1163,6 +1151,7 @@ const ACHIEVEMENT_CONDITIONS = {
   story_kalos:               s => (s.storyRegionsCompleted || []).includes("Kalos"),
   story_complete:            s => s.storyModeCompleted === true,
   story_complete_100:        s => s.storyModeCompletedPerfect === true,
+  poke_flute:                s => (s.pokeWoken || 0) >= 1,
 };
 
 // Las condiciones encounter_* comparten todas la misma forma (¿ha
@@ -1176,12 +1165,6 @@ const ACHIEVEMENT_CONDITIONS = {
 // cambia alguno de los dos umbrales, solo hay que tocarlo aquí.
 const ENCOUNTER_THRESHOLD_AVATAR = 10;
 const ENCOUNTER_THRESHOLD_HILL = 5;
-// Tercer escalón, más difícil aún: a las 20 apariciones («encounter_<id>_20»),
-// que no desbloquea al Pokémon de las colinas (ya lo estaba desde el
-// escalón de las colinas) sino que cambia SU SPRITE ahí por el shiny —
-// ver isHillPokemonShinyUnlocked()/hillPokemonSpriteInfo() en pokemon.js
-// y su uso en checkAchievements() más abajo.
-const ENCOUNTER_THRESHOLD_20 = 20;
 const ENCOUNTER_CONDITION_IDS = [
   "charizard", "slowpoke", "rapidash", "ditto", "inkay", "hypno", "chansey",
   "gengar", "pikachu", "blastoise", "venusaur", "electrode",
@@ -1190,7 +1173,6 @@ const ENCOUNTER_CONDITION_IDS = [
 ENCOUNTER_CONDITION_IDS.forEach(id => {
   ACHIEVEMENT_CONDITIONS[`encounter_${id}_5`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_AVATAR;
   ACHIEVEMENT_CONDITIONS[`encounter_${id}`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_HILL;
-  ACHIEVEMENT_CONDITIONS[`encounter_${id}_20`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_20;
 });
 
 
@@ -1264,23 +1246,15 @@ function getFeatureUnlocksForAchievement(achId) {
   if (achId === "story_complete") {
     feats.push({ icon: "🎉", name: t("feature.pokeEventsInInfinite"), type: t("feature.pokeEventsInInfiniteType") });
   }
-  if (achId.startsWith("encounter_") && achId.endsWith("_20")) {
-    // Logro de 20 apariciones: no añade un Pokémon nuevo a las colinas (ya
-    // paseaba desde el logro de 10), sino que le cambia el sprite a shiny
-    // (ver hillPokemonSpriteInfo() en pokemon.js). Caso especial: el propio
-    // Caterpie Shiny evoluciona ahí a un Metapod Shiny.
-    const eventId = achId.slice("encounter_".length, -"_20".length);
-    const ev = typeof PokeEvents !== "undefined" ? PokeEvents.list().find(e => e.id === eventId) : null;
-    if (ev) {
-      const name = eventId === "shiny"
-        ? t("feature.metapodShinyName")
-        : t("feature.hillPokemonShinyName", { name: tData(`pokeEvent.${ev.id}.name`, ev.name) });
-      feats.push({ icon: "🌟", name, type: t("feature.hillPokemon") });
-    }
-  } else if (achId.startsWith("encounter_")) {
+  if (achId.startsWith("encounter_")) {
     const eventId = achId.replace("encounter_", "");
     const ev = typeof PokeEvents !== "undefined" ? PokeEvents.list().find(e => e.id === eventId) : null;
     if (ev) feats.push({ icon: "🌄", name: t("feature.hillPokemonName", { name: tData(`pokeEvent.${ev.id}.name`, ev.name) }), type: t("feature.hillPokemon") });
+  }
+  if (typeof EXTRA_HILL_POKEMON !== "undefined") {
+    EXTRA_HILL_POKEMON.filter(ev => ev.achId === achId).forEach(ev => {
+      feats.push({ icon: "🌄", name: t("feature.hillPokemonName", { name: tData(`pokeEvent.${ev.id}.name`, ev.name) }), type: t("feature.hillPokemon") });
+    });
   }
   Object.keys(AVATAR_UNLOCKS).forEach(id => {
     const cfg = AVATAR_UNLOCKS[id];
@@ -1439,6 +1413,18 @@ function trackEncounter(id) {
   checkAchievements();
 }
 
+// Cuenta cuántas veces el jugador ha despertado a un Pokémon dormido de
+// las colinas tocándolo (para el logro «Poké Flauta»). Se llama desde
+// `wrap._bgPokeWakeNow()` en pokemon.js, solo cuando el despertar lo ha
+// provocado el jugador (no cuando el Pokémon despierta por su cuenta al
+// terminar la siesta).
+function trackPokeWoken() {
+  const s = achievementsData.stats;
+  s.pokeWoken = (s.pokeWoken || 0) + 1;
+  saveAchievements();
+  checkAchievements();
+}
+
 /** Registra el resultado de una partida terminada: partidas jugadas,
  * partida perfecta (100%), y récords de puntuación del Desafío
  * Infinito / Modo Historia si procede. */
@@ -1526,11 +1512,15 @@ function checkAchievements() {
 
     // Los logros «encounter_<id>» desbloquean, uno por uno, a los Pokémon
     // que pasean por las colinas del fondo. Avisamos y los añadimos al
-    // fondo sin tocar a los que ya estaban paseando.
+    // fondo sin tocar a los que ya estaban paseando. Además de los que
+    // tienen un Evento Pokémon propio, EXTRA_HILL_POKEMON (pokemon.js)
+    // puede atar un Pokémon de las colinas puramente decorativo al mismo
+    // logro que uno de esos eventos (p. ej. el Caterpie normal que
+    // aparece junto al Caterpie Shiny al conseguir «Cazabrillos»).
     const hillToasts = [];
     const newHillPokemon = [];
     newlyUnlockedIds.forEach(id => {
-      if (!id.startsWith("encounter_") || id.endsWith("_5") || id.endsWith("_20")) return;
+      if (!id.startsWith("encounter_") || id.endsWith("_5")) return;
       const eventId = id.replace("encounter_", "");
       const ev = PokeEvents.list().find(e => e.id === eventId);
       if (ev) {
@@ -1538,26 +1528,13 @@ function checkAchievements() {
         newHillPokemon.push(ev);
       }
     });
-
-    // Los logros «encounter_<id>_20», un escalón más difícil, no añaden un
-    // Pokémon nuevo (ya paseaba desde el logro de 10) sino que le cambian
-    // el sprite a shiny (ver refreshBgPokemonSprite() en pokemon.js). Caso
-    // especial: el propio evento Caterpie Shiny evoluciona ahí a un Metapod
-    // Shiny en vez de "volver a brillar".
-    const hillShinyToasts = [];
-    const shinyHillPokemon = [];
-    newlyUnlockedIds.forEach(id => {
-      if (!id.startsWith("encounter_") || !id.endsWith("_20")) return;
-      const eventId = id.slice("encounter_".length, -"_20".length);
-      const ev = PokeEvents.list().find(e => e.id === eventId);
-      if (ev) {
-        const title = eventId === "shiny"
-          ? t("toast.metapodShinyTitle")
-          : t("toast.newHillShinyTitle", { name: tData(`pokeEvent.${ev.id}.name`, ev.name) });
-        hillShinyToasts.push({ icon: "🌟", label: t("toast.newHillShinyLabel"), title });
-        shinyHillPokemon.push(ev);
-      }
-    });
+    if (typeof EXTRA_HILL_POKEMON !== "undefined") {
+      EXTRA_HILL_POKEMON.forEach(ev => {
+        if (!newlyUnlockedIds.includes(ev.achId)) return;
+        hillToasts.push({ icon: "🌄", label: t("toast.newHillEncounterLabel"), title: t("toast.newHillEncounterTitle", { name: tData(`pokeEvent.${ev.id}.name`, ev.name) }) });
+        newHillPokemon.push(ev);
+      });
+    }
 
     // Los logros «encounter_<id>_5» que aparecen en AVATAR_UNLOCKS también
     // desbloquean el avatar de perfil de ese Pokémon. Un mismo logro puede
@@ -1572,18 +1549,17 @@ function checkAchievements() {
       }
     });
 
-    if (modeToasts.length || eventToasts.length || hillToasts.length || hillShinyToasts.length || avatarToasts.length) playSFX(SFX.newmode);
+    if (modeToasts.length || eventToasts.length || hillToasts.length || avatarToasts.length) playSFX(SFX.newmode);
 
     // Los logros en sí (newlyUnlocked) sí son "Logro desbloqueado"; todo lo
     // demás (modo, minijuego, evento, colina, avatar) es una consecuencia
     // del logro, no el logro en sí, así que llevan su propia etiqueta (ver
     // arriba) en vez de reutilizar la de logro.
     const achievementToasts = newlyUnlocked.map(a => ({ icon: a.icon, label: t("toast.achievementUnlockedLabel"), title: tData(`achv.${a.id}.title`, a.title) }));
-    queueAchievementToasts(achievementToasts.concat(modeToasts).concat(eventToasts).concat(hillToasts).concat(hillShinyToasts).concat(avatarToasts));
+    queueAchievementToasts(achievementToasts.concat(modeToasts).concat(eventToasts).concat(hillToasts).concat(avatarToasts));
     updateModeLocksUI();
     updateOtherLocksUI();
     newHillPokemon.forEach(addBgPokemon);
-    shinyHillPokemon.forEach(refreshBgPokemonSprite);
     if (screens.achievements.classList.contains("show")) renderAchievementsScreen();
     updateHomeAchievementSummary();
   }

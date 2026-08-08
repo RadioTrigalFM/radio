@@ -293,6 +293,7 @@ const AVATAR_CATALOG = [
   { id: "magearna",   name: "Magearna",   url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0801/Normal.png" },
   { id: "zeraora",    name: "Zeraora",    url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0807/Normal.png" },
   { id: "meltan",     name: "Meltan",     url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0808/Normal.png" },
+  { id: "melmetal",   name: "Melmetal",   url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0809/Normal.png" },
   { id: "dragapult",  name: "Dragapult",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0887/Normal.png" },
   { id: "zacian",     name: "Zacian",     url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0888/Normal.png" },
   { id: "zamazenta",  name: "Zamazenta",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0889/Normal.png" },
@@ -413,6 +414,7 @@ function defaultAchStats() {
     perfectRegionsNormal: [], // regiones (Modo Normal) completadas alguna vez con el 100% de aciertos
     bestHardCorrectInGame: 0, // máximo de respuestas correctas en una sola partida del Modo Difícil
     encounterCounts: {},      // { "charizard": 3, "pikachu": 1, ... } nº de apariciones de cada evento Pokémon
+    pokeWoken: 0,              // nº de veces que se ha despertado a un Pokémon dormido de las colinas tocándolo
   };
 }
 
