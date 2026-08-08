@@ -7,8 +7,9 @@
    (desbloqueados + estadísticas acumuladas).
 
    Aquí solo vive la "forma de los datos" y las funciones para
-   cargarlos/guardarlos (loadX / saveX), junto con el pequeño catálogo
-   de avatares que necesita el perfil. La lógica de negocio que USA esos
+   cargarlos/guardarlos (loadX / saveX), junto con los pequeños catálogos
+   de avatares y estilos de puntero que necesita el perfil/los ajustes.
+   La lógica de negocio que USA esos
    datos (calcular el nivel a partir de la experiencia, comprobar si se
    desbloquea un logro, pintar la rejilla de avatares en pantalla...)
    sigue viviendo en game.js, que las consume con total normalidad.
@@ -46,6 +47,13 @@ const settings = {
   particles: true,    // Opciones gráficas: chispas al acertar / logros
   language: "es",     // idioma de los menús: "es" (Español) o "en" (English) — ver i18n.js
   hideEndlessInfo: false, // true = no volver a mostrar el aviso "modo infinito activado" (ver showEndlessInfoModal() en ui.js)
+  cursorStyle: "normal", // "normal" o un id de CURSOR_CATALOG (más abajo) — puntero
+                          // del ratón sustituido por el sprite de ese objeto. Solo
+                          // tiene efecto si, además, el estilo elegido está
+                          // desbloqueado por su logro correspondiente (ver
+                          // CURSOR_UNLOCKS/isCursorUnlocked() en game.js); si no lo
+                          // está, se trata como "normal" aunque el valor guardado no
+                          // lo sea (ver applyCursorStyle() en ui.js).
 };
 
 /** Carga las opciones del jugador (volumen, modo oscuro, fondo animado,
@@ -69,6 +77,7 @@ function loadSettings() {
     if (typeof obj.particles === "boolean") settings.particles = obj.particles;
     if (obj.language === "es" || obj.language === "en") settings.language = obj.language;
     if (typeof obj.hideEndlessInfo === "boolean") settings.hideEndlessInfo = obj.hideEndlessInfo;
+    if (obj.cursorStyle === "normal" || CURSOR_CATALOG.some(c => c.id === obj.cursorStyle)) settings.cursorStyle = obj.cursorStyle;
   } catch(e) {}
 }
 /** Persiste el objeto `settings` completo en localStorage. */
@@ -311,6 +320,24 @@ function getAvatarUrl(avatarId) {
   const av = AVATAR_CATALOG.find(a => a.id === avatarId);
   return av ? av.url : AVATAR_CATALOG[0].url;
 }
+
+// ── Catálogo de estilos de puntero del ratón (Opciones > Opciones
+// gráficas): igual que AVATAR_CATALOG, aquí solo vive la "forma de los
+// datos" de cada estilo (id, nombre por defecto en español — la
+// traducción al inglés vive en i18n.js bajo "cursorStyle.<id>.name" —
+// y la URL del sprite, del mismo repositorio PokeAPI/sprites que usa el
+// resto del proyecto para los objetos). QUÉ logro desbloquea cada uno
+// vive en CURSOR_UNLOCKS, en game.js (mismo patrón que AVATAR_UNLOCKS).
+// El estilo "normal" (el puntero del sistema, sin sprite) no aparece
+// aquí porque no es un sprite: está siempre disponible y se referencia
+// directamente por el id fijo "normal" (ver settings.cursorStyle arriba
+// e isCursorUnlocked() en game.js).
+const CURSOR_CATALOG = [
+  { id: "poke_flute", name: "Poké Flauta",   url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-flute.png" },
+  { id: "poke_ball",  name: "Poké Ball",     url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" },
+  { id: "super_rod",  name: "Supercaña",     url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-rod.png" },
+  { id: "rare_candy", name: "Caramelo Raro", url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" },
+];
 
 // Id del avatar preseleccionado para un jugador nuevo: tanto en `profile`
 // (más abajo) como en la pantalla de creación de perfil (pendingSetupAvatarId

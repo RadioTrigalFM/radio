@@ -1227,6 +1227,44 @@ function isOtherUnlocked(key) {
   return !!achievementsData.unlocked[cfg.achId];
 }
 
+// ── Estilos de puntero del ratón desbloqueables por logro (Opciones >
+// Opciones gráficas) ──
+// El catálogo de estilos (id, nombre, sprite) vive en CURSOR_CATALOG,
+// en storage.js; aquí solo vive QUÉ logro desbloquea cada uno, mismo
+// patrón que AVATAR_UNLOCKS. El estilo "normal" no aparece aquí: está
+// desbloqueado desde el principio (ver isCursorUnlocked()).
+const CURSOR_UNLOCKS = {
+  poke_flute: { achId: "poke_flute" },   // logro "Poké Flauta"
+  poke_ball:  { achId: "correct_50" },   // logro "Conocedor musical"
+  super_rod:  { achId: "sonidex_5" },    // logro "Primeras notas"
+  rare_candy: { achId: "all_modes" },    // logro "Explorador"
+};
+
+/** Indica si un estilo de puntero (id de CURSOR_CATALOG, o "normal")
+ * está desbloqueado para el jugador actual: "normal" siempre lo está;
+ * el resto, al conseguir el logro configurado en CURSOR_UNLOCKS. Mismo
+ * criterio que isModeUnlocked()/isOtherUnlocked() (por logro, aquí no
+ * hay ninguno desbloqueable por nivel). */
+function isCursorUnlocked(cursorId) {
+  if (cursorId === "normal") return true;
+  const cfg = CURSOR_UNLOCKS[cursorId];
+  if (!cfg) return false;
+  return !!achievementsData.unlocked[cfg.achId];
+}
+
+/** Texto legible con el logro necesario para desbloquear un estilo de
+ * puntero todavía bloqueado, usado tanto en el título del botón de la
+ * rejilla de Opciones como en el aviso al pulsarlo. Reutiliza las
+ * mismas claves de traducción que avatarLockRequirementText() para el
+ * requisito ("avatar.lockReqAchievement"/"avatar.lockReqUnknown"), ya
+ * que la redacción ("el logro «X»") es igual de válida aquí. */
+function cursorLockRequirementText(cursorId) {
+  const cfg = CURSOR_UNLOCKS[cursorId];
+  if (!cfg) return "";
+  const ach = ACHIEVEMENTS.find(a => a.id === cfg.achId);
+  return ach ? t("avatar.lockReqAchievement", { title: tData(`achv.${ach.id}.title`, ach.title) }) : t("avatar.lockReqUnknown");
+}
+
 
 
 // Devuelve, para un id de logro dado, la lista de funciones (modos de juego
@@ -1246,6 +1284,13 @@ function getFeatureUnlocksForAchievement(achId) {
   if (achId === "story_complete") {
     feats.push({ icon: "🎉", name: t("feature.pokeEventsInInfinite"), type: t("feature.pokeEventsInInfiniteType") });
   }
+  Object.keys(CURSOR_UNLOCKS).forEach(id => {
+    const cfg = CURSOR_UNLOCKS[id];
+    if (cfg.achId === achId) {
+      const c = CURSOR_CATALOG.find(x => x.id === id);
+      feats.push({ icon: "🖱️", name: t("feature.cursorName", { name: c ? tData(`cursorStyle.${id}.name`, c.name) : id }), type: t("feature.cursorType") });
+    }
+  });
   if (achId.startsWith("encounter_")) {
     const eventId = achId.replace("encounter_", "");
     const ev = typeof PokeEvents !== "undefined" ? PokeEvents.list().find(e => e.id === eventId) : null;
@@ -1549,16 +1594,31 @@ function checkAchievements() {
       }
     });
 
-    if (modeToasts.length || eventToasts.length || hillToasts.length || avatarToasts.length) playSFX(SFX.newmode);
+    // Los estilos de puntero de CURSOR_UNLOCKS desbloquean, además de la
+    // insignia del logro, un estilo de puntero alternativo en Opciones >
+    // Opciones gráficas (ver isCursorUnlocked() arriba y applyCursorStyle()
+    // en ui.js). Mismo patrón que avatarToasts, con su propia etiqueta.
+    const cursorToasts = [];
+    Object.keys(CURSOR_UNLOCKS).forEach(id => {
+      const cfg = CURSOR_UNLOCKS[id];
+      if (cfg.achId && newlyUnlockedIds.includes(cfg.achId)) {
+        const c = CURSOR_CATALOG.find(x => x.id === id);
+        const name = c ? tData(`cursorStyle.${id}.name`, c.name) : id;
+        cursorToasts.push({ icon: "🖱️", image: c ? c.url : null, label: t("toast.featureUnlockedLabel"), title: t("toast.newCursorTitle", { name }) });
+      }
+    });
+
+    if (modeToasts.length || eventToasts.length || hillToasts.length || avatarToasts.length || cursorToasts.length) playSFX(SFX.newmode);
 
     // Los logros en sí (newlyUnlocked) sí son "Logro desbloqueado"; todo lo
     // demás (modo, minijuego, evento, colina, avatar) es una consecuencia
     // del logro, no el logro en sí, así que llevan su propia etiqueta (ver
     // arriba) en vez de reutilizar la de logro.
     const achievementToasts = newlyUnlocked.map(a => ({ icon: a.icon, label: t("toast.achievementUnlockedLabel"), title: tData(`achv.${a.id}.title`, a.title) }));
-    queueAchievementToasts(achievementToasts.concat(modeToasts).concat(eventToasts).concat(hillToasts).concat(avatarToasts));
+    queueAchievementToasts(achievementToasts.concat(modeToasts).concat(eventToasts).concat(hillToasts).concat(avatarToasts).concat(cursorToasts));
     updateModeLocksUI();
     updateOtherLocksUI();
+    if (cursorToasts.length && typeof applyGraphicsSettings === "function") applyGraphicsSettings();
     newHillPokemon.forEach(addBgPokemon);
     if (screens.achievements.classList.contains("show")) renderAchievementsScreen();
     updateHomeAchievementSummary();

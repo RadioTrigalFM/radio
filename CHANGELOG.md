@@ -17,6 +17,52 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Estilos de puntero del ratón desbloqueables por logro**: cuatro
+  logros desbloquean, además de su insignia, un estilo de puntero
+  alternativo que sustituye la flecha del ratón por el sprite de un
+  objeto (mismo origen que el resto de sprites del proyecto:
+  PokeAPI/sprites, `sprites/items/*.png`): `poke_flute` ("Poké Flauta")
+  → Poké Flauta, `correct_50` ("Conocedor musical") → Poké Ball,
+  `sonidex_5` ("Primeras notas") → Supercaña, y `all_modes`
+  ("Explorador") → Caramelo Raro. El ajuste vive en Opciones → Opciones
+  gráficas, como una rejilla de opciones ("Normal" + un botón por
+  estilo, mismo patrón visual que la rejilla de avatares de perfil):
+  los estilos todavía no desbloqueados se ven en gris con un candado y,
+  al pulsarlos, muestran un aviso con el logro que falta en vez de
+  seleccionarse.
+  - `storage.js`: catálogo nuevo `CURSOR_CATALOG` (id, nombre, sprite
+    de cada estilo — mismo patrón que `AVATAR_CATALOG`), justo tras
+    `getAvatarUrl()`; nuevo campo `settings.cursorStyle` (`"normal"` o
+    un id de `CURSOR_CATALOG`), con su validación en `loadSettings()`.
+  - `game.js`: `CURSOR_UNLOCKS` (qué logro desbloquea cada id de
+    `CURSOR_CATALOG` — mismo patrón que `AVATAR_UNLOCKS`),
+    `isCursorUnlocked()` y `cursorLockRequirementText()`; entrada nueva
+    (bucle sobre `CURSOR_UNLOCKS`) en `getFeatureUnlocksForAchievement()`
+    para que cada logro muestre la ⭐ y el modal de "esto desbloquea" en
+    la pantalla de Logros; en `checkAchievements()`, un toast propio
+    ("¡Nuevo puntero disponible: {name}!") por cada estilo que se
+    desbloquee a la vez, y refresco de `applyGraphicsSettings()` si la
+    pantalla de Opciones está abierta.
+  - `ui.js`: `renderCursorGrid()` (pinta la rejilla de Opciones, mismo
+    patrón que `renderAvatarGrid()`) y `applyCursorStyle()` (añade/quita
+    la clase `custom-cursor` en `<body>` y la variable CSS
+    `--cursor-url` con el sprite elegido, comprobando tanto el ajuste
+    como el logro), ambas llamadas desde `applyGraphicsSettings()`.
+  - `index.html`: nueva fila en la tarjeta "Opciones gráficas" de la
+    pantalla de Opciones, con el contenedor `#cursor-style-grid` que
+    rellena `renderCursorGrid()`.
+  - `styles.css`: regla `body.custom-cursor { cursor: var(--cursor-url)
+    4 4, auto; }` (con variante para botones/enlaces, manteniendo el
+    hotspot tipo "pointer") en vez de una regla por estilo, ya que
+    varios estilos comparten la misma regla; `.cursor-style-grid`/
+    `.cursor-style-option` (mismo criterio visual que
+    `.profile-avatar-grid`/`.profile-avatar-option`, con botones
+    cuadrados y una etiqueta de texto bajo cada sprite).
+  - `i18n.js`: claves nuevas en español e inglés (`options.cursor.*`,
+    `cursorStyle.<id>.name` por cada estilo, `cursorStyle.lockedTitle`/
+    `lockedToast`, `toast.newCursorTitle`, `feature.cursorName`,
+    `feature.cursorType`).
+
 - **Tres logros nuevos**: `streak_50` ("Racha legendaria", sección
   Progreso y rachas — alcanzar una racha de 50 aciertos consecutivos),
   `sonidex_1` ("Primera ficha", sección Sonidex — desbloquear la primera

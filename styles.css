@@ -95,6 +95,28 @@
     transition: background .3s ease, color .3s ease;
   }
 
+  /* Puntero del ratón personalizado (Opciones > Opciones gráficas):
+     sustituye la flecha por el sprite del estilo elegido en
+     settings.cursorStyle, desbloqueado por su logro correspondiente —
+     ver CURSOR_UNLOCKS/isCursorUnlocked() en game.js y applyCursorStyle()
+     en ui.js. La URL del sprite se pasa en la variable CSS --cursor-url
+     (puesta por JS), en vez de una regla fija por estilo, porque hay
+     varios estilos posibles (Poké Flauta, Poké Ball, Supercaña, Caramelo
+     Raro...) que comparten la misma regla. El "4 4" fija el punto exacto
+     del sprite (30×30, ver sprites de objetos de PokeAPI) que actúa como
+     punta del puntero; "auto"/"pointer" son el resguardo si el navegador
+     no pudiera cargar la imagen. */
+  body.custom-cursor {
+    cursor: var(--cursor-url) 4 4, auto;
+  }
+  body.custom-cursor button,
+  body.custom-cursor a,
+  body.custom-cursor .toggle,
+  body.custom-cursor [style*="cursor:pointer"],
+  body.custom-cursor .answer-btn {
+    cursor: var(--cursor-url) 4 4, pointer;
+  }
+
   ::selection { background: var(--yellow); color: #000; }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -1228,6 +1250,48 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 1.1rem;
     background: #00000040;
+  }
+
+  /* Rejilla de estilos de puntero del ratón (Opciones > Opciones
+     gráficas), mismo criterio visual que .profile-avatar-grid de arriba
+     pero con botones cuadrados (los sprites de objetos no son caras) y
+     una etiqueta de texto con el nombre debajo de cada uno — ver
+     renderCursorGrid() en ui.js. */
+  .cursor-style-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 4px 0 2px;
+  }
+  .cursor-style-option {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 12px 6px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: var(--bg-card2);
+    cursor: pointer;
+    transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .cursor-style-option img { width: 30px; height: 30px; image-rendering: pixelated; }
+  .cursor-style-option .cursor-style-icon { font-size: 1.5rem; line-height: 30px; height: 30px; }
+  .cursor-style-option .cursor-style-name { font-size: .68rem; font-weight: 800; text-align: center; color: var(--text-dim); }
+  .cursor-style-option:hover { transform: translateY(-2px); border-color: var(--yellow-glow); }
+  .cursor-style-option:active { transform: scale(.96); }
+  .cursor-style-option.selected {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px var(--yellow-glow), var(--shadow-md);
+  }
+  /* Estilos todavía no desbloqueados (ver CURSOR_UNLOCKS/isCursorUnlocked()
+     en game.js): en gris, con candado, y no seleccionables (el click
+     muestra un aviso con el logro que falta en vez de elegirlos). */
+  .cursor-style-option.locked { cursor: not-allowed; }
+  .cursor-style-option.locked img,
+  .cursor-style-option.locked .cursor-style-icon { filter: grayscale(1) brightness(.6); opacity: .7; }
+  .cursor-style-option.locked:hover { transform: none; border-color: var(--border); }
+  .cursor-style-lock-badge {
+    position: absolute; top: 4px; right: 6px;
+    font-size: .8rem;
   }
 
   /* Pantalla de configuración inicial (primera vez que se juega) */

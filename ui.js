@@ -2055,6 +2055,69 @@ function applyGraphicsSettings(){
   }
   if (bgCanvas) bgCanvas.style.display = settings.animatedBg ? "" : "none";
   if (bgPokeLayer) bgPokeLayer.style.display = settings.animatedBg ? "" : "none";
+  renderCursorGrid();
+  applyCursorStyle();
+}
+
+// ── Rejilla de estilos de puntero del ratón (Opciones > Opciones
+// gráficas): "Normal" + un botón por cada entrada de CURSOR_CATALOG
+// (storage.js). Mismo patrón que renderAvatarGrid(): los estilos
+// todavía no desbloqueados (isCursorUnlocked()/CURSOR_UNLOCKS, en
+// game.js) se pintan en gris con un candado y, al pulsarlos, muestran
+// un aviso con el logro que falta en vez de seleccionarse. ──
+function cursorStyleName(cursorId) {
+  if (cursorId === "normal") return t("options.cursor.normalName");
+  const c = CURSOR_CATALOG.find(x => x.id === cursorId);
+  return c ? tData(`cursorStyle.${cursorId}.name`, c.name) : cursorId;
+}
+function renderCursorGrid() {
+  const gridEl = document.getElementById("cursor-style-grid");
+  if (!gridEl) return;
+  gridEl.innerHTML = "";
+  [{ id: "normal" }].concat(CURSOR_CATALOG).forEach(entry => {
+    const unlocked = typeof isCursorUnlocked === "function" && isCursorUnlocked(entry.id);
+    const name = cursorStyleName(entry.id);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cursor-style-option"
+      + (settings.cursorStyle === entry.id ? " selected" : "")
+      + (unlocked ? "" : " locked");
+    btn.title = unlocked ? name : t("cursorStyle.lockedTitle", { name, req: cursorLockRequirementText(entry.id) });
+    btn.innerHTML = (entry.id === "normal"
+        ? `<span class="cursor-style-icon">🖱️</span>`
+        : `<img src="${entry.url}" alt="${name}" loading="lazy" onerror="this.closest('.cursor-style-option').style.display='none'">`)
+      + `<span class="cursor-style-name">${name}</span>`
+      + (unlocked ? "" : `<span class="cursor-style-lock-badge">🔒</span>`);
+    btn.addEventListener("click", () => {
+      if (!unlocked) {
+        queueAchievementToasts([{ icon: "🔒", label: t("lock.badge"), title: t("cursorStyle.lockedToast", { req: cursorLockRequirementText(entry.id) }) }]);
+        return;
+      }
+      settings.cursorStyle = entry.id;
+      saveSettings();
+      renderCursorGrid();
+      applyCursorStyle();
+    });
+    gridEl.appendChild(btn);
+  });
+}
+
+/** Aplica (o quita) al <body> el puntero del ratón sustituido por el
+ * sprite del estilo elegido en `settings.cursorStyle`. Comprueba también
+ * isCursorUnlocked() (no solo el valor guardado), para que un estilo
+ * guardado de una partida antigua no tenga efecto si, por lo que sea, su
+ * logro ya no constara como desbloqueado. */
+function applyCursorStyle() {
+  const id = settings.cursorStyle;
+  const unlocked = id !== "normal" && typeof isCursorUnlocked === "function" && isCursorUnlocked(id);
+  const cursorData = unlocked ? CURSOR_CATALOG.find(c => c.id === id) : null;
+  if (cursorData) {
+    document.body.classList.add("custom-cursor");
+    document.body.style.setProperty("--cursor-url", `url("${cursorData.url}")`);
+  } else {
+    document.body.classList.remove("custom-cursor");
+    document.body.style.removeProperty("--cursor-url");
+  }
 }
 
 musicSlider.addEventListener("input", () => {
