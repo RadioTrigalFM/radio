@@ -17,6 +17,14 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Cambiado
+- **Los récords por región del modal de perfil** (pantalla Perfil → "Tus
+  récords") **ahora muestran el emoticono propio de cada región**
+  (`REGION_META[r].icon`, game.js) en vez del icono genérico 🗺️ fijo para
+  todas — el mismo que ya se usa en la pantalla de selección de región
+  del Modo Normal y en la pestaña "Regiones" de Clasificaciones. Cambio
+  solo en `ui.js` (`renderProfileStats()`), reutilizando `REGION_META`
+  ya existente, mismo patrón que `renderLeaderboardRegionTabs()`.
+
 - **`all_encounters` ("Avistamiento total") ahora desbloquea el avatar
   Pikachu gordo** (`pikachu-gordo`, `images/avatar-pikachu-gordo.png`,
   no desbloqueaba nada antes). Entrada nueva en `AVATAR_CATALOG`
