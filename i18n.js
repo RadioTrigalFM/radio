@@ -1082,7 +1082,7 @@ const I18N = {
     "song.Ciudad Colosalia": "Ever Grande City",
     "song.Ciudad Petalia": "Petalburg City",
     "song.Museo Oceánico": "Oceanic Museum",
-    "song.Monte Pírico": "Mt. Pyre",
+    "song.Exterior del Monte Pírico": "Outside Mt. Pyre",
     "song.Frente de Batalla": "Battle Frontier",
     "song.Barco del Sr. Arenque": "Mr. Briney's Boat",
     "song.Buceo": "Underwater",

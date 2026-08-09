@@ -136,7 +136,7 @@ const songs = [
   { title: "Ciudad Colosalia",  file: "songs/main/hoenn/ciudad-colosalia.mp3",     image: "images/ciudad-colosalia.png",   group: "main",  region: "Hoenn" },
   { title: "Ciudad Petalia",  file: "songs/main/hoenn/ciudad-petalia.mp3",     image: "images/ciudad-petalia.png",   group: "main",  region: "Hoenn" },
   { title: "Museo Oceánico",  file: "songs/main/hoenn/museo-oceanico.mp3",     image: "images/museo-oceanico.png",   group: "main",  region: "Hoenn" },
-  { title: "Monte Pírico",  file: "songs/main/hoenn/monte-pirico.mp3",     image: "images/monte-pirico.png",   group: "main",  region: "Hoenn" },
+  { title: "Exterior del Monte Pírico",  file: "songs/main/hoenn/monte-pirico.mp3",     image: "images/monte-pirico.png",   group: "main",  region: "Hoenn" },
   { title: "Frente de Batalla",  file: "songs/main/hoenn/frente-de-batalla.mp3",     image: "images/frente-de-batalla.png",   group: "main",  region: "Hoenn" },
   { title: "Barco del Sr. Arenque", file: "songs/main/hoenn/barco-sr-arenque.mp3", image: "images/barco-sr-arenque.png", group: "main", region: "Hoenn" },
   { title: "Buceo", file: "songs/main/hoenn/buceo-hoenn.mp3", image: "images/buceo-hoenn.png", group: "main", region: "Hoenn" },
