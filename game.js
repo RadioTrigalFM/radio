@@ -2011,7 +2011,24 @@ function storyGameOver() {
   }, 2000);
 }
 
-
+// Abandona una partida de Modo Historia en curso "a medias" (el jugador
+// confirma que quiere salir desde el aviso de "¿Salir del Modo
+// Historia?" — ver showLeaveStoryConfirm()/backBtn en ui.js — sin haber
+// completado todas las regiones ni haberse quedado sin vidas). Igual que
+// storyGameOver()/storyFinish(), resetea el progreso de la partida (la
+// próxima empezará desde Kanto, tal y como ya avisa ese diálogo) y,
+// sobre todo, apaga de inmediato el indicador de vidas y el aviso de
+// "nervios" (#nervous-overlay, overlay fijo que se ve por encima de
+// cualquier pantalla): sin esto, si el jugador sale con 1 sola vida
+// (efecto "nervioso" activo), el overlay se queda "colgado" sobre el
+// menú al que se vuelve, ya que nada más lo apaga.
+function abandonStoryMode() {
+  if (session.mode !== GameMode.STORY) return;
+  session.storyRegionIndex = 0;
+  session.storyLives = 3;
+  session.mode = null;
+  renderLives();
+}
 
 
 // Electrode explota: si el jugador aún no ha respondido esta ronda, cuenta

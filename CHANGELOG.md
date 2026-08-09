@@ -314,6 +314,28 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     `CURSOR_CATALOG` de forma genérica.
 
 ### Corregido
+- **El aviso de "nervios" del Modo Historia (`#nervous-overlay`, el
+  pulso rojo en toda la pantalla cuando queda 1 sola vida) podía
+  quedarse "colgado" tras salir de la partida**: `storyGameOver()` y
+  `storyFinish()` ya lo apagaban correctamente al perder todas las
+  vidas o al completar las 7 regiones (resetean `session.mode` y
+  llaman a `renderLives()`), pero al salir del Modo Historia a medias
+  con el botón "Atrás" (confirmando "Salir igualmente" en el aviso de
+  "¿Salir del Modo Historia?") no se limpiaba nada de la sesión de
+  Historia, así que si esto ocurría con 1 sola vida el overlay seguía
+  activo sobre el menú al que se volvía.
+  - `game.js`: nueva función `abandonStoryMode()`, junto a
+    `storyGameOver()`, con el mismo patrón de limpieza (resetea
+    `session.storyRegionIndex`/`storyLives`, pone `session.mode` a
+    `null` y llama a `renderLives()`).
+  - `ui.js`: el `onConfirmExit` que se pasa a `showLeaveStoryConfirm()`
+    desde el listener de `backBtn` ahora llama primero a
+    `abandonStoryMode()` antes de `goBackFromCurrentScreen()`.
+  - No hace falta tocar el `exit-btn` de la pantalla de resultado
+    (`exitGame()`) ni `storyShowEnemyScreen()`/`storyShowRegionSplash()`:
+    ninguno de esos otros caminos puede alcanzarse con el Modo Historia
+    a medias y el aviso de "nervios" todavía activo.
+
 - **Tamaño y punto de clic de los punteros con forma de Pokémon**: se
   mostraban a tamaño completo y con el punto de clic en la esquina
   superior izquierda del sprite (heredado del hotspot fijo "4 4"

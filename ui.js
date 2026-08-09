@@ -263,7 +263,12 @@ backBtn.addEventListener("click", () => {
   // confirmación antes de abandonar, avisando de que la próxima partida
   // tendrá que empezar desde Kanto.
   if (leavingQuiz && session.mode === GameMode.STORY) {
-    showLeaveStoryConfirm(goBackFromCurrentScreen);
+    // El jugador confirma que sale del Modo Historia a medias: además de
+    // navegar hacia atrás, hay que cerrar la partida de Historia como tal
+    // (abandonStoryMode(), en game.js) para que el indicador de vidas y el
+    // aviso de "nervios" (1 sola vida) no se queden activos sobre la
+    // pantalla a la que se vuelve — ver el comentario de esa función.
+    showLeaveStoryConfirm(() => { abandonStoryMode(); goBackFromCurrentScreen(); });
     return;
   }
 
