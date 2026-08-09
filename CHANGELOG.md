@@ -16,6 +16,202 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Cambiado
+- **`all_encounters` ("Avistamiento total") ahora desbloquea el avatar
+  Pikachu gordo** (`pikachu-gordo`, `images/avatar-pikachu-gordo.png`,
+  no desbloqueaba nada antes). Entrada nueva en `AVATAR_CATALOG`
+  (`storage.js`) y en `AVATAR_UNLOCKS` (`game.js`); no hace falta
+  traducción en `i18n.js` (los avatares usan directamente el nombre del
+  catálogo).
+
+  > Nota: falta añadir `images/avatar-pikachu-gordo.png` a la carpeta
+  > `images/` del proyecto; sin ella el avatar no se verá aunque el
+  > logro ya lo desbloquee.
+
+- **`games_100` ("Leyenda de Radio Trigal FM") ahora desbloquea el
+  puntero Meloetta** (`meloetta`, `images/cursor-meloetta.png`, no
+  desbloqueaba nada antes). Mismo patrón que la reasignación anterior:
+  entrada nueva en `CURSOR_CATALOG` (`storage.js`) y en `CURSOR_UNLOCKS`
+  (`game.js`), más su traducción `cursorStyle.meloetta.name` en
+  `i18n.js` (es/en).
+
+  > Nota: falta añadir `images/cursor-meloetta.png` a la carpeta
+  > `images/` del proyecto; sin ella el puntero no se verá aunque el
+  > logro ya lo desbloquee.
+
+- **Reasignación del contenido desbloqueable (avatares/punteros) de 14
+  logros**, moviendo lo que desbloqueaba cada uno a lo pedido:
+  - `hispanohablante` ahora desbloquea el puntero **Ludicolo** (antes no
+    desbloqueaba nada).
+  - `perfect_openings_anime` ("Opening perfecto") → avatar **Greninja**.
+  - `perfect_title_screens` ("Portada perfecta") → avatar **Zarude**.
+  - `perfect_ranger` ("Estilo perfecto") → puntero **Manaphy**.
+  - `perfect_surf` ("Ola perfecta") → puntero **Supercaña** (`super_rod`,
+    antes desbloqueado por `sonidex_5`).
+  - `perfect_laboratorios` ("Bata perfecta") → puntero **Magnemite**.
+  - `perfect_centro_pokemon` ("Enfermera perfecta") → puntero **Chansey**.
+  - `perfect_bicicletas` ("Pedalada perfecta") → avatar **Corviknight**.
+  - `streak_5_thrice` ("Racha reincidente") → avatar **Cloyster**.
+  - `streak_100` ("Racha mítica") → puntero **Rayquaza**.
+  - `soldado_clicker` ("Soldado del clicker") → puntero **Jigglypuff**.
+  - `hard_infinite_round_20` ("Maratón difícil") → puntero **Regigigas**.
+  - `hard_infinite_round_50` ("Ultramaratón difícil") → puntero
+    **Rayquaza shiny**.
+  - `sonidex_5` ("Primeras notas") → avatar **Butterfree** (antes
+    desbloqueaba el puntero Supercaña, que ahora pasa a `perfect_surf`).
+
+  Cambios de código:
+  - `storage.js`:
+    - `AVATAR_CATALOG` — 5 avatares nuevos: `greninja` (imagen local
+      `images/avatar-greninja.png`, ya existente en el proyecto),
+      `zarude`, `corviknight`, `cloyster` y `butterfree` (estos cuatro
+      con retrato de PMDCollab, mismo origen que el resto del catálogo).
+    - `CURSOR_CATALOG` — 8 punteros nuevos con forma de Pokémon
+      (`ludicolo`, `manaphy`, `magnemite`, `chansey`, `rayquaza`,
+      `jigglypuff`, `regigigas`, `rayquaza_shiny`), todos con imagen
+      local en `images/cursor-<id>.png` y `scale: 1/3`, mismo patrón que
+      `shuckle`/`cosmog`/etc.
+  - `game.js`:
+    - `AVATAR_UNLOCKS` — 5 entradas nuevas (`greninja`, `zarude`,
+      `corviknight`, `cloyster`, `butterfree`) apuntando cada una al
+      `achId` que le corresponde según la lista de arriba.
+    - `CURSOR_UNLOCKS` — 8 entradas nuevas (mismos 8 punteros) más el
+      cambio del `achId` de `super_rod`, que pasa de `sonidex_5` a
+      `perfect_surf`.
+  - `i18n.js`: traducción (`cursorStyle.<id>.name`) de los 8 punteros
+    nuevos, en español e inglés (los avatares no necesitan traducción:
+    ya usan directamente el nombre del Pokémon en `AVATAR_CATALOG`).
+
+  > Nota: las imágenes `images/cursor-ludicolo.png`, `cursor-manaphy.png`,
+  > `cursor-magnemite.png`, `cursor-chansey.png`, `cursor-rayquaza.png`,
+  > `cursor-jigglypuff.png`, `cursor-regigigas.png` y
+  > `cursor-rayquaza-shiny.png` deben añadirse a la carpeta `images/` del
+  > proyecto (no se han generado en esta sesión); sin ellas, esos
+  > punteros no se verán aunque el logro correspondiente ya los
+  > desbloquee.
+
+### Añadido
+- **Nuevo logro oculto: `soldado_clicker` 🖱️ "Soldado del clicker"**, en
+  la sección Progreso y rachas. Se desbloquea al tocar 100 veces el logo
+  de Radio Trigal FM del menú principal. Al ser un logro oculto
+  (`hidden: true`), no aparece en la pestaña de Logros ni cuenta en el
+  recuento total ("X / Y") hasta que se consigue: el recuento marca
+  99 mientras sigue bloqueado y pasa a 100 en el momento exacto en que
+  se desbloquea.
+
+  Cambios de código:
+  - `game.js`:
+    - Nueva entrada en `ACHIEVEMENTS` con `hidden: true` y en
+      `ACHIEVEMENT_CONDITIONS` (`s.logoClicks >= 100`).
+    - Nueva función `visibleAchievements()`, que filtra los logros
+      `hidden` mientras sigan bloqueados; es la que deben usar
+      `ui.js`/estadísticas de perfil para calcular el total en vez de
+      leer `ACHIEVEMENTS` directamente, para que un logro oculto no se
+      "adelante" en el recuento antes de conseguirse.
+    - Nueva función `trackLogoClick()` (mismo patrón que
+      `trackPokeWoken()`), que incrementa `s.logoClicks` y llama a
+      `checkAchievements()`.
+  - `storage.js`: `defaultAchStats()` — nuevo campo `logoClicks: 0`.
+  - `ui.js`:
+    - El listener de clic del logo del menú principal (ya existente,
+      solo reacción visual/sonora) ahora también llama a
+      `trackLogoClick()` tras el efecto visual.
+    - `renderAchievementsScreen()`, `updateHomeAchievementSummary()` y
+      `renderProfileStats()` usan `visibleAchievements()` en vez de
+      `ACHIEVEMENTS` para el total mostrado.
+  - `i18n.js`: traducción al inglés (`achv.soldado_clicker.title`/`.desc`).
+
+
+- **6 logros nuevos, cada uno en su categoría:**
+  - Progreso y rachas:
+    - `games_100` 🏵️ "Leyenda de Radio Trigal FM" — jugar 100 partidas
+      (reutiliza `s.gamesPlayed`, ya existente).
+    - `streak_5_thrice` 🔁 "Racha reincidente" — alcanzar una racha de 5
+      respuestas correctas consecutivas en 3 ocasiones distintas.
+  - Eventos Pokémon:
+    - `all_encounters` 🔭 "Avistamiento total" — que aparezca cada Evento
+      Pokémon al menos una vez.
+  - Maestría y partidas perfectas:
+    - `hispanohablante` 🗣️ — jugar Openings del Anime tanto en español de
+      España como en español latino.
+    - `hard_infinite_round_20` 🏃 "Maratón difícil" y
+      `hard_infinite_round_50` 🚀 "Ultramaratón difícil" — alcanzar la
+      ronda 20/50 del modo Difícil con el interruptor ♾️ activado.
+
+  Cambios de código:
+  - `game.js`:
+    - 6 nuevas entradas en `ACHIEVEMENTS` y en `ACHIEVEMENT_CONDITIONS`
+      (la de `all_encounters` se añade tras `ENCOUNTER_CONDITION_IDS`,
+      reutilizando esa misma lista, en vez de duplicarla).
+    - `trackCorrectAnswer()`: incrementa el nuevo contador
+      `s.streaksOf5Count` cada vez que `state.streak` pasa a valer
+      exactamente 5.
+    - `trackModePlayed()`: registra en el nuevo array
+      `s.openingsVariantsPlayed` (`"spain"`/`"latino"`) qué doblaje de
+      Openings del Anime se ha jugado, a partir de
+      `session.openingsVariant`, solo cuando `settings.language === "es"`.
+    - Nueva función `trackHardInfiniteRound()` (separada de
+      `trackGameFinished()` a propósito, para no marcar `perfect_hard`
+      en partidas infinitas) que guarda en `s.bestHardEndlessRound` la
+      ronda más alta alcanzada; se llama desde `showResult()` cuando
+      `session.mode === GameMode.HARD` dentro de una sesión infinita.
+  - `storage.js`: `defaultAchStats()` — nuevos campos
+    `bestHardEndlessRound`, `streaksOf5Count` y `openingsVariantsPlayed`.
+  - `i18n.js`: traducción al inglés (`achv.<id>.title`/`.desc`) de los 6
+    logros nuevos.
+
+- **Nuevo logro de racha: `streak_100` "Racha mítica"** 🌌, en la sección
+  Progreso y rachas, por encima del ya existente `streak_50` ("Racha
+  legendaria"). Se desbloquea al alcanzar una racha de 100 respuestas
+  correctas consecutivas. No se ha añadido un logro de "racha de 50"
+  porque ya existía (`streak_50`, vinculado también al avatar de
+  Melmetal).
+  - `game.js`: nueva entrada en `ACHIEVEMENTS` y en
+    `ACHIEVEMENT_CONDITIONS` (`s.bestStreak >= 100`); reutiliza el mismo
+    contador `bestStreak` que ya usan el resto de logros de racha, sin
+    tocar el tracking.
+  - `i18n.js`: traducción al inglés (`achv.streak_100.title`/`.desc`).
+
+### Añadido
+- **Un logro de partida perfecta para cada categoría de Minijuegos que
+  todavía no lo tenía.** Ya existían `perfect_colosseum_xd` ("Sombra
+  perfecta") y `perfect_mystery_dungeon` ("Mazmorra perfecta"); ahora se
+  añade el mismo tipo de logro al resto de categorías de la pantalla de
+  Minijuegos:
+  - `perfect_centro_pokemon` 🏥 "Enfermera perfecta" (Centro Pokémon)
+  - `perfect_laboratorios` 🧪 "Bata perfecta" (Laboratorios)
+  - `perfect_bicicletas` 🚲 "Pedalada perfecta" (Bicicletas)
+  - `perfect_surf` 🏄 "Ola perfecta" (Surf)
+  - `perfect_ranger` 🧭 "Estilo perfecto" (Pokémon Ranger)
+  - `perfect_title_screens` 🖼️ "Portada perfecta" (Pantallas de Título)
+  - `perfect_openings_anime` 🎬 "Opening perfecto" (Openings del Anime)
+
+  Mismo patrón que los dos logros ya existentes: se desbloquean al
+  terminar una partida con el 100 % de aciertos en esa categoría
+  concreta de Minijuegos (no dan ninguna recompensa adicional aparte de
+  la insignia, igual que ellos).
+  - `game.js`: 7 nuevas entradas en `ACHIEVEMENTS` (sección `mastery`) y
+    en `ACHIEVEMENT_CONDITIONS`; `trackGameFinished()` amplía la cadena
+    `if/else` de `opts.otherGame` para marcar el flag correspondiente de
+    cada nueva categoría.
+  - `storage.js`: `defaultAchStats()` — 7 nuevos flags booleanos
+    (`perfectCentroPokemonGame`, `perfectLaboratoriosGame`,
+    `perfectBicicletasGame`, `perfectSurfGame`, `perfectRangerGame`,
+    `perfectTitleScreensGame`, `perfectOpeningsAnimeGame`).
+  - `i18n.js`: traducción al inglés (`achv.<id>.title`/`.desc`) de los 7
+    logros nuevos, mismo patrón que el resto de `ACHIEVEMENTS`.
+
+### Cambiado
+- **Rejilla de avatares: los desbloqueados van primero.** `renderAvatarGrid()`
+  (usada tanto en la creación de perfil como en el modal de perfil) ahora
+  ordena primero todos los avatares ya desbloqueados y deja los bloqueados
+  al final, en vez de intercalarlos según su nivel/logro requerido. Dentro
+  de cada uno de esos dos grupos se mantiene el orden de siempre (menor a
+  mayor nivel requerido, logros al final).
+  - `ui.js`: `renderAvatarGrid()` — el comparador del `sort()` ahora
+    compara primero por `isAvatarUnlocked()` y solo usa `avatarSortWeight()`
+    como criterio de desempate.
+
 ### Añadido
 - **Nuevo avatar de perfil: Lotad**, desbloqueado por el logro
   `correct_20` ("Oído entrenado"). Mismo patrón que el resto del

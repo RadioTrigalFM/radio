@@ -314,6 +314,14 @@ const AVATAR_CATALOG = [
   { id: "spectrier",  name: "Spectrier",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0897/Normal.png" },
   { id: "calyrex",    name: "Calyrex",    url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0898/Normal.png" },
   { id: "lotad",      name: "Lotad",      url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0270/Normal.png" },
+  // Avatares locales (no vienen del repositorio PMDCollab, se sirven
+  // desde images/ del propio proyecto — ver el comentario de arriba).
+  { id: "greninja",    name: "Greninja",    url: "images/avatar-greninja.png" },
+  { id: "pikachu-gordo", name: "Pikachu gordo", url: "images/avatar-pikachu-gordo.png" },
+  { id: "zarude",      name: "Zarude",      url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0893/Normal.png" },
+  { id: "corviknight", name: "Corviknight", url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0823/Normal.png" },
+  { id: "cloyster",    name: "Cloyster",    url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0091/Normal.png" },
+  { id: "butterfree",  name: "Butterfree",  url: "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/0012/Normal.png" },
 ];
 /** Devuelve la URL de imagen del avatar con ese id, o la del primer
  * avatar del catálogo si no se encuentra (avatar por defecto). */
@@ -366,6 +374,15 @@ const CURSOR_CATALOG = [
   { id: "charizard_x",  name: "Charizard X",  url: "images/cursor-charizard-x.png",  scale: 1/3 },
   { id: "pikachu",      name: "Pikachu",      url: "images/cursor-pikachu.png",      scale: 1/3 },
   { id: "spinda",       name: "Spinda",       url: "images/cursor-spinda.png",       scale: 1/3 },
+  { id: "ludicolo",       name: "Ludicolo",       url: "images/cursor-ludicolo.png",       scale: 1/3 },
+  { id: "manaphy",        name: "Manaphy",        url: "images/cursor-manaphy.png",        scale: 1/3 },
+  { id: "magnemite",      name: "Magnemite",      url: "images/cursor-magnemite.png",      scale: 1/3 },
+  { id: "chansey",        name: "Chansey",        url: "images/cursor-chansey.png",        scale: 1/3 },
+  { id: "rayquaza",       name: "Rayquaza",       url: "images/cursor-rayquaza.png",       scale: 1/3 },
+  { id: "jigglypuff",     name: "Jigglypuff",     url: "images/cursor-jigglypuff.png",     scale: 1/3 },
+  { id: "regigigas",      name: "Regigigas",      url: "images/cursor-regigigas.png",      scale: 1/3 },
+  { id: "rayquaza_shiny", name: "Rayquaza shiny", url: "images/cursor-rayquaza-shiny.png", scale: 1/3 },
+  { id: "meloetta",       name: "Meloetta",       url: "images/cursor-meloetta.png",       scale: 1/3 },
 ];
 
 // Id del avatar preseleccionado para un jugador nuevo: tanto en `profile`
@@ -467,10 +484,21 @@ function defaultAchStats() {
     perfectCombatGame: false, // true si se ha terminado alguna partida perfecta en Modo Combate
     perfectColosseumGame: false,     // true si se ha terminado una partida perfecta del minijuego Colosseum/XD
     perfectMysteryDungeonGame: false, // true si se ha terminado una partida perfecta del minijuego Mundo Misterioso
+    perfectCentroPokemonGame: false, // true si se ha terminado una partida perfecta de la categoría de Minijuegos Centro Pokémon
+    perfectLaboratoriosGame: false,  // true si se ha terminado una partida perfecta de la categoría de Minijuegos Laboratorios
+    perfectBicicletasGame: false,    // true si se ha terminado una partida perfecta de la categoría de Minijuegos Bicicletas
+    perfectSurfGame: false,          // true si se ha terminado una partida perfecta de la categoría de Minijuegos Surf
+    perfectRangerGame: false,        // true si se ha terminado una partida perfecta del minijuego de Pokémon Ranger
+    perfectTitleScreensGame: false,  // true si se ha terminado una partida perfecta de la categoría de Minijuegos Pantallas de Título
+    perfectOpeningsAnimeGame: false, // true si se ha terminado una partida perfecta de la categoría de Minijuegos Openings del Anime
     perfectRegionsNormal: [], // regiones (Modo Normal) completadas alguna vez con el 100% de aciertos
     bestHardCorrectInGame: 0, // máximo de respuestas correctas en una sola partida del Modo Difícil
+    bestHardEndlessRound: 0,  // ronda más alta alcanzada en Modo Difícil con el interruptor ♾️ activado (logros "Maratón"/"Ultramaratón difícil")
+    streaksOf5Count: 0,       // nº de veces que se ha alcanzado una racha de 5 (logro "Racha reincidente")
+    openingsVariantsPlayed: [], // variantes de doblaje de Openings del Anime jugadas en español: "spain" | "latino" (logro "Hispanohablante")
     encounterCounts: {},      // { "charizard": 3, "pikachu": 1, ... } nº de apariciones de cada evento Pokémon
     pokeWoken: 0,              // nº de veces que se ha despertado a un Pokémon dormido de las colinas tocándolo
+    logoClicks: 0,             // nº de veces que se ha tocado el logo de Radio Trigal FM del menú principal (logro oculto "Soldado del clicker")
   };
 }
 

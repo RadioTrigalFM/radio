@@ -78,11 +78,14 @@ function showPointsPopup(btn, points, multiplier) {
 // pintan en gris con un candado y no son seleccionables: al tocarlos se
 // muestra un aviso con el requisito que hace falta (avatarLockRequirementText()
 // en game.js), igual que al pulsar un modo/minijuego bloqueado.
-// Orden de pintado: de menor a mayor nivel requerido para los avatares
-// desbloqueables por nivel; los desbloqueables por logro van después de
-// esos (en el mismo orden en que aparecen en AVATAR_CATALOG); los avatares
-// sin entrada en AVATAR_UNLOCKS están desbloqueados desde el nivel 1, así
-// que van primero de todos (sort estable → no se reordenan entre sí).
+// Orden de pintado: primero todos los avatares ya DESBLOQUEADOS, y luego
+// los bloqueados — así el jugador ve antes lo que ya puede usar. Dentro de
+// cada uno de esos dos grupos, el criterio es el de siempre: de menor a
+// mayor nivel requerido para los avatares desbloqueables por nivel; los
+// desbloqueables por logro van después de esos (en el mismo orden en que
+// aparecen en AVATAR_CATALOG); los avatares sin entrada en AVATAR_UNLOCKS
+// están desbloqueados desde el nivel 1, así que van primero de todos
+// (sort estable → no se reordenan entre sí).
 const AVATAR_ACHIEVEMENT_SORT_WEIGHT = 1000;
 function avatarSortWeight(avatarId) {
   const cfg = AVATAR_UNLOCKS[avatarId];
@@ -91,7 +94,11 @@ function avatarSortWeight(avatarId) {
 }
 function renderAvatarGrid(gridEl, selectedId, onSelect) {
   gridEl.innerHTML = "";
-  const sortedCatalog = [...AVATAR_CATALOG].sort((a, b) => avatarSortWeight(a.id) - avatarSortWeight(b.id));
+  const sortedCatalog = [...AVATAR_CATALOG].sort((a, b) => {
+    const unlockedDiff = (isAvatarUnlocked(b.id) ? 1 : 0) - (isAvatarUnlocked(a.id) ? 1 : 0);
+    if (unlockedDiff !== 0) return unlockedDiff;
+    return avatarSortWeight(a.id) - avatarSortWeight(b.id);
+  });
   sortedCatalog.forEach(av => {
     const unlocked = isAvatarUnlocked(av.id);
     const btn = document.createElement("button");
@@ -485,6 +492,7 @@ if (homeHeroLogo) {
     homeHeroLogo.classList.add("logo-clicked");
     spawnLogoParticles(homeHeroLogo);
     playSFX(SFX.go);
+    trackLogoClick(); // game.js: cuenta el toque para el logro oculto "Soldado del clicker"
   });
   homeHeroLogo.addEventListener("animationend", () => homeHeroLogo.classList.remove("logo-clicked"));
 }
@@ -572,7 +580,7 @@ function renderAchievementsScreen() {
   let unlockedCount = 0;
 
   ACHIEVEMENT_SECTIONS.forEach(sec => {
-    const items = ACHIEVEMENTS.filter(a => a.section === sec.id);
+    const items = visibleAchievements().filter(a => a.section === sec.id);
     if (!items.length) return;
     let sectionUnlocked = 0;
 
@@ -606,15 +614,15 @@ function renderAchievementsScreen() {
     list.appendChild(details);
   });
 
-  document.getElementById("ach-progress-subtitle").textContent = t("achievements.progress", { n: unlockedCount, total: ACHIEVEMENTS.length });
-  document.getElementById("ach-progress-bar-fill").style.width = (unlockedCount / ACHIEVEMENTS.length * 100) + "%";
+  document.getElementById("ach-progress-subtitle").textContent = t("achievements.progress", { n: unlockedCount, total: visibleAchievements().length });
+  document.getElementById("ach-progress-bar-fill").style.width = (unlockedCount / visibleAchievements().length * 100) + "%";
 }
 /** Actualiza el resumen "X / Y desbloqueados" que se muestra en la
  * pantalla de Inicio. */
 function updateHomeAchievementSummary() {
   const unlockedCount = Object.keys(achievementsData.unlocked).length;
   const el = document.getElementById("home-ach-summary");
-  if (el) el.textContent = t("achievements.progress", { n: unlockedCount, total: ACHIEVEMENTS.length });
+  if (el) el.textContent = t("achievements.progress", { n: unlockedCount, total: visibleAchievements().length });
 }
 
 // ═══════════════════════════════════════════════
@@ -2467,7 +2475,7 @@ function renderProfileStats() {
   const pts = t("common.pts");
   const rows = [
     { label: t("profile.stats.totalPoints"), value: profile.xp || 0 },
-    { label: t("profile.stats.achievementsUnlocked"), value: `${unlockedCount} / ${ACHIEVEMENTS.length}` },
+    { label: t("profile.stats.achievementsUnlocked"), value: `${unlockedCount} / ${visibleAchievements().length}` },
     { label: t("profile.stats.gamesPlayed"), value: s.gamesPlayed || 0 },
     { label: t("profile.stats.correctAnswers"), value: s.totalCorrect || 0 },
     { label: t("profile.stats.bestStreak"), value: s.bestStreak || 0 },

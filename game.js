@@ -655,6 +655,12 @@ const AVATAR_UNLOCKS = {
   urshifu:    { achId: "sonidex_20"               },
   zeraora:    { achId: "sonidex_10"               },
   lotad:      { achId: "correct_20"               }, // logro "Oído entrenado"
+  greninja:    { achId: "perfect_openings_anime"  }, // logro "Opening perfecto"
+  zarude:      { achId: "perfect_title_screens"   }, // logro "Portada perfecta"
+  corviknight: { achId: "perfect_bicicletas"      }, // logro "Pedalada perfecta"
+  cloyster:    { achId: "streak_5_thrice"         }, // logro "Racha reincidente"
+  butterfree:  { achId: "sonidex_5"               }, // logro "Primeras notas"
+  "pikachu-gordo": { achId: "all_encounters"       }, // logro "Avistamiento total"
   sunkern:     { level: 2  },
   magikarp:    { level: 2  },
   ralts:       { level: 2  },
@@ -997,9 +1003,11 @@ const ACHIEVEMENTS = [
   { id: "first_correct",          icon: "🎯", title: "Primer acierto",         desc: "Consigue tu primer acierto.", section: "progress" },
   { id: "streak_3",               icon: "✨", title: "Buena racha",            desc: "Alcanza una racha de 3 respuestas correctas consecutivas.", section: "progress" },
   { id: "streak_5",               icon: "🔥", title: "En racha",               desc: "Alcanza una racha de 5 respuestas correctas consecutivas.", section: "progress" },
+  { id: "streak_5_thrice",        icon: "🔁", title: "Racha reincidente",      desc: "Alcanza una racha de 5 respuestas correctas consecutivas en 3 ocasiones distintas.", section: "progress" },
   { id: "streak_20",              icon: "👑", title: "Leyenda viviente",       desc: "Alcanza una racha de 20 respuestas correctas consecutivas.", section: "progress" },
   { id: "streak_30",              icon: "🌠", title: "Racha imparable",        desc: "Alcanza una racha de 30 respuestas correctas consecutivas.", section: "progress" },
   { id: "streak_50",              icon: "💫", title: "Racha legendaria",       desc: "Alcanza una racha de 50 respuestas correctas consecutivas.", section: "progress" },
+  { id: "streak_100",             icon: "🌌", title: "Racha mítica",           desc: "Alcanza una racha de 100 respuestas correctas consecutivas.", section: "progress" },
   { id: "perfect_normal_region",  icon: "🏆", title: "Región perfecta",        desc: "Completa una partida perfecta en cualquier región del modo Normal.", section: "mastery" },
   { id: "perfect_easy",           icon: "🌱", title: "Fácil perfecto",         desc: "Completa una partida perfecta en el modo Fácil.", section: "mastery" },
   { id: "hard_correct_8",         icon: "💪", title: "Reto superado",          desc: "Consigue 8 o más respuestas correctas en una partida del modo Difícil.", section: "mastery" },
@@ -1015,11 +1023,26 @@ const ACHIEVEMENTS = [
   { id: "games_20",               icon: "🕹️", title: "Jugador habitual",       desc: "Juega 20 partidas.", section: "progress" },
   { id: "games_30",               icon: "🎲", title: "Entrenador dedicado",    desc: "Juega 30 partidas.", section: "progress" },
   { id: "games_50",               icon: "🎖️", title: "Veterano",               desc: "Juega 50 partidas.", section: "progress" },
+  { id: "games_100",              icon: "🏵️", title: "Leyenda de Radio Trigal FM", desc: "Juega 100 partidas.", section: "progress" },
+  // Logro oculto: no debe aparecer en la pestaña de Logros (ni contar en
+  // el recuento total) hasta que se desbloquea — ver `hidden: true` y
+  // `visibleAchievements()` más abajo, que es quien aplica esa regla.
+  { id: "soldado_clicker",        icon: "🖱️", title: "Soldado del clicker",    desc: "Toca 100 veces el logo de Radio Trigal FM del menú principal.", section: "progress", hidden: true },
   { id: "all_modes",              icon: "🗺️", title: "Explorador",             desc: "Completa al menos una partida en los modos Fácil, Normal y Difícil.", section: "mastery" },
   { id: "all_regions",            icon: "🌍", title: "Viajero regional",       desc: "Completa al menos una partida en todas las regiones disponibles.", section: "mastery" },
   { id: "perfect_combat",         icon: "⚔️", title: "As del combate",         desc: "Completa una partida perfecta en el modo Combate.", section: "mastery" },
   { id: "perfect_colosseum_xd",   icon: "🌑", title: "Sombra perfecta",        desc: "Completa una partida perfecta en el minijuego de Pokémon Colosseum / XD.", section: "mastery" },
   { id: "perfect_mystery_dungeon", icon: "🏰", title: "Mazmorra perfecta",     desc: "Completa una partida perfecta en el minijuego de Pokémon Mundo Misterioso.", section: "mastery" },
+  { id: "perfect_centro_pokemon", icon: "🏥", title: "Enfermera perfecta",     desc: "Completa una partida perfecta en la categoría de Minijuegos Centro Pokémon.", section: "mastery" },
+  { id: "perfect_laboratorios",   icon: "🧪", title: "Bata perfecta",          desc: "Completa una partida perfecta en la categoría de Minijuegos Laboratorios.", section: "mastery" },
+  { id: "perfect_bicicletas",     icon: "🚲", title: "Pedalada perfecta",      desc: "Completa una partida perfecta en la categoría de Minijuegos Bicicletas.", section: "mastery" },
+  { id: "perfect_surf",           icon: "🏄", title: "Ola perfecta",           desc: "Completa una partida perfecta en la categoría de Minijuegos Surf.", section: "mastery" },
+  { id: "perfect_ranger",         icon: "🧭", title: "Estilo perfecto",        desc: "Completa una partida perfecta en el minijuego de Pokémon Ranger.", section: "mastery" },
+  { id: "perfect_title_screens",  icon: "🖼️", title: "Portada perfecta",       desc: "Completa una partida perfecta en la categoría de Minijuegos Pantallas de Título.", section: "mastery" },
+  { id: "perfect_openings_anime", icon: "🎬", title: "Opening perfecto",       desc: "Completa una partida perfecta en la categoría de Minijuegos Openings del Anime.", section: "mastery" },
+  { id: "hispanohablante",        icon: "🗣️", title: "Hispanohablante",        desc: "Juega a los Openings del Anime tanto en español de España como en español latino.", section: "mastery" },
+  { id: "hard_infinite_round_20", icon: "🏃", title: "Maratón difícil",        desc: "Alcanza la ronda 20 del modo Difícil jugando con el modo infinito (♾️) activado.", section: "mastery" },
+  { id: "hard_infinite_round_50", icon: "🚀", title: "Ultramaratón difícil",   desc: "Alcanza la ronda 50 del modo Difícil jugando con el modo infinito (♾️) activado.", section: "mastery" },
   { id: "sonidex_1",              icon: "🎵", title: "Primera ficha",          desc: "Desbloquea tu primera ficha de la Sonidex.", section: "sonidex" },
   { id: "sonidex_5",              icon: "🎼", title: "Primeras notas",         desc: "Desbloquea 5 fichas de la Sonidex.", section: "sonidex" },
   { id: "sonidex_10",             icon: "📀", title: "Coleccionista de sonidos", desc: "Desbloquea 10 fichas de la Sonidex.", section: "sonidex" },
@@ -1079,6 +1102,7 @@ const ACHIEVEMENTS = [
   { id: "encounter_mew",          icon: "🎭", title: "Transformista",          desc: "Haz que Mew aparezca 5 veces.", section: "encounters" },
   { id: "encounter_mew_5",         icon: "🎭", title: "Avistamiento: Mew",        desc: "Haz que Mew aparezca 10 veces.", section: "encounters" },
   { id: "poke_flute",             icon: "🪈", title: "Poké Flauta",            desc: "Despierta a un Pokémon dormido de las colinas tocándolo.", section: "encounters" },
+  { id: "all_encounters",         icon: "🔭", title: "Avistamiento total",     desc: "Haz que aparezca cada uno de los Eventos Pokémon al menos una vez.", section: "encounters" },
 ];
 
 // Secciones en las que se agrupan los logros en la pantalla de Logros (ver
@@ -1094,6 +1118,25 @@ const ACHIEVEMENT_SECTIONS = [
   { id: "encounters", icon: "👻", title: "Eventos Pokémon" },
 ];
 
+/**
+ * Lista de logros que deben mostrarse en la pantalla de Logros y contar
+ * en el recuento total ("X / Y") — ver `renderAchievementsScreen()` y
+ * `updateHomeAchievementSummary()` en ui.js, y las estadísticas del
+ * perfil, que deben usar SIEMPRE esta función en vez de `ACHIEVEMENTS`
+ * directamente para calcular ese total.
+ *
+ * Filtra los logros marcados como `hidden: true` (ver ACHIEVEMENTS)
+ * mientras sigan bloqueados: un logro oculto no debe ni aparecer en la
+ * lista ni sumar al total hasta que el jugador lo consigue, momento en
+ * el que pasa a comportarse como cualquier otro logro. Esto es lo que
+ * hace que el recuento total suba (p. ej. de 99 a 100) justo al
+ * desbloquearlo, en vez de mostrar de antemano un logro bloqueado con
+ * título y descripción visibles (lo cual arruinaría la sorpresa).
+ */
+function visibleAchievements() {
+  return ACHIEVEMENTS.filter(a => !a.hidden || achievementsData.unlocked[a.id]);
+}
+
 // Genera la condición «desbloquea todas las fichas de la Sonidex de <region>»
 // a partir del catálogo principal de canciones (group "main") de esa región.
 function sonidexRegionCondition(region) {
@@ -1107,9 +1150,11 @@ const ACHIEVEMENT_CONDITIONS = {
   first_correct:            s => s.totalCorrect >= 1,
   streak_3:                 s => s.bestStreak >= 3,
   streak_5:                 s => s.bestStreak >= 5,
+  streak_5_thrice:          s => (s.streaksOf5Count || 0) >= 3,
   streak_20:                s => s.bestStreak >= 20,
   streak_30:                s => s.bestStreak >= 30,
   streak_50:                s => s.bestStreak >= 50,
+  streak_100:               s => s.bestStreak >= 100,
   perfect_normal_region:    s => (s.perfectRegionsNormal || []).length >= 1,
   perfect_easy:             s => s.perfectEasyGame === true,
   hard_correct_8:           s => (s.bestHardCorrectInGame || 0) >= 8,
@@ -1125,11 +1170,22 @@ const ACHIEVEMENT_CONDITIONS = {
   games_20:                  s => s.gamesPlayed >= 20,
   games_30:                  s => s.gamesPlayed >= 30,
   games_50:                  s => s.gamesPlayed >= 50,
+  games_100:                 s => s.gamesPlayed >= 100,
   all_modes:                 s => ["easy","normal","hard"].every(m => s.modesPlayed.includes(m)),
   all_regions:               s => REGIONS.every(r => s.regionsPlayed.includes(r)),
   perfect_combat:            s => s.perfectCombatGame === true,
   perfect_colosseum_xd:      s => s.perfectColosseumGame === true,
   perfect_mystery_dungeon:   s => s.perfectMysteryDungeonGame === true,
+  perfect_centro_pokemon:    s => s.perfectCentroPokemonGame === true,
+  perfect_laboratorios:      s => s.perfectLaboratoriosGame === true,
+  perfect_bicicletas:        s => s.perfectBicicletasGame === true,
+  perfect_surf:              s => s.perfectSurfGame === true,
+  perfect_ranger:            s => s.perfectRangerGame === true,
+  perfect_title_screens:     s => s.perfectTitleScreensGame === true,
+  perfect_openings_anime:    s => s.perfectOpeningsAnimeGame === true,
+  hispanohablante:           s => (s.openingsVariantsPlayed || []).includes("spain") && (s.openingsVariantsPlayed || []).includes("latino"),
+  hard_infinite_round_20:    s => (s.bestHardEndlessRound || 0) >= 20,
+  hard_infinite_round_50:    s => (s.bestHardEndlessRound || 0) >= 50,
   sonidex_1:                 s => sonidexUnlockedCountForList(s, songs) >= 1,
   sonidex_5:                 s => sonidexUnlockedCountForList(s, songs) >= 5,
   sonidex_10:                s => sonidexUnlockedCountForList(s, songs) >= 10,
@@ -1153,6 +1209,7 @@ const ACHIEVEMENT_CONDITIONS = {
   story_complete:            s => s.storyModeCompleted === true,
   story_complete_100:        s => s.storyModeCompletedPerfect === true,
   poke_flute:                s => (s.pokeWoken || 0) >= 1,
+  soldado_clicker:           s => (s.logoClicks || 0) >= 100,
 };
 
 // Las condiciones encounter_* comparten todas la misma forma (¿ha
@@ -1175,6 +1232,12 @@ ENCOUNTER_CONDITION_IDS.forEach(id => {
   ACHIEVEMENT_CONDITIONS[`encounter_${id}_5`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_AVATAR;
   ACHIEVEMENT_CONDITIONS[`encounter_${id}`] = s => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= ENCOUNTER_THRESHOLD_HILL;
 });
+
+// Logro «Avistamiento total»: que haya aparecido CADA Evento Pokémon
+// (misma lista ENCOUNTER_CONDITION_IDS de arriba) al menos una vez, sin
+// importar el umbral de los logros individuales.
+ACHIEVEMENT_CONDITIONS.all_encounters = s =>
+  ENCOUNTER_CONDITION_IDS.every(id => ((s.encounterCounts && s.encounterCounts[id]) || 0) >= 1);
 
 
 // Cuenta cuántas canciones de una lista están desbloqueadas en la Sonidex
@@ -1237,7 +1300,7 @@ function isOtherUnlocked(key) {
 const CURSOR_UNLOCKS = {
   poke_flute: { achId: "poke_flute" },   // logro "Poké Flauta"
   poke_ball:  { achId: "correct_50" },   // logro "Conocedor musical"
-  super_rod:  { achId: "sonidex_5" },    // logro "Primeras notas"
+  super_rod:  { achId: "perfect_surf" }, // logro "Ola perfecta"
   rare_candy: { achId: "all_modes" },    // logro "Explorador"
   // Punteros con forma de Pokémon (ver CURSOR_CATALOG en storage.js).
   // Nótese que "Historia: Kanto" y "Entrenador dedicado" desbloquean cada
@@ -1265,6 +1328,15 @@ const CURSOR_UNLOCKS = {
   charizard_x: { achId: "games_30" },               // logro "Entrenador dedicado"
   pikachu:     { achId: "sonidex_kanto" },          // logro "Sonidex de Kanto"
   spinda:      { achId: "streak_5" },               // logro "En racha"
+  ludicolo:       { achId: "hispanohablante" },        // logro "Hispanohablante"
+  manaphy:        { achId: "perfect_ranger" },         // logro "Estilo perfecto"
+  magnemite:      { achId: "perfect_laboratorios" },   // logro "Bata perfecta"
+  chansey:        { achId: "perfect_centro_pokemon" }, // logro "Enfermera perfecta"
+  rayquaza:       { achId: "streak_100" },             // logro "Racha mítica"
+  jigglypuff:     { achId: "soldado_clicker" },        // logro "Soldado del clicker"
+  regigigas:      { achId: "hard_infinite_round_20" }, // logro "Maratón difícil"
+  rayquaza_shiny: { achId: "hard_infinite_round_50" }, // logro "Ultramaratón difícil"
+  meloetta:       { achId: "games_100" },              // logro "Leyenda de Radio Trigal FM"
 };
 
 /** Indica si un estilo de puntero (id de CURSOR_CATALOG, o "normal")
@@ -1353,6 +1425,17 @@ function trackModePlayed(mode, extra) {
   if (!s.modesPlayed.includes(mode)) s.modesPlayed.push(mode);
   if ((mode === GameMode.NORMAL || mode === GameMode.STORY) && extra && extra !== "Combate" && !s.regionsPlayed.includes(extra)) s.regionsPlayed.push(extra);
   if (mode === GameMode.OTHER && extra && !s.otherPlayed.includes(extra)) s.otherPlayed.push(extra);
+  // Logro «Hispanohablante»: registra si esta partida de Openings del Anime
+  // se jugó en español de España o en español latino (session.openingsVariant,
+  // fijado en la pantalla previa de selección de doblaje — ver el listener de
+  // #openings-lang-spain/#openings-lang-latino). Solo cuenta cuando se juega
+  // en español (settings.language === "es"): jugar en inglés también deja
+  // session.openingsVariant a null, pero eso no es la variante "España".
+  if (mode === GameMode.OTHER && extra === "openings-anime" && settings.language === "es") {
+    if (!s.openingsVariantsPlayed) s.openingsVariantsPlayed = [];
+    const variant = session.openingsVariant === "latino" ? "latino" : "spain";
+    if (!s.openingsVariantsPlayed.includes(variant)) s.openingsVariantsPlayed.push(variant);
+  }
   saveAchievements();
   checkAchievements();
 }
@@ -1363,6 +1446,14 @@ function trackCorrectAnswer() {
   const s = achievementsData.stats;
   s.totalCorrect = (s.totalCorrect || 0) + 1;
   if (state.streak > (s.bestStreak || 0)) s.bestStreak = state.streak;
+
+  // Cuenta cuántas veces se ha alcanzado (no superado) una racha de 5,
+  // sin importar si la racha sigue creciendo después o si se rompe justo
+  // ahí: cada vez que state.streak pasa a valer exactamente 5 es una
+  // "racha de 5" nueva (para el logro «Racha reincidente»).
+  if (state.streak === 5) {
+    s.streaksOf5Count = (s.streaksOf5Count || 0) + 1;
+  }
 
   // Rachas máximas diferenciadas por modo
   if (session.mode === GameMode.EASY) {
@@ -1497,6 +1588,18 @@ function trackPokeWoken() {
   checkAchievements();
 }
 
+// Cuenta cuántas veces el jugador ha tocado el logo de Radio Trigal FM
+// del menú principal (para el logro oculto «Soldado del clicker»). Se
+// llama desde el listener de clic del logo en ui.js, que solo se ocupa
+// de la reacción visual/sonora; decidir y guardar el conteo es una regla
+// de juego y por eso vive aquí.
+function trackLogoClick() {
+  const s = achievementsData.stats;
+  s.logoClicks = (s.logoClicks || 0) + 1;
+  saveAchievements();
+  checkAchievements();
+}
+
 /** Registra el resultado de una partida terminada: partidas jugadas,
  * partida perfecta (100%), y récords de puntuación del Desafío
  * Infinito / Modo Historia si procede. */
@@ -1523,12 +1626,41 @@ function trackGameFinished(pct, opts) {
         s.perfectColosseumGame = true;
       } else if (opts.otherGame === "mystery-dungeon") {
         s.perfectMysteryDungeonGame = true;
+      } else if (opts.otherGame === "centro-pokemon") {
+        s.perfectCentroPokemonGame = true;
+      } else if (opts.otherGame === "laboratorios") {
+        s.perfectLaboratoriosGame = true;
+      } else if (opts.otherGame === "bicicletas") {
+        s.perfectBicicletasGame = true;
+      } else if (opts.otherGame === "surf") {
+        s.perfectSurfGame = true;
+      } else if (opts.otherGame === "ranger") {
+        s.perfectRangerGame = true;
+      } else if (opts.otherGame === "title-screens") {
+        s.perfectTitleScreensGame = true;
+      } else if (opts.otherGame === "openings-anime") {
+        s.perfectOpeningsAnimeGame = true;
       }
     }
   }
   if (opts.mode === GameMode.HARD && typeof opts.correctCount === "number") {
     if (opts.correctCount > (s.bestHardCorrectInGame || 0)) s.bestHardCorrectInGame = opts.correctCount;
   }
+  saveAchievements();
+  checkAchievements();
+}
+
+/** Registra, para los logros «Maratón difícil»/«Ultramaratón difícil», la
+ * ronda más alta alcanzada en el modo Difícil jugado con el interruptor ♾️
+ * activado (session.endless, no el propio Desafío Infinito). Se llama
+ * desde showResult() en cuanto termina una de esas partidas, con la ronda
+ * en la que se ha fallado (state.round). Aparte de esto, esas partidas no
+ * cuentan para perfect_hard ni para bestHardCorrectInGame (eso sigue
+ * gestionándolo trackGameFinished() solo para el modo Difícil de rondas
+ * fijas), así que esta función vive separada en vez de meterse ahí. */
+function trackHardInfiniteRound(round) {
+  const s = achievementsData.stats;
+  if (round > (s.bestHardEndlessRound || 0)) s.bestHardEndlessRound = round;
   saveAchievements();
   checkAchievements();
 }
@@ -2340,6 +2472,12 @@ function showResult() {
     overlay.classList.add('show');
     if (state.correct >= 10) playSFX(SFX.victory);
     trackGameFinished(Math.round(Math.min(state.correct / 20, 1) * 100));
+    // Logros «Maratón difícil»/«Ultramaratón difícil»: solo aplican al modo
+    // Difícil jugado con el interruptor ♾️ activado (session.mode === HARD
+    // y isEndlessSession() true por session.endless, no por GameMode.INFINITE
+    // — ver isEndlessSession()). state.round, en el momento de fallar, es la
+    // ronda en la que se ha llegado, así que basta con guardar el máximo.
+    if (session.mode === GameMode.HARD) trackHardInfiniteRound(state.round);
 
     // El récord personal y el envío a la clasificación global "infinite"
     // solo aplican al propio Desafío Infinito (GameMode.INFINITE): el
