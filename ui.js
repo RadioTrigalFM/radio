@@ -695,20 +695,26 @@ function renderLeaderboardPersonalBests() {
   if (combatEl) combatEl.textContent = achievementsData.stats.bestCombatScore || 0;
 
   // Un récord por región (Modo Normal): se genera aquí, no como filas
-  // fijas en index.html, porque depende de REGIONS/regionDisplayName
-  // (game.js/i18n.js, que cargan después que ui.js) — seguro porque esta
-  // función solo se ejecuta al abrir la pantalla de Clasificaciones,
-  // nunca durante la carga inicial de la página. Mismo criterio de fila
-  // (streak-row) que renderStreaksCard().
+  // fijas en index.html, porque depende de REGIONS/REGION_META/
+  // regionDisplayName (game.js/i18n.js, que cargan después que ui.js) —
+  // seguro porque esta función solo se ejecuta al abrir la pantalla de
+  // Clasificaciones, nunca durante la carga inicial de la página. Mismo
+  // criterio de fila (streak-row) que renderStreaksCard(), y mismo icono
+  // por región que renderProfileStats() (modal de Perfil).
   const regionsWrap = document.getElementById("leaderboard-personal-regions");
   if (regionsWrap) {
     const bestByRegion = achievementsData.stats.bestRegionScore || {};
-    regionsWrap.innerHTML = REGIONS.map(r => `
+    // Mismo icono por región que en el modal de Perfil (REGION_META[r].icon,
+    // ver renderProfileStats() más abajo) en vez del 🗺️ fijo genérico.
+    regionsWrap.innerHTML = REGIONS.map(r => {
+      const meta = REGION_META[r] || { icon: "🎮" };
+      return `
       <div class="streak-row">
-        <div class="streak-name">🗺️ ${regionDisplayName(r)}</div>
+        <div class="streak-name">${meta.icon} ${regionDisplayName(r)}</div>
         <div class="streak-value">💰 ${bestByRegion[r] || 0}</div>
       </div>
-    `).join("");
+    `;
+    }).join("");
   }
 }
 

@@ -313,6 +313,16 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
     rejilla de Opciones (`renderCursorGrid()`) ya itera sobre
     `CURSOR_CATALOG` de forma genérica.
 
+### Cambiado
+- **Los récords por región de la tarjeta "Tus récords" en la pantalla
+  de Clasificaciones ahora muestran el emoticono propio de cada región**
+  (`REGION_META[r].icon`, game.js) en vez del icono genérico 🗺️ fijo
+  para todas — mismo cambio que ya se hizo antes en el modal de Perfil
+  (ver entrada anterior de `renderProfileStats()`) y mismo icono que ya
+  usaban las pestañas de región de esta misma pantalla
+  (`renderLeaderboardRegionTabs()`). Cambio solo en `ui.js`
+  (`renderLeaderboardPersonalBests()`).
+
 ### Corregido
 - **El aviso de "nervios" del Modo Historia (`#nervous-overlay`, el
   pulso rojo en toda la pantalla cuando queda 1 sola vida) podía
