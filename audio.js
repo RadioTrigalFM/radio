@@ -118,12 +118,15 @@ function stopMenuMusic(){menuAudio.pause();menuAudio.currentTime=0;}
 // funciones otra vez, basta con llamar a estas dos con el elemento y la
 // clave de AMBIENT_SFX que correspondan.
 /** Arranca en bucle el sonido ambiente `src` sobre el elemento `el`
- * (fija la fuente la primera vez, aplica el volumen de SFX actual y
+ * (fija la fuente la primera vez, aplica el volumen de SFX actual —
+ * multiplicado por `volumeMultiplier` si se indica, para sonidos
+ * ambiente que deben oírse más fuerte que el resto de SFX, con el
+ * resultado siempre acotado a 1 (el máximo que admite <audio>) — y
  * reproduce desde el principio). */
-function startAmbientLoop(el, src) {
+function startAmbientLoop(el, src, volumeMultiplier) {
   try {
     if (!el.src) el.src = src;
-    el.volume = settings.sfxVol;
+    el.volume = Math.min(1, settings.sfxVol * (volumeMultiplier || 1));
     el.currentTime = 0;
     el.play().catch(() => {});
   } catch (e) {}
@@ -159,8 +162,9 @@ function stopBlastoiseRainSound() { stopAmbientLoop(blastoiseRainAudio); }
 // partida, fin del Modo Historia, etc.).
 const snorlaxSnoreAudio = document.getElementById('snorlax-snore-audio');
 /** Arranca en bucle el sonido de ronquido asociado al evento Pokémon de
- * Snorlax (suena junto a la canción de la ronda). */
-function startSnorlaxSnoreSound() { startAmbientLoop(snorlaxSnoreAudio, AMBIENT_SFX.snore); }
+ * Snorlax (suena junto a la canción de la ronda), al doble de volumen
+ * que el resto de SFX para que se note bien por encima de la canción. */
+function startSnorlaxSnoreSound() { startAmbientLoop(snorlaxSnoreAudio, AMBIENT_SFX.snore, 2); }
 /** Detiene y rebobina el sonido de ronquido de Snorlax. */
 function stopSnorlaxSnoreSound() { stopAmbientLoop(snorlaxSnoreAudio); }
 

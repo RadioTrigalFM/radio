@@ -16,6 +16,19 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Cambiado
+- **Ronquido de Snorlax al doble de volumen**: el sonido ambiente de
+  ronquido en bucle del evento Pokémon de Snorlax ahora suena al doble
+  de fuerte que el resto de efectos de sonido (acotado siempre a 1, el
+  volumen máximo que admite `<audio>`), para que se note bien por
+  encima de la canción de la ronda.
+
+  Cambios de código:
+  - `audio.js`: `startAmbientLoop(el, src, volumeMultiplier)` admite
+    ahora un multiplicador de volumen opcional (por defecto 1, sin
+    cambios para el resto de sonidos ambiente como la lluvia de
+    Blastoise); `startSnorlaxSnoreSound()` lo llama con `2`.
+
 ### Añadido
 - **Nueva categoría de Minijuegos: Calle Victoria** 🏔️, situada justo
   debajo de Pantallas de Título en la pantalla de Minijuegos. Se
