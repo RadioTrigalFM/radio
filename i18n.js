@@ -1041,10 +1041,10 @@ const I18N = {
     // oficial inglés del lugar/canción. Cubre las siete regiones,
     // Combate y las categorías de Minijuegos (Laboratorios, Bicicletas/
     // Montura, Centro Pokémon, Surf, Colosseum/XD, Ranger, Pantallas de
-    // Título y Openings del Anime). Quedan sin traducir (se muestran en
-    // español también en inglés) los nombres propios que coinciden en
-    // ambos idiomas, y todo el bloque de "Pokémon Mundo Misterioso",
-    // pendientes de revisar.
+    // Título, Calle Victoria y Openings del Anime). Quedan sin traducir
+    // (se muestran en español también en inglés) los nombres propios que
+    // coinciden en ambos idiomas, y todo el bloque de "Pokémon Mundo
+    // Misterioso", pendientes de revisar.
     "song.Pueblo Paleta": "Pallet Town",
     "song.Ciudad Celeste": "Cerulean City",
     "song.Ciudad Verde": "Viridian City",
@@ -1127,6 +1127,7 @@ const I18N = {
     "song.Sala Final de Cintia": "Cynthia's Champion Room",
     "song.Ribera Valor": "Valor Lakefront",
     "song.Valle Eólico": "Valley Windworks",
+    "song.Gran Pantano": "Great Marsh",
 
     // Teselia (Unova)
     "song.Ciudad Caolín": "Opelucid City",
@@ -1341,11 +1342,15 @@ const I18N = {
     "song.Pantalla de Título Kalos": "Kalos Title Screen",
     "song.Pantalla de Título Alola": "Alola Title Screen",
 
-    // Calle Victoria: solo la pista de Alola tiene nombre propio real
-    // dentro del juego (Monte Lanakila); el resto de regiones se
-    // muestran igual en los dos idiomas (pendientes de revisar, mismo
-    // criterio que el resto de categorías de Minijuegos sin traducir
-    // — ver nota al principio de este bloque).
+    // Calle Victoria: la pista de Alola tiene nombre propio real dentro
+    // del juego (Monte Lanakila); el resto de regiones se traducen con
+    // el mismo criterio que Pantallas de Título ("Victory Road" + región).
+    "song.Calle Victoria Kanto": "Victory Road Kanto",
+    "song.Calle Victoria Johto": "Victory Road Johto",
+    "song.Calle Victoria Hoenn": "Victory Road Hoenn",
+    "song.Calle Victoria Sinnoh": "Victory Road Sinnoh",
+    "song.Calle Victoria Teselia": "Victory Road Unova",
+    "song.Calle Victoria Kalos": "Victory Road Kalos",
     "song.Monte Lanakila": "Mount Lanakila",
 
     // Openings del Anime (mismas claves para las tres variantes/doblajes —

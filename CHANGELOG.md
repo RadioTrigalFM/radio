@@ -16,7 +16,27 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Añadido
+- **Nueva canción de Sinnoh: "Gran Pantano"**: nueva entrada en el
+  catálogo de canciones de la región Sinnoh (`songs/main/sinnoh/gran-pantano.mp3`,
+  `images/gran-pantano.png`), con su traducción al inglés ("Great
+  Marsh") siguiendo el mismo criterio que el resto de canciones de esa
+  región. Se integra automáticamente en la Sonidex, en la selección de
+  canciones de Sinnoh y en los contadores de progreso, que se calculan
+  a partir del catálogo.
+
+  > Nota: falta añadir el archivo de audio (`gran-pantano.mp3`) y la
+  > imagen (`gran-pantano.png`) a sus carpetas; sin ellos la canción
+  > aparece en el catálogo pero no sonará ni se verá su carátula.
+
 ### Corregido
+- **Títulos de Calle Victoria sin traducir al inglés**: solo la pista
+  de Alola ("Monte Lanakila" → "Mount Lanakila") tenía traducción; las
+  otras seis ("Calle Victoria Kanto/Johto/Hoenn/Sinnoh/Teselia/Kalos")
+  se mostraban en español aunque el juego estuviera en inglés. Añadidas
+  en `i18n.js` como "Victory Road <región>", mismo criterio que ya se
+  usa para Pantallas de Título.
+
 - **Guía de Juego desactualizada — sección Sonidex**: el listado de
   categorías de Minijuegos de `guide.sonidex.organization` (ES/EN) no
   incluía "Calle Victoria" / "Victory Road" pese a que el resto de

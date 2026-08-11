@@ -167,6 +167,7 @@ const songs = [
   { title: "Sala Final de Cintia", file: "songs/main/sinnoh/cintia-sala-final.mp3", image: "images/cintia-sala-final.png", group: "main", region: "Sinnoh" },
   { title: "Orilla Valor", file: "songs/main/sinnoh/orilla-valor.mp3", image: "images/orilla-valor.png", group: "main", region: "Sinnoh" },
   { title: "Valle Eólico", file: "songs/main/sinnoh/valle-eolico.mp3", image: "images/valle-eolico.png", group: "main", region: "Sinnoh" },
+  { title: "Gran Pantano", file: "songs/main/sinnoh/gran-pantano.mp3", image: "images/gran-pantano.png", group: "main", region: "Sinnoh" },
   { title: "Ciudad Caolín",  file: "songs/main/teselia/ciudad-caolin.mp3",     image: "images/ciudad-caolin.png",   group: "main",  region: "Teselia" },
   { title: "Ciudad Engobe",  file: "songs/main/teselia/ciudad-engobe.mp3",     image: "images/ciudad-engobe.png",   group: "main",  region: "Teselia" },
   { title: "Ciudad Esmalte",  file: "songs/main/teselia/ciudad-esmalte.mp3",     image: "images/ciudad-esmalte.png",   group: "main",  region: "Teselia" },
