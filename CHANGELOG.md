@@ -17,6 +17,19 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Traducción al japonés de la pantalla de Clasificaciones**
+  (`#screen-leaderboard`): todos los textos de esta pantalla ya tenían
+  su clave `data-i18n` correspondiente en `index.html`
+  (`leaderboard.subtitle`, `leaderboard.yourRecords`, `leaderboard.top50`,
+  `leaderboard.tab.*` para cada pestaña de categoría — Nivel, Infinito,
+  Historia, Difícil, Combate, Regiones — y las demás claves
+  `leaderboard.*` de esta pantalla), pero solo estaban traducidas en
+  `I18N.es`/`I18N.en`; a `I18N.ja` (`i18n.js`) solo le había llegado
+  `leaderboard.title`. Se completó el resto de claves `leaderboard.*`
+  en `I18N.ja`, incluyendo "Los 50 mejores de cada categoría", "Tus
+  récords", "Top 50 global" y las seis pestañas de categoría, además
+  de `leaderboard.loading`/`error`/`empty`/`viewProfile` que tampoco
+  tenían traducción japonesa.
 - **Traducción al japonés de la abreviatura "pts" en las estadísticas
   del perfil**: `renderProfileStats()` (`ui.js`) usa `t("common.pts")`
   para formar textos como "1234 pts" en los récords del perfil
