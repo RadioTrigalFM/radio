@@ -17,6 +17,21 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Detección automática del idioma del navegador la primera vez que
+  se abre el juego**: se añadió `detectBrowserLanguage()` (`storage.js`),
+  que lee `navigator.languages`/`navigator.language` y devuelve
+  `"es"`/`"en"`/`"ja"` si alguna de las preferencias del navegador
+  coincide con un idioma soportado, o `null` en caso contrario (idioma
+  no soportado, o el entorno no expone esa información). `loadSettings()`
+  (`storage.js`) la usa como valor inicial de `settings.language` solo
+  cuando todavía no existe `pokequiz_settings` en `localStorage`, es
+  decir, solo la primera vez que se abre el juego en ese navegador: si
+  el jugador ya guardó alguna vez una preferencia de idioma (incluida
+  la que ya tenía por defecto, español, al no haber tocado la opción),
+  esa preferencia guardada se sigue respetando siempre y nunca se
+  sobrescribe con la detección del navegador. No hizo falta tocar
+  `i18n.js` ni `ui.js`: siguen sin saber nada de `navigator`, solo leen
+  `settings.language` como hasta ahora.
 - **Traducción al japonés de la pantalla de Clasificaciones**
   (`#screen-leaderboard`): todos los textos de esta pantalla ya tenían
   su clave `data-i18n` correspondiente en `index.html`

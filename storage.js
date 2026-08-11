@@ -56,16 +56,43 @@ const settings = {
                           // lo sea (ver applyCursorStyle() en ui.js).
 };
 
+/** Devuelve "es"/"en"/"ja" si el idioma preferido del navegador
+ * (`navigator.languages`, o `navigator.language` si el navegador no
+ * soporta la lista) coincide con alguno de los idiomas que soporta el
+ * juego (ver I18N en i18n.js), o `null` si no hay ninguna coincidencia
+ * (p. ej. el navegador está en francés o alemán) o el entorno no
+ * expone esa información. Solo se usa como valor inicial de
+ * `settings.language` la primera vez que se abre el juego, antes de
+ * que el jugador haya guardado nunca una preferencia — ver
+ * loadSettings() más abajo. */
+function detectBrowserLanguage() {
+  try {
+    const prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+    for (const pref of prefs) {
+      const code = (pref || "").slice(0, 2).toLowerCase();
+      if (code === "es" || code === "en" || code === "ja") return code;
+    }
+  } catch(e) {}
+  return null;
+}
+
 /** Carga las opciones del jugador (volumen, modo oscuro, fondo animado,
  * partículas...) desde localStorage, sustituyendo los valores por
  * defecto de `settings` solo cuando el dato guardado es válido. */
 function loadSettings() {
   try {
     // Lee el JSON guardado bajo la clave "pokequiz_settings". Si no hay
-    // nada guardado todavía (primera vez que se abre el juego), no hay
-    // nada que hacer y se mantienen los valores por defecto de arriba.
+    // nada guardado todavía (primera vez que se abre el juego), se usa
+    // el idioma del navegador como valor inicial si coincide con alguno
+    // de los soportados (ver detectBrowserLanguage() arriba) y no hay
+    // nada más que hacer: se mantienen el resto de valores por defecto
+    // de arriba.
     const raw = localStorage.getItem("pokequiz_settings");
-    if (!raw) return;
+    if (!raw) {
+      const browserLang = detectBrowserLanguage();
+      if (browserLang) settings.language = browserLang;
+      return;
+    }
     const obj = JSON.parse(raw);
     // Se valida el tipo de cada campo antes de aplicarlo, por si el JSON
     // guardado estuviera corrupto o viniera de una versión distinta del
