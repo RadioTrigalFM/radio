@@ -13,9 +13,10 @@ la región o el título exacto, según el modo. Hay:
 
 - **5 modos principales**: Fácil, Normal, Difícil, Combate, Desafío
   Infinito.
-- **Minijuegos**: 8 categorías temáticas (Centro Pokémon, Laboratorios,
-  Bicicletas, Surf, Mundo Misterioso, Colosseum/XD, Ranger, Pantallas
-  de Título), partidas cortas de 5 rondas.
+- **Minijuegos**: 10 categorías temáticas (Centro Pokémon, Laboratorios,
+  Bicicletas, Surf, Pantallas de Título, Calle Victoria, Openings del
+  Anime, Mundo Misterioso, Colosseum/XD, Ranger), partidas cortas de 5
+  rondas (Mundo Misterioso dura 10).
 - **Modo Historia**: recorrido por las 7 regiones (Kanto → Alola), cada
   una con una fase de 10 rondas normales + una fase de combate de 3
   rondas contra un "enemigo poderoso".

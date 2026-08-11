@@ -881,6 +881,7 @@ const SONIDEX_GROUPS = [
   { title: "Bicicletas",           filter: s => s.group === "other" && s.other === "bicicletas" },
   { title: "Música de Surf",       filter: s => s.group === "other" && s.other === "surf" },
   { title: "Pantallas de Título",  filter: s => s.group === "other" && s.other === "title-screens" },
+  { title: "Calle Victoria",       filter: s => s.group === "other" && s.other === "calle-victoria" },
   { title: "Openings del Anime",   filter: s => s.group === "other" && s.other === "openings-anime" },
   { title: "Mundo Misterioso",     filter: s => s.group === "other" && s.other === "mystery-dungeon" },
   { title: "Pokémon Colosseum / XD", filter: s => s.group === "other" && s.other === "colosseum-xd" },
@@ -1704,6 +1705,7 @@ function prettyOther(key){
   if (key === "ranger") return t("other.ranger.title");
   if (key === "bicicletas") return t("other.bike.title");
   if (key === "title-screens") return t("other.titlescreens.title");
+  if (key === "calle-victoria") return t("other.callevictoria.title");
   if (key === "openings-anime") return t("other.openinganime.title");
   return key;
 }

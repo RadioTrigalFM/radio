@@ -142,6 +142,8 @@ const I18N = {
     "other.surf.desc": "Solo canciones y opciones de Surf",
     "other.titlescreens.title": "Pantallas de Título",
     "other.titlescreens.desc": "Solo canciones y opciones de Pantallas de Título",
+    "other.callevictoria.title": "Calle Victoria",
+    "other.callevictoria.desc": "Solo canciones y opciones de Calle Victoria",
     "other.openinganime.title": "Openings del Anime",
     "other.openinganime.desc": "Solo canciones y opciones de Openings del Anime",
     "other.mysterydungeon.title": "Pokémon Mundo Misterioso",
@@ -236,7 +238,7 @@ const I18N = {
     "guide.modes.story.title": "📖 Modo Historia",
     "guide.modes.story.desc": "Recorre todas las regiones en orden, de Kanto a Alola. En cada región juegas una fase de 10 rondas normales y, después, una fase de combate de 3 rondas contra un \"enemigo poderoso\". Aquí sí hay vidas ❤️: se recargan a 3 al empezar cada región y, al perderlas todas, termina la partida. La puntuación y la racha se acumulan durante todo el recorrido.",
     "guide.modes.minigames.title": "🕹️ Minijuegos",
-    "guide.modes.minigames.desc": "Partidas cortas centradas en una categoría concreta: Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Openings del Anime, Pokémon Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger. La mayoría dura 5 rondas, salvo Pokémon Mundo Misterioso, que dura 10. Al igual que Fácil/Normal/Difícil/Combate, fallar no te elimina. Cada categoría se desbloquea al conseguir un logro concreto o al alcanzar un nivel de perfil determinado, según la categoría (puedes ver cuál en la propia pantalla de Minijuegos).",
+    "guide.modes.minigames.desc": "Partidas cortas centradas en una categoría concreta: Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Calle Victoria, Openings del Anime, Pokémon Mundo Misterioso, Pokémon Colosseum/XD y Pokémon Ranger. La mayoría dura 5 rondas, salvo Pokémon Mundo Misterioso, que dura 10. Al igual que Fácil/Normal/Difícil/Combate, fallar no te elimina. Cada categoría se desbloquea al conseguir un logro concreto o al alcanzar un nivel de perfil determinado, según la categoría (puedes ver cuál en la propia pantalla de Minijuegos).",
     "guide.scoring.title": "🏆 Sistema de puntuación",
     "guide.scoring.speed.title": "⏱️ Velocidad de respuesta",
     "guide.scoring.speed.desc": "Cada acierto da entre 20 y 100 puntos base según lo rápido que respondas: cuanto antes contestes, más puntos consigues. A partir de 15 segundos, el acierto ya solo otorga el mínimo garantizado (20 pts).",
@@ -249,7 +251,7 @@ const I18N = {
     "guide.achievements.modes.title": "🎮 Modos de juego",
     "guide.achievements.modes.desc": "El Modo Difícil se desbloquea al alcanzar el nivel 5 de perfil y el Modo Combate al alcanzar el nivel 8; el Desafío Infinito se desbloquea con el logro «Viajero regional» (jugar en todas las regiones).",
     "guide.achievements.minigames.title": "🕹️ Categorías de Minijuegos",
-    "guide.achievements.minigames.desc": "Cada categoría de Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Openings del Anime, Mundo Misterioso, Colosseum/XD, Ranger) se desbloquea al alcanzar un nivel de perfil concreto o al conseguir un logro concreto, según la categoría, indicado con un 🔒 en el botón mientras siga bloqueada.",
+    "guide.achievements.minigames.desc": "Cada categoría de Minijuegos (Centros Pokémon, Laboratorios, Bicicletas, Surf, Pantallas de Título, Calle Victoria, Openings del Anime, Mundo Misterioso, Colosseum/XD, Ranger) se desbloquea al alcanzar un nivel de perfil concreto o al conseguir un logro concreto, según la categoría, indicado con un 🔒 en el botón mientras siga bloqueada.",
     "guide.achievements.events.title": "✨ Eventos Pokémon",
     "guide.achievements.events.desc": "Al completar el Modo Historia («Maestro de la Historia») se desbloquean los Eventos Pokémon sorpresa (Gengar, Hypno, Shiny, Porygon, Electrode, Blastoise, Venusaur…) también en el Desafío Infinito. Los logros de \"encuentro\" (por ejemplo, hacer aparecer 5 veces a un Pokémon) desbloquean, uno a uno, que ese Pokémon pueda pasear por el fondo del menú, y también el avatar de perfil de ese Pokémon.",
     "guide.achievements.sonidex.title": "🎼 Fichas de la Sonidex",
@@ -492,6 +494,8 @@ const I18N = {
     "other.surf.desc": "Only Surf songs and options",
     "other.titlescreens.title": "Title Screens",
     "other.titlescreens.desc": "Only Title Screen songs and options",
+    "other.callevictoria.title": "Victory Road",
+    "other.callevictoria.desc": "Only Victory Road songs and options",
     "other.openinganime.title": "Anime Openings",
     "other.openinganime.desc": "Only Anime Opening songs and options",
     "other.mysterydungeon.title": "Pokémon Mystery Dungeon",
@@ -587,7 +591,7 @@ const I18N = {
     "guide.modes.story.title": "📖 Story Mode",
     "guide.modes.story.desc": "Travel through every region in order, from Kanto to Alola. In each region you play a 10-round normal phase and then a 3-round battle phase against a \"powerful enemy\". This mode does have lives ❤️: they recharge to 3 at the start of each region, and losing them all ends the game. Score and streak carry over across the whole journey.",
     "guide.modes.minigames.title": "🕹️ Minigames",
-    "guide.modes.minigames.desc": "Short games focused on one specific category: Pokémon Centers, Labs, Bicycles, Surfing, Title Screens, Anime Openings, Pokémon Mystery Dungeon, Pokémon Colosseum/XD and Pokémon Ranger. Most last 5 rounds, except Pokémon Mystery Dungeon, which lasts 10. Like Easy/Normal/Hard/Battle, a wrong answer doesn't eliminate you. Each category unlocks by earning a specific achievement or reaching a certain profile level, depending on the category (you can check which on the Minigames screen itself).",
+    "guide.modes.minigames.desc": "Short games focused on one specific category: Pokémon Centers, Labs, Bicycles, Surfing, Title Screens, Victory Road, Anime Openings, Pokémon Mystery Dungeon, Pokémon Colosseum/XD and Pokémon Ranger. Most last 5 rounds, except Pokémon Mystery Dungeon, which lasts 10. Like Easy/Normal/Hard/Battle, a wrong answer doesn't eliminate you. Each category unlocks by earning a specific achievement or reaching a certain profile level, depending on the category (you can check which on the Minigames screen itself).",
     "guide.scoring.title": "🏆 Scoring system",
     "guide.scoring.speed.title": "⏱️ Answer speed",
     "guide.scoring.speed.desc": "Each correct answer gives between 20 and 100 base points depending on how fast you answer: the sooner you answer, the more points you get. From 15 seconds onward, a correct answer only grants the guaranteed minimum (20 pts).",
@@ -600,7 +604,7 @@ const I18N = {
     "guide.achievements.modes.title": "🎮 Game modes",
     "guide.achievements.modes.desc": "Hard Mode unlocks at profile level 5 and Battle Mode at level 8; Infinite Challenge unlocks with the «Regional Traveler» achievement (playing in every region).",
     "guide.achievements.minigames.title": "🕹️ Minigame categories",
-    "guide.achievements.minigames.desc": "Each Minigame category (Pokémon Centers, Labs, Bicycles, Surfing, Title Screens, Anime Openings, Mystery Dungeon, Colosseum/XD, Ranger) unlocks at a specific profile level or by earning a specific achievement, depending on the category, shown with a 🔒 on the button while still locked.",
+    "guide.achievements.minigames.desc": "Each Minigame category (Pokémon Centers, Labs, Bicycles, Surfing, Title Screens, Victory Road, Anime Openings, Mystery Dungeon, Colosseum/XD, Ranger) unlocks at a specific profile level or by earning a specific achievement, depending on the category, shown with a 🔒 on the button while still locked.",
     "guide.achievements.events.title": "✨ Pokémon Events",
     "guide.achievements.events.desc": "Completing Story Mode («Story Master») unlocks the surprise Pokémon Events (Gengar, Hypno, Shiny, Porygon, Electrode, Blastoise, Venusaur…) in Infinite Challenge too. The \"encounter\" achievements (for example, making a Pokémon appear 5 times) unlock, one by one, that Pokémon wandering the menu background, as well as that Pokémon's profile avatar.",
     "guide.achievements.sonidex.title": "🎼 Sonidex entries",
@@ -807,6 +811,8 @@ const I18N = {
     "achv.perfect_title_screens.desc": "Complete a perfect run in the Title Screens Minigame category.",
     "achv.perfect_openings_anime.title": "Perfect opening",
     "achv.perfect_openings_anime.desc": "Complete a perfect run in the Anime Openings Minigame category.",
+    "achv.perfect_calle_victoria.title": "Perfect route",
+    "achv.perfect_calle_victoria.desc": "Complete a perfect run in the Victory Road Minigame category.",
     "achv.hispanohablante.title": "Spanish speaker",
     "achv.hispanohablante.desc": "Play Anime Openings in both European Spanish and Latin American Spanish dubs.",
     "achv.hard_infinite_round_20.title": "Hard marathon",
@@ -1015,6 +1021,8 @@ const I18N = {
     "otherUnlock.ranger.reqTitle": "Enthusiast",
     "otherUnlock.title-screens.name": "Title Screens",
     "otherUnlock.title-screens.reqTitle": "Profile level 7",
+    "otherUnlock.calle-victoria.name": "Victory Road",
+    "otherUnlock.calle-victoria.reqTitle": "Profile level 11",
     "otherUnlock.openings-anime.name": "Anime Openings",
     "otherUnlock.openings-anime.reqTitle": "Profile level 9",
 
@@ -1332,6 +1340,13 @@ const I18N = {
     "song.Pantalla de Título Teselia": "Unova Title Screen",
     "song.Pantalla de Título Kalos": "Kalos Title Screen",
     "song.Pantalla de Título Alola": "Alola Title Screen",
+
+    // Calle Victoria: solo la pista de Alola tiene nombre propio real
+    // dentro del juego (Monte Lanakila); el resto de regiones se
+    // muestran igual en los dos idiomas (pendientes de revisar, mismo
+    // criterio que el resto de categorías de Minijuegos sin traducir
+    // — ver nota al principio de este bloque).
+    "song.Monte Lanakila": "Mount Lanakila",
 
     // Openings del Anime (mismas claves para las tres variantes/doblajes —
     // España/Latino/Inglés—, ya que comparten `title` en el catálogo de game.js;

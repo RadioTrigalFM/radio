@@ -17,6 +17,64 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Nueva categoría de Minijuegos: Calle Victoria** 🏔️, situada justo
+  debajo de Pantallas de Título en la pantalla de Minijuegos. Se
+  desbloquea al alcanzar el nivel 11 de perfil. 7 canciones, una por
+  región (Kanto → Alola, esta última titulada "Monte Lanakila" / "Mount
+  Lanakila", el nombre real de la Calle Victoria de esa región en los
+  juegos — el archivo sigue llamándose `calle-victoria-alola.mp3`/
+  `.png`, solo cambia el título mostrado), en
+  `songs/other/calle-victoria/calle-victoria-<región>.mp3` con carátula
+  `images/calle-victoria-<región>.png`.
+
+  Cambios de código (mismo patrón que el resto de categorías de
+  Minijuegos — ver tabla de `OTHER_UNLOCKS` en `game.js`):
+  - `game.js`: 7 entradas nuevas en `songs` (`other: "calle-victoria"`),
+    entrada en `OTHER_UNLOCKS`, `"calle-victoria": false` en
+    `otherEndlessToggle`.
+  - `index.html`: nuevo botón en `#screen-other-games`
+    (`data-other="calle-victoria"`) y ambas menciones de la lista de
+    categorías en la Guía de Juego actualizadas.
+  - `ui.js`: nueva entrada en `SONIDEX_GROUPS` (pantalla Sonidex) y en
+    `prettyOther()`.
+  - `i18n.js`: `other.callevictoria.title/desc` (ES/EN, "Victory Road"
+    en inglés), `otherUnlock.calle-victoria.name/reqTitle` (solo EN,
+    mismo criterio que el resto de `otherUnlock.*`), `song.Monte
+    Lanakila` (traducción a "Mount Lanakila" del título de la pista de
+    Alola); actualizadas las dos menciones de la Guía de Juego (ES/EN).
+  - `PROJECT.md`: actualizado el recuento y listado de categorías de
+    Minijuegos (de paso se corrige que ya estaba desactualizado: no
+    incluía Openings del Anime y decía "8" en vez de "9").
+
+  > Nota: faltan por añadir los 7 archivos de audio
+  > (`songs/other/calle-victoria/calle-victoria-*.mp3`) y las 7 imágenes
+  > (`images/calle-victoria-*.png`) a sus carpetas; sin ellos la
+  > categoría se ve en el menú pero las canciones no sonarán ni se verá
+  > la carátula.
+
+### Añadido
+- **Logro "partida perfecta" para Calle Victoria**: nuevo logro
+  `perfect_calle_victoria` ("Ruta perfecta" 🏁), que se consigue al
+  completar una partida perfecta (100 % de aciertos) en la categoría de
+  Minijuegos Calle Victoria — mismo patrón que el resto de categorías
+  (p. ej. `perfect_title_screens`). Este logro pasa a ser la nueva
+  forma de desbloquear el puntero de ratón "Caramelo Raro", en
+  sustitución del logro "Explorador" (`all_modes`), que deja de
+  desbloquear ningún puntero.
+
+  Cambios de código:
+  - `game.js`: nueva entrada `perfect_calle_victoria` en `ACHIEVEMENTS`
+    (sección `mastery`) y en el mapa de condiciones de logros; nueva
+    rama `otherGame === "calle-victoria"` en `trackGameFinished()` que
+    marca `perfectCalleVictoriaGame`; `CURSOR_UNLOCKS.rare_candy` ahora
+    apunta a `achId: "perfect_calle_victoria"` en vez de `"all_modes"`.
+  - `storage.js`: nuevo campo `perfectCalleVictoriaGame: false` en
+    `defaultAchStats()`.
+  - `i18n.js`: `achv.perfect_calle_victoria.title/desc` (solo EN; en ES
+    se usa directamente el texto de `game.js`, mismo criterio que el
+    resto de logros).
+
+### Añadido
 - **Perfil público de otros jugadores desde Clasificaciones**: ahora se
   puede pulsar (clic o Enter/Espacio) cualquier fila del top 50 de la
   pantalla de Clasificaciones para abrir una ficha de solo lectura de

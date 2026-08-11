@@ -491,6 +491,7 @@ function defaultAchStats() {
     perfectRangerGame: false,        // true si se ha terminado una partida perfecta del minijuego de Pokémon Ranger
     perfectTitleScreensGame: false,  // true si se ha terminado una partida perfecta de la categoría de Minijuegos Pantallas de Título
     perfectOpeningsAnimeGame: false, // true si se ha terminado una partida perfecta de la categoría de Minijuegos Openings del Anime
+    perfectCalleVictoriaGame: false, // true si se ha terminado una partida perfecta de la categoría de Minijuegos Calle Victoria
     perfectRegionsNormal: [], // regiones (Modo Normal) completadas alguna vez con el 100% de aciertos
     bestHardCorrectInGame: 0, // máximo de respuestas correctas en una sola partida del Modo Difícil
     bestHardEndlessRound: 0,  // ronda más alta alcanzada en Modo Difícil con el interruptor ♾️ activado (logros "Maratón"/"Ultramaratón difícil")

@@ -308,6 +308,7 @@ const songs = [
   //   "colosseum-xd"    → songs/other/colosseum-xd/<pista>.mp3
   //   "ranger"          → songs/other/ranger/<pista>.mp3
   //   "title-screens"   → songs/other/title/<region-en-minusculas>.mp3
+  //   "calle-victoria"  → songs/other/calle-victoria/calle-victoria-<region-en-minusculas>.mp3
   //   "openings-anime"  → tres rutas distintas según el doblaje/idioma (ver el
   //                        bloque "Openings del Anime" más abajo, con `variant`):
   //                          España (sin `variant`): songs/other/openings/españa/<archivo>.mp3
@@ -419,6 +420,15 @@ const songs = [
   { title: "Pantalla de Título Teselia",  file: "songs/other/title/teselia.mp3",  image: "images/titulo-teselia.png",  group: "other", other: "title-screens" },
   { title: "Pantalla de Título Kalos",    file: "songs/other/title/kalos.mp3",    image: "images/titulo-kalos.png",    group: "other", other: "title-screens" },
   { title: "Pantalla de Título Alola",    file: "songs/other/title/alola.mp3",    image: "images/titulo-alola.png",    group: "other", other: "title-screens" },
+
+  // Calle Victoria
+  { title: "Calle Victoria Kanto",    file: "songs/other/calle-victoria/calle-victoria-kanto.mp3",    image: "images/calle-victoria-kanto.png",    group: "other", other: "calle-victoria" },
+  { title: "Calle Victoria Johto",    file: "songs/other/calle-victoria/calle-victoria-johto.mp3",    image: "images/calle-victoria-johto.png",    group: "other", other: "calle-victoria" },
+  { title: "Calle Victoria Hoenn",    file: "songs/other/calle-victoria/calle-victoria-hoenn.mp3",    image: "images/calle-victoria-hoenn.png",    group: "other", other: "calle-victoria" },
+  { title: "Calle Victoria Sinnoh",   file: "songs/other/calle-victoria/calle-victoria-sinnoh.mp3",   image: "images/calle-victoria-sinnoh.png",   group: "other", other: "calle-victoria" },
+  { title: "Calle Victoria Teselia",  file: "songs/other/calle-victoria/calle-victoria-teselia.mp3",  image: "images/calle-victoria-teselia.png",  group: "other", other: "calle-victoria" },
+  { title: "Calle Victoria Kalos",    file: "songs/other/calle-victoria/calle-victoria-kalos.mp3",    image: "images/calle-victoria-kalos.png",    group: "other", other: "calle-victoria" },
+  { title: "Monte Lanakila",    file: "songs/other/calle-victoria/calle-victoria-alola.mp3",    image: "images/calle-victoria-alola.png",    group: "other", other: "calle-victoria" },
 
   // Openings del Anime
   // Cada opening real tiene hasta tres entradas (misma canción, distinto doblaje/
@@ -934,7 +944,7 @@ let endlessToggle = { easy: false, normal: false, hard: false, combat: false };
 // de Openings del Anime, que pregunta España/Latino antes de arrancar).
 let otherEndlessToggle = {
   "centro-pokemon": false, "laboratorios": false, "bicicletas": false,
-  "surf": false, "title-screens": false, "openings-anime": false,
+  "surf": false, "title-screens": false, "calle-victoria": false, "openings-anime": false,
   "mystery-dungeon": false, "colosseum-xd": false, "ranger": false,
 };
 
@@ -949,7 +959,7 @@ function isEndlessSession() {
 let session = {
   mode: null,            // GameMode
   normalRegion: null,    // "Kanto"...
-  otherGame: null,       // "mystery-dungeon" | "colosseum-xd" | "ranger" | "title-screens" | "openings-anime"
+  otherGame: null,       // "mystery-dungeon" | "colosseum-xd" | "ranger" | "title-screens" | "calle-victoria" | "openings-anime"
   openingsVariant: null, // null (España) | "latino" — solo aplica cuando otherGame === "openings-anime"
                           // Y ADEMÁS settings.language === "es" (con "en" se ignora, ver buildPool()).
                           // Se pregunta con la pantalla previa "screen-openings-lang-select" (solo si
@@ -1040,6 +1050,7 @@ const ACHIEVEMENTS = [
   { id: "perfect_ranger",         icon: "🧭", title: "Estilo perfecto",        desc: "Completa una partida perfecta en el minijuego de Pokémon Ranger.", section: "mastery" },
   { id: "perfect_title_screens",  icon: "🖼️", title: "Portada perfecta",       desc: "Completa una partida perfecta en la categoría de Minijuegos Pantallas de Título.", section: "mastery" },
   { id: "perfect_openings_anime", icon: "🎬", title: "Opening perfecto",       desc: "Completa una partida perfecta en la categoría de Minijuegos Openings del Anime.", section: "mastery" },
+  { id: "perfect_calle_victoria", icon: "🏁", title: "Ruta perfecta",          desc: "Completa una partida perfecta en la categoría de Minijuegos Calle Victoria.", section: "mastery" },
   { id: "hispanohablante",        icon: "🗣️", title: "Hispanohablante",        desc: "Juega a los Openings del Anime tanto en español de España como en español latino.", section: "mastery" },
   { id: "hard_infinite_round_20", icon: "🏃", title: "Maratón difícil",        desc: "Alcanza la ronda 20 del modo Difícil jugando con el modo infinito (♾️) activado.", section: "mastery" },
   { id: "hard_infinite_round_50", icon: "🚀", title: "Ultramaratón difícil",   desc: "Alcanza la ronda 50 del modo Difícil jugando con el modo infinito (♾️) activado.", section: "mastery" },
@@ -1183,6 +1194,7 @@ const ACHIEVEMENT_CONDITIONS = {
   perfect_ranger:            s => s.perfectRangerGame === true,
   perfect_title_screens:     s => s.perfectTitleScreensGame === true,
   perfect_openings_anime:    s => s.perfectOpeningsAnimeGame === true,
+  perfect_calle_victoria:    s => s.perfectCalleVictoriaGame === true,
   hispanohablante:           s => (s.openingsVariantsPlayed || []).includes("spain") && (s.openingsVariantsPlayed || []).includes("latino"),
   hard_infinite_round_20:    s => (s.bestHardEndlessRound || 0) >= 20,
   hard_infinite_round_50:    s => (s.bestHardEndlessRound || 0) >= 50,
@@ -1278,6 +1290,7 @@ const OTHER_UNLOCKS = {
   "colosseum-xd":    { achId: "correct_100",   name: "Pokémon Colosseum / XD",   reqTitle: "Melómano" },
   "ranger":          { achId: "games_10",      name: "Pokémon Ranger",           reqTitle: "Aficionado" },
   "title-screens":   { level: 7,               name: "Pantallas de Título",      reqTitle: "Nivel 7 de perfil" },
+  "calle-victoria":  { level: 11,              name: "Calle Victoria",           reqTitle: "Nivel 11 de perfil" },
   "openings-anime":  { level: 9,               name: "Openings del Anime",       reqTitle: "Nivel 9 de perfil" },
 };
 
@@ -1301,7 +1314,7 @@ const CURSOR_UNLOCKS = {
   poke_flute: { achId: "poke_flute" },   // logro "Poké Flauta"
   poke_ball:  { achId: "correct_50" },   // logro "Conocedor musical"
   super_rod:  { achId: "perfect_surf" }, // logro "Ola perfecta"
-  rare_candy: { achId: "all_modes" },    // logro "Explorador"
+  rare_candy: { achId: "perfect_calle_victoria" }, // logro "Ruta perfecta"
   // Punteros con forma de Pokémon (ver CURSOR_CATALOG en storage.js).
   // Nótese que "Historia: Kanto" y "Entrenador dedicado" desbloquean cada
   // una DOS/TRES punteros distintos a la vez (varios ids de
@@ -1640,6 +1653,8 @@ function trackGameFinished(pct, opts) {
         s.perfectTitleScreensGame = true;
       } else if (opts.otherGame === "openings-anime") {
         s.perfectOpeningsAnimeGame = true;
+      } else if (opts.otherGame === "calle-victoria") {
+        s.perfectCalleVictoriaGame = true;
       }
     }
   }
