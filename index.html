@@ -50,7 +50,7 @@
       <span class="splash-brand-text">Radio Trigal</span>
       <span class="splash-brand-fm">FM</span>
     </div>
-    <div class="splash-subtitle">🎵 PokéQuiz · Music Edition</div>
+    <div class="splash-subtitle" data-i18n="splash.subtitle">🎵 PokéQuiz · Music Edition</div>
     <div class="splash-waves" aria-hidden="true">
       <span></span><span></span><span></span><span></span>
     </div>
@@ -74,7 +74,7 @@
 
 <!-- MODO HISTORIA: pantalla previa de región / aviso de enemigo -->
 <div id="story-overlay">
-  <button type="button" class="story-info-btn" id="story-info-btn" aria-label="Información de los Eventos Pokémon">ⓘ</button>
+  <button type="button" class="story-info-btn" id="story-info-btn" data-i18n-aria="pokeEventsInfo.btnAria" aria-label="Información de los Eventos Pokémon">ⓘ</button>
   <div class="story-splash-content">
     <div class="story-badge">
       <span class="story-badge-ring r1"></span>
@@ -98,10 +98,10 @@
 <div id="poke-events-info-overlay">
   <div class="poke-events-info-card">
     <div class="poke-events-info-header">
-      <div class="title" style="font-size:1.1rem;">🎲 Eventos Pokémon</div>
+      <div class="title" style="font-size:1.1rem;" data-i18n="pokeEventsInfo.title">🎲 Eventos Pokémon</div>
       <button type="button" class="poke-events-info-close" id="poke-events-info-close" data-i18n-aria="common.close" aria-label="Cerrar">✕</button>
     </div>
-    <div class="poke-events-info-subtitle">Al azar, durante una ronda puede aparecer uno de estos Pokémon con un efecto especial:</div>
+    <div class="poke-events-info-subtitle" data-i18n="pokeEventsInfo.subtitle">Al azar, durante una ronda puede aparecer uno de estos Pokémon con un efecto especial:</div>
     <div class="poke-events-info-list" id="poke-events-info-list"></div>
   </div>
 </div>
@@ -265,7 +265,7 @@
     <div class="ach-feature-icon">⭐</div>
     <div class="ach-feature-title" id="ach-feature-title">—</div>
     <div class="ach-feature-list" id="ach-feature-list"></div>
-    <div class="ach-feature-hint">Toca fuera de este recuadro para cerrar</div>
+    <div class="ach-feature-hint" data-i18n="achFeature.closeHint">Toca fuera de este recuadro para cerrar</div>
   </div>
 </div>
 
@@ -574,6 +574,7 @@
         <div class="language-switch" id="language-switch">
           <button type="button" class="language-switch-btn" id="lang-es-btn" data-lang="es" data-i18n="options.language.es">Español</button>
           <button type="button" class="language-switch-btn" id="lang-en-btn" data-lang="en" data-i18n="options.language.en">English</button>
+          <button type="button" class="language-switch-btn" id="lang-ja-btn" data-lang="ja" data-i18n="options.language.ja">日本語</button>
         </div>
       </div>
 

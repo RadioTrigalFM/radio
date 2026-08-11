@@ -45,7 +45,7 @@ const settings = {
   darkMode: true,      // true = tema oscuro, false = tema claro
   animatedBg: true,   // Opciones gráficas: cielo/nubes/Pokémon de fondo
   particles: true,    // Opciones gráficas: chispas al acertar / logros
-  language: "es",     // idioma de los menús: "es" (Español) o "en" (English) — ver i18n.js
+  language: "es",     // idioma de los menús: "es" (Español), "en" (English) o "ja" (日本語) — ver i18n.js
   hideEndlessInfo: false, // true = no volver a mostrar el aviso "modo infinito activado" (ver showEndlessInfoModal() en ui.js)
   cursorStyle: "normal", // "normal" o un id de CURSOR_CATALOG (más abajo) — puntero
                           // del ratón sustituido por el sprite de ese objeto. Solo
@@ -75,7 +75,7 @@ function loadSettings() {
     if (typeof obj.darkMode === "boolean") settings.darkMode = obj.darkMode;
     if (typeof obj.animatedBg === "boolean") settings.animatedBg = obj.animatedBg;
     if (typeof obj.particles === "boolean") settings.particles = obj.particles;
-    if (obj.language === "es" || obj.language === "en") settings.language = obj.language;
+    if (obj.language === "es" || obj.language === "en" || obj.language === "ja") settings.language = obj.language;
     if (typeof obj.hideEndlessInfo === "boolean") settings.hideEndlessInfo = obj.hideEndlessInfo;
     if (obj.cursorStyle === "normal" || CURSOR_CATALOG.some(c => c.id === obj.cursorStyle)) settings.cursorStyle = obj.cursorStyle;
   } catch(e) {}

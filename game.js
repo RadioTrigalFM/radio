@@ -1418,7 +1418,7 @@ function getFeatureUnlocksForAchievement(achId) {
     const cfg = AVATAR_UNLOCKS[id];
     if (cfg.achId === achId) {
       const av = AVATAR_CATALOG.find(a => a.id === id);
-      feats.push({ icon: "🖼️", name: av ? t("feature.avatarName", { name: av.name }) : t("feature.avatarGeneric"), type: t("feature.avatarType") });
+      feats.push({ icon: "🖼️", name: av ? t("feature.avatarName", { name: tData(`avatarName.${av.id}`, av.name) }) : t("feature.avatarGeneric"), type: t("feature.avatarType") });
     }
   });
   return feats;
@@ -2893,6 +2893,14 @@ loadSettings();
 // el jugador toque nada.
 applyTranslations();
 applyLanguageSwitchUI();
+// Las tarjetas de región del Modo Normal (#region-pills) se construyen más
+// arriba en este mismo archivo, antes de loadSettings(), así que su texto
+// visible queda pintado con el idioma por defecto ("es") aunque el
+// jugador tenga guardado otro idioma. refreshRegionPillNames() (ui.js) es
+// la misma función que usa setLanguage() para repintarlas al cambiar de
+// idioma en Opciones; se reutiliza aquí para que ya salgan correctas
+// desde el primer render.
+refreshRegionPillNames();
 loadAchievements();
 loadProfile();
 renderProfileBar();

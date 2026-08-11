@@ -17,6 +17,230 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Traducción al japonés de la abreviatura "pts" en las estadísticas
+  del perfil**: `renderProfileStats()` (`ui.js`) usa `t("common.pts")`
+  para formar textos como "1234 pts" en los récords del perfil
+  (Desafío Infinito, Modo Historia, etc.), pero la clave `common.pts`
+  solo tenía traducción en `I18N.es`/`I18N.en`. Se añadió a `I18N.ja`
+  (`i18n.js`) como "点" (forma natural en japonés para puntuaciones,
+  en vez de una traducción literal de "pts").
+- **Traducción al japonés del modal de información de Eventos Pokémon**
+  (botón "ⓘ" de la pantalla previa de región del Modo Historia,
+  `#poke-events-info-overlay`): el nombre y la descripción de cada
+  Pokémon en la lista ya se traducían correctamente vía `tData()`
+  (claves `pokeEvent.<id>.name`/`.desc`), pero el resto del modal no
+  pasaba por el sistema de traducción: el `aria-label` del botón "ⓘ"
+  (`#story-info-btn`), el título "🎲 Eventos Pokémon" y el subtítulo
+  "Al azar, durante una ronda…" estaban escritos a pelo en `index.html`.
+  Se añadieron las claves `pokeEventsInfo.btnAria`, `pokeEventsInfo.title`
+  y `pokeEventsInfo.subtitle` a `I18N.es`/`I18N.en`/`I18N.ja` (`i18n.js`)
+  y se engancharon con `data-i18n`/`data-i18n-aria` en `index.html`. De
+  paso se detectó que `I18N.ja` no tenía **ninguna** entrada para las
+  claves `common.*` (usadas, entre otros, por el botón de cerrar de
+  este mismo modal y de los modales de perfil): se añadieron
+  `common.close` y `common.trainerDefault` a `I18N.ja`.
+- **Traducción al japonés de la pantalla previa inicial (splash) y del
+  eslogan del menú principal**: `splash.tap` («Toca la pantalla para
+  empezar») y `home.tagline` («Tu emisora Pokémon») ya existían como
+  claves `data-i18n` en `index.html`, pero les faltaba la entrada en
+  `I18N.ja` (`i18n.js`), así que en japonés caían al español por el
+  fallback de `t()`. Se añadieron ambas traducciones. Además, el
+  subtítulo «🎵 PokéQuiz · Music Edition» del splash estaba escrito a
+  pelo en `index.html` sin ninguna clave de traducción; se creó la
+  clave nueva `splash.subtitle` en `I18N.es`/`I18N.en`/`I18N.ja`
+  (`i18n.js`) y se enganchó el `<div class="splash-subtitle">` con
+  `data-i18n="splash.subtitle"` en `index.html`.
+- **Traducción al japonés de los nombres de Pokémon en el recuadro de
+  "función desbloqueada" de la pestaña de Logros**: `getFeatureUnlocksForAchievement()`
+  (`game.js`) mostraba el nombre del avatar (`av.name`, de `AVATAR_CATALOG`
+  en `storage.js`) sin traducir, así que en japonés se seguían viendo
+  nombres en inglés como "Calyrex" o "Regidrago". Se cambió esa línea
+  para pasar el nombre por `tData("avatarName.<id>", av.name)` en vez
+  de usar `av.name` directamente, y se añadieron a `I18N.ja` (`i18n.js`)
+  las 53 claves `avatarName.<id>` correspondientes a los avatares que
+  aparecen en `AVATAR_UNLOCKS` con `achId` (los únicos que puede mostrar
+  ese recuadro; los desbloqueables por nivel no pasan por ahí, así que
+  no necesitan traducción). No hizo falta tocar `storage.js`: el
+  catálogo de avatares sigue teniendo un único nombre por avatar, igual
+  que el resto de "nombres por defecto" del proyecto (canciones,
+  Eventos Pokémon, logros...), y la traducción vive solo en `i18n.js`.
+- **Traducción al japonés del aviso de cierre del recuadro de función
+  desbloqueada (pestaña de Logros)**: se comprobó que los textos que ya
+  mencionaban avatares de Pokémon desbloqueables en esa pantalla
+  (`feature.avatarName`, `feature.avatarType`, `feature.avatarGeneric`,
+  las claves `avatar.locked*` y `guide.achievements.events.desc`) ya
+  tenían traducción japonesa en `I18N.ja` (`i18n.js`); el único texto
+  que faltaba era el aviso «Toca fuera de este recuadro para cerrar»
+  del overlay `#ach-feature-overlay` (`index.html`), que estaba escrito
+  a pelo en el HTML sin pasar por `data-i18n`. Se añadió la clave
+  `achFeature.closeHint` a `I18N.es`/`I18N.en`/`I18N.ja` (`i18n.js`) y
+  se enganchó el `<div class="ach-feature-hint">` correspondiente con
+  `data-i18n="achFeature.closeHint"` en `index.html` para que
+  `applyTranslations()` lo traduzca igual que el resto del overlay.
+- **Traducción al japonés del aviso de "¿Salir del Modo Historia?"**: se
+  añadieron a `I18N.ja` (`i18n.js`) las claves `confirm.leaveStoryTitle`,
+  `confirm.leaveStoryBody`, `confirm.keepPlaying` y
+  `confirm.leaveAnyway`, usadas por el overlay
+  `#leave-story-confirm-overlay` (`index.html`) que `showLeaveStoryConfirm()`
+  (`ui.js`) muestra al pulsar "Atrás" durante una partida del Modo
+  Historia. Al ser claves `data-i18n`/`data-i18n-html` normales, no hizo
+  falta tocar `index.html` ni `ui.js`.
+- **Traducción al japonés de las pantallas previas del Modo Historia y
+  de los nombres de los cursores**: se añadieron a `I18N.ja` (`i18n.js`)
+  las claves `story.regionCompleted`, `story.tapStart`,
+  `story.enemyTitle`, `story.tapFight`, `story.gameOverTitle`,
+  `story.gameOverDesc` y `story.completeTitle` (junto a
+  `story.subtitleMain`/`story.subtitleCombat`, que ya estaban
+  traducidas), usadas por `storyShowRegionSplash()`,
+  `storyShowEnemyScreen()`, `storyShowRegionComplete()` (`ui.js`) y
+  `storyGameOver()`/`storyFinish()` (`game.js`) en las pantallas "toca
+  la pantalla para..." previas a cada fase y en los overlays de
+  región completada/Game Over/Historia completada. También se
+  añadieron las 33 claves `cursorStyle.*.name` (más `.lockedTitle` y
+  `.lockedToast`) junto a `options.cursor.normalName`, ya traducido:
+  los nombres de los 33 punteros de ratón desbloqueables (objetos y
+  Pokémon) ahora usan sus nombres oficiales en japonés en vez de caer
+  al español vía el fallback de `t()`/`tData()`.
+
+### Corregido
+- **Nombres de región del Modo Normal en el primer render cuando el
+  idioma guardado no es español**: `#region-pills` (`game.js`) se
+  construye con `regionDisplayName()` en la sección "Menús: handlers",
+  antes de que el bloque INIT llame a `loadSettings()`; por eso, al
+  cargar la página, esas tarjetas se pintaban siempre con
+  `settings.language` en su valor por defecto (`"es"`, ver
+  `storage.js`) sin importar qué idioma tuviera guardado el jugador, y
+  solo se corregían si tocaba manualmente el selector de idioma en
+  Opciones (que sí llama a `refreshRegionPillNames()`, vía
+  `setLanguage()` → `refreshLanguageDependentUI()`). Se añadió una
+  llamada a esa misma función (`ui.js`) justo después de
+  `applyTranslations()`/`applyLanguageSwitchUI()` en el bloque INIT de
+  `game.js`, reutilizando la función ya existente en vez de duplicar
+  lógica.
+- **Traducción al japonés de la cabecera de ronda y la pantalla del
+  quiz**: se añadieron a `I18N.ja` (`i18n.js`) las claves `header.back`,
+  `header.points`, `header.round`, `header.streak` y las 18 claves
+  `quiz.*` (carga, pista visual, botón "Siguiente Ronda", las 8
+  variantes de "Modo: ...", las dos preguntas — región/canción —,
+  "Reproduciendo...", "Toca la pantalla para reproducir" y el aviso de
+  la segunda oportunidad de Chansey/ラッキー), colocadas en un bloque
+  nuevo al final de `I18N.ja` con su propio comentario de sección. Antes
+  caían al español vía el fallback de `t()`, así que la partida en sí
+  (no solo los menús) se veía en español aunque `settings.language`
+  fuera `"ja"`. Al ser claves ya usadas por `ui.js`/`game.js` a través
+  de `t()`, no hizo falta tocar ningún otro archivo.
+- **Traducción al japonés de la Guía de Juego**: se añadieron a
+  `I18N.ja` (`i18n.js`) las 47 claves `guide.*` (`#screen-guide` en
+  `index.html`: modos de juego, sistema de puntuación, logros y
+  contenido desbloqueable, Sonidex, perfil/experiencia/avatares y
+  clasificación global), justo a continuación de `options.guide.desc`,
+  igual criterio de colocación que el resto de secciones ya
+  traducidas. Al ser claves `data-i18n`/`data-i18n-html` normales, no
+  hizo falta tocar `index.html` ni `ui.js`: `applyTranslations()` ya
+  las recoge automáticamente en cuanto `settings.language` es `"ja"`.
+  Se actualizaron también los comentarios de cabecera de `i18n.js`
+  (general y del bloque `ja`), que indicaban explícitamente que la
+  Guía de Juego se quedaba solo en español.
+- **Traducción al japonés de los subtítulos de los menús**: se
+  añadieron a `I18N.ja` (`i18n.js`) las claves `region.subtitle`,
+  `other.subtitle`, `openingsLang.subtitle`, `story.subtitleMain` y
+  `story.subtitleCombat` (esta última pareja no tenía ninguna entrada
+  `story.*` previa en japonés), colocadas junto a su `.title`
+  correspondiente, igual que ya estaba `options.subtitle`. El resto de
+  claves de esas mismas pantallas (descripciones más largas, botones)
+  sigue sin traducir y cae al español vía el fallback de `t()`/
+  `tData()`, como el resto de la traducción parcial al japonés.
+- **Traducción al japonés de los Minijuegos (Laboratorios, Bicicletas/
+  Montura, Centro Pokémon, Surf, Pantallas de Título y Calle
+  Victoria)**: se añadieron a `I18N.ja` (`i18n.js`) las 42 claves
+  `song.*` correspondientes a esas seis categorías del catálogo
+  `songs` (`game.js`), justo a continuación de las de Pokémon Ranger.
+  Para las cinco categorías con una pista por región (Laboratorios,
+  Centro Pokémon, Pantallas de Título) se combina el nombre japonés de
+  la región con el término japonés del lugar/concepto (p. ej.
+  `"song.Laboratorio Kanto": "カントーの研究所"`). En Bicicletas y
+  Surf, Alola usa una entrada con nombre propio real dentro del juego
+  en vez de "región + palabra" (`"song.Montura Alola": "アローラのポ
+  ケモンライド"`, `"song.Montura Acuática Alola": "アローラの水上ラ
+  イド"`), y el resto de regiones de esas dos categorías siguen el
+  mismo criterio de "región + palabra" que las demás. En Calle
+  Victoria, Alola también tiene nombre propio (`"song.Monte Lanakila":
+  "ラナキラマウンテン"`) y el resto de regiones usan el nombre oficial
+  japonés de la Calle Victoria, "チャンピオンロード" (Champion Road),
+  combinado con la región. Antes de este cambio, esas 42 canciones se
+  mostraban en español también jugando en japonés (fallback habitual
+  de `tData()`); ahora se muestran en japonés. Se actualizó también el
+  comentario de cobertura de esa sección en `i18n.js` para reflejar
+  las nuevas categorías cubiertas.
+
+- **Traducción al japonés de los títulos de canciones de Hoenn**: se
+  añadieron a `I18N.ja` (`i18n.js`) las 25 claves `song.*`
+  correspondientes a las canciones de región `"Hoenn"` del catálogo
+  `songs` (`game.js`), con el nombre oficial japonés de cada lugar
+  (p. ej. `"song.Villa Raíz": "ミシロタウン"`). La guarida del Team
+  Aqua y la del Team Magma comparten una única entrada en el catálogo
+  (`song.Guarida del Team Aqua/Magma`), igual que ya ocurre en `en`
+  (`"Team Aqua/Magma Hideout"`), así que se combinaron sus dos
+  nombres japoneses en esa misma clave (`"アクア団/マグマ団アジト"`).
+  Sigue el mismo formato y ubicación ya usados para las canciones de
+  Kanto y Johto, justo a continuación de esas claves. Antes de este
+  cambio, esas 25 canciones se mostraban en español también jugando
+  en japonés (fallback habitual de `tData()`); ahora se muestran en
+  japonés. Se actualizó también el comentario de cobertura de esa
+  sección en `i18n.js` (de "cubre Kanto y Johto" a "cubre Kanto,
+  Johto y Hoenn"). El resto de regiones y categorías queda pendiente.
+
+- **Traducción al japonés de los títulos de canciones de Johto**: se
+  añadieron a `I18N.ja` (`i18n.js`) las 16 claves `song.*`
+  correspondientes a las canciones de región `"Johto"` del catálogo
+  `songs` (`game.js`), con el nombre oficial japonés de cada lugar
+  (p. ej. `"song.Pueblo Primavera": "ワカバタウン"`). Sigue el mismo
+  formato y ubicación ya usados para las canciones de Kanto, justo a
+  continuación de esas 15 claves. Antes de este cambio,
+  `songDisplayName()` no tenía ninguna clave `song.*` de Johto en
+  `ja`, así que esas 16 canciones se mostraban en español también
+  jugando en japonés (fallback habitual de `tData()`); ahora se
+  muestran en japonés. El resto de regiones y categorías queda
+  pendiente.
+
+- **Traducción al japonés de los títulos de canciones de Kanto**: se
+  añadieron a `I18N.ja` (`i18n.js`) las 15 claves `song.*`
+  correspondientes a las canciones de región `"Kanto"` del catálogo
+  `songs` (`game.js`), con el nombre oficial japonés de cada lugar
+  (p. ej. `"song.Pueblo Paleta": "マサラタウン"`). Sigue el mismo
+  formato ya usado para esas mismas claves en `I18N.en`. Antes de este
+  cambio, `songDisplayName()` no tenía ninguna clave `song.*` en `ja`,
+  así que las 15 canciones de Kanto se mostraban en español también
+  jugando en japonés (fallback habitual de `tData()`); ahora se
+  muestran en japonés. El resto de regiones y categorías queda
+  pendiente. Se actualizó también el comentario de cabecera de
+  `i18n.js`, que decía (ya desde antes de este cambio, y de forma
+  incorrecta para `en`) que los títulos de canciones no se traducían
+  en ningún idioma.
+
+- **Traducción al japonés de la pantalla de Opciones/Ajustes**: se
+  completaron en `I18N.ja` (`i18n.js`) todas las claves `options.*` que
+  usa `#screen-options` (`index.html`) — subtítulo, música, efectos de
+  sonido, modo oscuro, activado/desactivado, fondo animado, partículas,
+  puntero del ratón (y su nombre "Normal"), nota de guardado automático,
+  descripción del selector de idioma y enlace a la Guía de Juego. Antes
+  de este cambio esas claves no existían en `I18N.ja`, así que `t()`
+  caía a español en toda la pantalla salvo en los títulos ya
+  traducidos; ahora la pantalla de Ajustes se ve íntegra en japonés al
+  elegir "日本語". El resto de pantallas sigue con traducción parcial
+  (solo títulos), tal y como documenta el comentario al inicio del
+  bloque `ja` en `i18n.js`.
+
+- **Japonés como tercer idioma seleccionable en Opciones**: nuevo botón
+  "日本語" en el selector de idioma (junto a Español/English), y
+  `settings.language` ahora también acepta `"ja"` (validado en
+  `loadSettings()`, `storage.js`). `setLanguage()` (`i18n.js`) acepta
+  el nuevo valor y se añadió la clave `"options.language.ja"` a los
+  diccionarios `es`/`en` existentes para el propio botón. De momento no
+  existe un diccionario `I18N.ja`: al jugar en japonés, `t()` recae en
+  español (su fallback habitual cuando falta una traducción), así que
+  los textos de la interfaz siguen en español hasta que se traduzcan.
+
 - **Nueva canción de Sinnoh: "Gran Pantano"**: nueva entrada en el
   catálogo de canciones de la región Sinnoh (`songs/main/sinnoh/gran-pantano.mp3`,
   `images/gran-pantano.png`), con su traducción al inglés ("Great

@@ -2308,15 +2308,18 @@ if (particlesToggle) {
 // ── Selector de idioma de los menús ──
 const langEsBtn = document.getElementById("lang-es-btn");
 const langEnBtn = document.getElementById("lang-en-btn");
+const langJaBtn = document.getElementById("lang-ja-btn");
 
-/** Refleja en los dos botones del selector de idioma cuál está activo
+/** Refleja en los botones del selector de idioma cuál está activo
  * ahora mismo (según `settings.language`). */
 function applyLanguageSwitchUI(){
   if (langEsBtn) langEsBtn.classList.toggle("active", settings.language === "es");
   if (langEnBtn) langEnBtn.classList.toggle("active", settings.language === "en");
+  if (langJaBtn) langJaBtn.classList.toggle("active", settings.language === "ja");
 }
 if (langEsBtn) langEsBtn.addEventListener("click", () => { setLanguage("es"); applyLanguageSwitchUI(); });
 if (langEnBtn) langEnBtn.addEventListener("click", () => { setLanguage("en"); applyLanguageSwitchUI(); });
+if (langJaBtn) langJaBtn.addEventListener("click", () => { setLanguage("ja"); applyLanguageSwitchUI(); });
 
 /** Refresca el nombre visible de las tarjetas de región del Modo Normal
  * (pantalla `#screen-region-select`, generadas una única vez en game.js
