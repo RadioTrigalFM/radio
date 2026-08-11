@@ -16,6 +16,15 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Corregido
+- **Guía de Juego desactualizada — sección Sonidex**: el listado de
+  categorías de Minijuegos de `guide.sonidex.organization` (ES/EN) no
+  incluía "Calle Victoria" / "Victory Road" pese a que el resto de
+  menciones de la Guía (modos de juego y logros) ya la tenían — se
+  quedó fuera solo de esta lista al añadir la categoría. Añadida en
+  `i18n.js` (ES y EN) y en el texto de respaldo equivalente en
+  `index.html`.
+
 ### Cambiado
 - **Ronquido de Snorlax al doble de volumen**: el sonido ambiente de
   ronquido en bucle del evento Pokémon de Snorlax ahora suena al doble
