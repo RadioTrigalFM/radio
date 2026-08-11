@@ -669,6 +669,13 @@ let leaderboardActiveRegion = null;
 // pedida.
 let leaderboardRenderToken = 0;
 
+// Último top devuelto por Leaderboard.fetchTop() para la categoría
+// activa, guardado tal cual (incluido `stats`, con TODAS las
+// puntuaciones del jugador — ver fetchTop() en leaderboard.js) para que
+// abrir el perfil público de una fila (ver openPublicProfileModal() más
+// abajo) no tenga que volver a pedirlo a Firestore: ya lo tenemos aquí.
+let leaderboardCurrentTop = [];
+
 /** Devuelve el icono de medalla para los tres primeros puestos de la
  * clasificación global; el resto de puestos muestran solo el número. */
 function leaderboardRankIcon(rank) {
@@ -800,8 +807,13 @@ function renderLeaderboardScreen() {
       return;
     }
     statusEl.textContent = "";
-    listEl.innerHTML = top.slice(0, 50).map((entry, i) => `
-      <div class="leaderboard-row">
+    leaderboardCurrentTop = top.slice(0, 50);
+    // Cada fila es clicable y abre el perfil público de ese jugador
+    // (ver openPublicProfileModal() más abajo). `data-index` referencia
+    // la posición dentro de leaderboardCurrentTop en vez de guardar el
+    // objeto entero en el DOM.
+    listEl.innerHTML = leaderboardCurrentTop.map((entry, i) => `
+      <div class="leaderboard-row clickable" data-index="${i}" role="button" tabindex="0" aria-label="${t("leaderboard.viewProfile", { name: entry.username || "???" })}">
         <div class="leaderboard-rank">${leaderboardRankIcon(i + 1)}</div>
         <div class="profile-avatar-frame leaderboard-avatar"><img src="${getAvatarUrl(entry.avatarId)}" alt=""></div>
         <div class="leaderboard-name">${entry.username || "???"}</div>
@@ -810,6 +822,30 @@ function renderLeaderboardScreen() {
     `).join("");
   });
 }
+
+// Pulsar (o activar con teclado) una fila del top abre el perfil
+// público de ese jugador. Delegado en listEl porque las filas se
+// regeneran por completo en cada renderLeaderboardScreen(), en vez de
+// añadir un listener por fila cada vez.
+const leaderboardListEl = document.getElementById("leaderboard-list");
+leaderboardListEl?.addEventListener("click", (e) => {
+  const row = e.target.closest(".leaderboard-row.clickable");
+  if (!row) return;
+  const entry = leaderboardCurrentTop[Number(row.dataset.index)];
+  if (!entry) return;
+  playSFX(SFX.go);
+  openPublicProfileModal(entry);
+});
+leaderboardListEl?.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest(".leaderboard-row.clickable");
+  if (!row) return;
+  e.preventDefault();
+  const entry = leaderboardCurrentTop[Number(row.dataset.index)];
+  if (!entry) return;
+  playSFX(SFX.go);
+  openPublicProfileModal(entry);
+});
 
 // Cambiar de pestaña vuelve a pintar la pantalla con la categoría elegida.
 document.getElementById("leaderboard-tabs")?.querySelectorAll(".leaderboard-tab").forEach(btn => {
@@ -2311,6 +2347,14 @@ function refreshLanguageDependentUI(){
   if (document.getElementById("profile-overlay").classList.contains("show") && typeof renderProfileStats === "function") {
     renderProfileStats();
   }
+  // El modal de perfil PÚBLICO no guarda a quién está mostrando (solo
+  // pinta lo que le pasó openPublicProfileModal() en su momento), así
+  // que si sigue abierto al cambiar de idioma simplemente se cierra en
+  // vez de quedarse con textos a medio traducir — el jugador puede
+  // volver a pulsar la fila si quiere verlo de nuevo.
+  if (document.getElementById("public-profile-overlay").classList.contains("show") && typeof closePublicProfileModal === "function") {
+    closePublicProfileModal();
+  }
   if (document.getElementById("screen-achievements").classList.contains("show") && typeof renderAchievementsScreen === "function") {
     renderAchievementsScreen();
   }
@@ -2540,6 +2584,69 @@ function closeProfileModal() {
 profileBar.addEventListener('click', openProfileModal);
 profileCloseBtn.addEventListener('click', closeProfileModal);
 profileOverlay.addEventListener('click', (e) => { if (e.target === profileOverlay) closeProfileModal(); });
+
+// ── Modal de perfil PÚBLICO: ficha de solo lectura de otro jugador, al
+// pulsar su fila en la pantalla de Clasificaciones ──
+const publicProfileOverlay = document.getElementById('public-profile-overlay');
+const publicProfileCloseBtn = document.getElementById('public-profile-close-btn');
+const publicProfileAvatarImg = document.getElementById('public-profile-avatar-img');
+const publicProfileLevelBadge = document.getElementById('public-profile-level-badge');
+const publicProfileName = document.getElementById('public-profile-name');
+const publicProfileStatsList = document.getElementById('public-profile-stats-list');
+
+/** Abre la ficha de perfil público de un jugador de la clasificación
+ * global a partir de la fila pulsada (`entry`, un elemento de
+ * `leaderboardCurrentTop`, con la forma que devuelve
+ * Leaderboard.fetchTop() — ver leaderboard.js): avatar, nombre, nivel y
+ * todas sus puntuaciones (`entry.stats`), incluida una por región.
+ * A diferencia del modal de "mi perfil" (openProfileModal()), es de
+ * solo lectura: no hay botón de cambiar avatar ni barra de XP, porque
+ * de otro jugador solo conocemos lo que guarda su documento de
+ * Firestore, no su experiencia exacta ni podemos tocar su avatar. */
+function openPublicProfileModal(entry) {
+  const stats = entry.stats || {};
+  const pts = t("common.pts");
+
+  publicProfileAvatarImg.src = getAvatarUrl(entry.avatarId);
+  publicProfileLevelBadge.textContent = stats.level || 1;
+  publicProfileName.textContent = entry.username || t("common.trainerDefault");
+
+  const rows = [
+    { label: t("leaderboard.infinite"), value: `💰 ${stats.infinite || 0} ${pts}` },
+    { label: t("leaderboard.story"), value: `💰 ${stats.story || 0} ${pts}` },
+    { label: t("leaderboard.hard"), value: `💰 ${stats.hard || 0} ${pts}` },
+    { label: t("leaderboard.combat"), value: `💰 ${stats.combat || 0} ${pts}` },
+  ];
+
+  // Un récord por región (Modo Normal), mismo criterio de fila e icono
+  // que renderLeaderboardPersonalBests()/renderProfileStats(): depende
+  // de REGIONS/REGION_META/regionDisplayName (game.js, que carga
+  // después que ui.js) — seguro aquí porque esta función solo se llama
+  // al pulsar una fila ya renderizada de la pantalla de Clasificaciones.
+  const regionRows = REGIONS.map(r => {
+    const meta = REGION_META[r] || { icon: "🎮" };
+    return `
+    <div class="streak-row">
+      <div class="streak-name">${meta.icon} ${regionDisplayName(r)}</div>
+      <div class="streak-value">💰 ${stats["region_" + r] || 0} ${pts}</div>
+    </div>
+  `;
+  }).join("");
+
+  publicProfileStatsList.innerHTML =
+    `<div class="profile-stats-title">${t("publicProfile.scoresTitle")}</div>` +
+    rows.map(r => `<div class="streak-row"><div class="streak-name">${r.label}</div><div class="streak-value">${r.value}</div></div>`).join("") +
+    `<div class="profile-stats-title">${t("profile.stats.regionRecordsTitle")}</div>` +
+    regionRows;
+
+  publicProfileOverlay.classList.add('show');
+}
+/** Cierra el modal de perfil público. */
+function closePublicProfileModal() {
+  publicProfileOverlay.classList.remove('show');
+}
+publicProfileCloseBtn.addEventListener('click', closePublicProfileModal);
+publicProfileOverlay.addEventListener('click', (e) => { if (e.target === publicProfileOverlay) closePublicProfileModal(); });
 
 // Nota: el nombre de entrenador ya NO se puede editar desde este modal
 // (solo se elige una vez, en la pantalla de configuración inicial —

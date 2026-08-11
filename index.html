@@ -126,6 +126,27 @@
   </div>
 </div>
 
+<!-- PERFIL PÚBLICO: ficha de solo lectura de OTRO jugador, al pulsar su fila en
+     la pantalla de Clasificaciones (ver openPublicProfileModal() en ui.js).
+     Reutiliza las mismas clases visuales que #profile-overlay (profile-card,
+     profile-avatar-frame, profile-level-badge, profile-stats-list...) pero
+     sin barra de XP ni botón de cambiar avatar, porque de otro jugador solo
+     conocemos lo que devuelve Leaderboard.fetchTop(): su nivel y sus
+     puntuaciones, no su experiencia exacta, y no podemos editar su avatar. -->
+<div id="public-profile-overlay">
+  <div class="profile-card">
+    <button type="button" class="profile-close-btn" id="public-profile-close-btn" data-i18n-aria="common.close" aria-label="Cerrar">✕</button>
+    <div class="profile-avatar-frame large" id="public-profile-avatar-frame">
+      <img id="public-profile-avatar-img" src="" alt="Avatar del jugador">
+      <span class="profile-level-badge large" id="public-profile-level-badge">1</span>
+    </div>
+    <div class="profile-name-row">
+      <div class="result-title" id="public-profile-name">Entrenador</div>
+    </div>
+    <div class="profile-stats-list" id="public-profile-stats-list"></div>
+  </div>
+</div>
+
 <!-- MODO HISTORIA: animación de región completada / historia completada / Game Over -->
 <div id="story-complete-overlay">
   <div class="story-splash-content">

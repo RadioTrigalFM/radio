@@ -1418,6 +1418,23 @@
   }
   body.light #profile-overlay { background: #00000066; }
   #profile-overlay.show { opacity: 1; pointer-events: all; }
+
+  /* Modal de perfil PÚBLICO (otro jugador, desde Clasificaciones): mismo
+     overlay a pantalla completa que #profile-overlay, con su propio id
+     porque ambos modales pueden, en teoría, quedar montados en el DOM a
+     la vez (uno para "mi perfil", otro para el perfil que se esté
+     consultando). */
+  #public-profile-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: #0a0e1add;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+    backdrop-filter: blur(6px);
+    padding: 20px;
+  }
+  body.light #public-profile-overlay { background: #00000066; }
+  #public-profile-overlay.show { opacity: 1; pointer-events: all; }
   .profile-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -1857,6 +1874,20 @@
     padding: 10px 0; border-bottom: 1px dashed var(--border);
   }
   .leaderboard-row:last-child { border-bottom: none; }
+  /* Filas clicables: pulsar un jugador del top abre su perfil público
+     (ver openPublicProfileModal() en ui.js). */
+  .leaderboard-row.clickable {
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding-left: 6px; padding-right: 6px;
+    margin: 0 -6px;
+    transition: background .15s ease;
+  }
+  .leaderboard-row.clickable:hover,
+  .leaderboard-row.clickable:focus-visible {
+    background: var(--bg-card2);
+    outline: none;
+  }
   .leaderboard-rank {
     width: 30px; flex-shrink: 0; text-align: center;
     font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--text-dim);

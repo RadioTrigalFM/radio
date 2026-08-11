@@ -16,6 +16,44 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 
 ## [Unreleased]
 
+### Añadido
+- **Perfil público de otros jugadores desde Clasificaciones**: ahora se
+  puede pulsar (clic o Enter/Espacio) cualquier fila del top 50 de la
+  pantalla de Clasificaciones para abrir una ficha de solo lectura de
+  ese jugador (avatar, nombre, nivel y todas sus puntuaciones —
+  Desafío Infinito, Modo Historia, Modo Difícil, Modo Combate y una por
+  cada región del Modo Normal), reutilizando el mismo diseño visual que
+  el modal de "mi perfil" pero sin barra de XP ni botón de cambiar
+  avatar (de otro jugador solo conocemos lo que guarda su documento de
+  Firestore).
+
+  Cambios de código:
+  - `leaderboard.js`: `fetchTop()` ahora devuelve también un campo
+    `stats` por fila con TODAS las categorías del jugador (no solo la
+    pedida), reaprovechando el documento que Firestore ya trae para
+    ordenar — sin ninguna consulta extra a la base de datos al abrir un
+    perfil.
+  - `ui.js`:
+    - Nueva variable `leaderboardCurrentTop`, que guarda el último top
+      recibido para poder recuperar la fila pulsada por su índice.
+    - Las filas de `.leaderboard-list` ahora llevan la clase
+      `clickable`, `role="button"` y `tabindex="0"`; un listener
+      delegado en `#leaderboard-list` (clic y teclado) abre el perfil.
+    - Nuevas `openPublicProfileModal(entry)` / `closePublicProfileModal()`,
+      mismo patrón que `openProfileModal()`/`closeProfileModal()` pero
+      de solo lectura.
+    - `refreshLanguageDependentUI()` cierra el modal de perfil público
+      si está abierto al cambiar de idioma (no guarda a quién muestra,
+      así que no puede volver a traducirlo sobre la marcha).
+  - `index.html`: nuevo overlay `#public-profile-overlay`.
+  - `styles.css`: estilos de `#public-profile-overlay` y
+    `.leaderboard-row.clickable` (cursor, hover/foco).
+  - `i18n.js`: nuevas claves `leaderboard.viewProfile` y
+    `publicProfile.scoresTitle` (ES/EN); el resto de textos reutiliza
+    claves ya existentes (`leaderboard.infinite/story/hard/combat`,
+    `profile.stats.regionRecordsTitle`, `common.pts`,
+    `common.trainerDefault`).
+
 ### Cambiado
 - **Los récords por región del modal de perfil** (pantalla Perfil → "Tus
   récords") **ahora muestran el emoticono propio de cada región**

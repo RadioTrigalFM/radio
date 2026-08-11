@@ -160,9 +160,19 @@ const LEADERBOARD_CATEGORIES = {
  *   LEADERBOARD_CATEGORIES.
  * @param {number} n
  * @returns {Promise<Array|null>}
- *   - Array de { username, avatarId, value } (puede estar vacío) si la
- *     petición fue bien. `value` es el nivel o la puntuación, según la
- *     categoría pedida.
+ *   - Array de { username, avatarId, value, stats } (puede estar vacío)
+ *     si la petición fue bien. `value` es el nivel o la puntuación,
+ *     según la categoría pedida. `stats` trae TODOS los campos de
+ *     categoría del documento del jugador (uno por cada valor de
+ *     LEADERBOARD_CATEGORIES, ya con su nombre corto de categoría como
+ *     clave — p. ej. `stats.infinite`, `stats.region_Kanto` — no el
+ *     nombre de campo de Firestore), pensado para pintar una ficha de
+ *     "perfil público" con todas sus puntuaciones (ver
+ *     openPublicProfileModal() en ui.js) sin tener que pedir el
+ *     documento otra vez: como fetchTop() ya trae el documento entero
+ *     de cada jugador para ordenar por el campo pedido, reaprovechar
+ *     esos mismos datos evita una consulta extra a Firestore por cada
+ *     jugador cuyo perfil se quiera consultar.
  *   - null si hubo un error (reglas de Firestore, sin conexión,
  *     categoría desconocida...), para que quien llama pueda distinguir
  *     "no hay nadie todavía" de "no se ha podido cargar".
@@ -182,7 +192,15 @@ async function fetchTop(category, n = 50) {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => {
       const data = d.data();
-      return { username: data.username, avatarId: data.avatarId, value: data[field] };
+      // Todas las categorías del jugador, con la clave corta
+      // (level/infinite/story/...) en vez del nombre de campo de
+      // Firestore, para que quien consuma esto (ui.js) no tenga que
+      // conocer la forma interna del documento.
+      const stats = {};
+      for (const [catId, catField] of Object.entries(LEADERBOARD_CATEGORIES)) {
+        stats[catId] = data[catField];
+      }
+      return { username: data.username, avatarId: data.avatarId, value: data[field], stats };
     });
   } catch (e) {
     console.error("[Leaderboard] Error al obtener la clasificación:", e);

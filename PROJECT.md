@@ -157,7 +157,10 @@ Combate (`combat`) y una por cada una de las 7 regiones del Modo Normal
 sí, para que el récord de una región no compita con el de otra). Expone
 únicamente
 `Leaderboard.fetchTop(category, n)` (pide los N mejores de esa
-categoría, cada fila como `{ username, avatarId, value }`) y
+categoría, cada fila como `{ username, avatarId, value, stats }`, donde
+`stats` trae TODAS las categorías de ese jugador — no solo la pedida —
+para poder pintar su perfil público sin una consulta extra, ver
+`openPublicProfileModal()` en `ui.js`) y
 `Leaderboard.submitScore(category, username, avatarId, value, playerId)`
 (guarda un nuevo récord en esa categoría), ambas `async` y sin lanzar
 excepciones hacia fuera (igual que `storage.js` con `localStorage`: si

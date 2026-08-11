@@ -297,6 +297,8 @@ const I18N = {
     "leaderboard.loading": "Cargando clasificación…",
     "leaderboard.error": "⚠️ No se ha podido cargar la clasificación. Inténtalo más tarde.",
     "leaderboard.empty": "Todavía no hay clasificación global disponible.",
+    "leaderboard.viewProfile": "Ver perfil de {name}",
+    "publicProfile.scoresTitle": "🏆 Puntuaciones",
 
     "quiz.loading": "Cargando…",
     "quiz.hint": "👁️ Pista visual",
@@ -646,6 +648,8 @@ const I18N = {
     "leaderboard.loading": "Loading leaderboard…",
     "leaderboard.error": "⚠️ Couldn't load the leaderboard. Try again later.",
     "leaderboard.empty": "There's no global leaderboard yet.",
+    "leaderboard.viewProfile": "View {name}'s profile",
+    "publicProfile.scoresTitle": "🏆 Scores",
 
     "quiz.loading": "Loading…",
     "quiz.hint": "👁️ Visual hint",
