@@ -43,6 +43,8 @@ const I18N = {
   es: {
     "splash.tap": "Toca la pantalla para empezar",
     "splash.subtitle": "🎵 PokéQuiz · Music Edition",
+    "brand.radioTrigal": "Radio Trigal",
+    "brand.fm": "FM",
 
     "common.close": "Cerrar",
     "common.trainerDefault": "Entrenador",
@@ -402,6 +404,8 @@ const I18N = {
   en: {
     "splash.tap": "Tap the screen to start",
     "splash.subtitle": "🎵 PokéQuiz · Music Edition",
+    "brand.radioTrigal": "Radio Trigal",
+    "brand.fm": "FM",
 
     "common.close": "Close",
     "common.trainerDefault": "Trainer",
@@ -1419,6 +1423,13 @@ const I18N = {
 
     "splash.tap": "画面をタップして始めよう",
     "splash.subtitle": "🎵 ポケクイズ・ミュージックエディション",
+    // "Trigal" hace referencia a Ciudad Trigal (Goldenrod City en inglés),
+    // cuyo nombre oficial en japonés es コガネシティ (Kogane City); aquí se
+    // usa solo la parte del nombre de la ciudad, sin "シティ" (city), igual
+    // que en español/inglés el logo dice "Radio Trigal"/"Radio Trigal" sin
+    // la palabra "ciudad"/"city".
+    "brand.radioTrigal": "ラジオコガネ",
+    "brand.fm": "FM",
     "home.tagline": "あなたのポケモンラジオ局",
 
     "profileSetup.title": "ようこそ、トレーナー!",

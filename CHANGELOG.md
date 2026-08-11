@@ -17,6 +17,23 @@ cada versión agrupa sus cambios en `Añadido`, `Cambiado`, `Corregido` y
 ## [Unreleased]
 
 ### Añadido
+- **Traducción al japonés del título "Radio Trigal FM" en la pantalla
+  previa inicial y en el menú principal**: los `<span>` que forman el
+  logo textual ("Radio Trigal" + "FM") en `#splash-screen`
+  (`.splash-brand-text`/`.splash-brand-fm`) y en el menú principal
+  (`.htxt`/`.hfm` dentro de `.home-hero-title`) estaban escritos a pelo
+  en `index.html`, sin pasar por el sistema de traducción. Se
+  engancharon ambos pares con `data-i18n="brand.radioTrigal"` y
+  `data-i18n="brand.fm"`, y se añadieron esas dos claves a
+  `I18N.es`/`I18N.en`/`I18N.ja` (`i18n.js`). En japonés, "Trigal" se
+  tradujo como "コガネ" (Kogane), que es el nombre oficial en japonés
+  de Ciudad Trigal (コガネシティ, Goldenrod City en inglés) sin la
+  palabra "ciudad"/"city", igual que el logo en español/inglés no
+  incluye esa palabra; "FM" se mantiene igual en los tres idiomas por
+  ser un préstamo ya asentado en japonés. No se tocaron otras
+  apariciones del texto "Radio Trigal FM" fuera de esas dos pantallas
+  (la etiqueta `<title>` de la página, el `alt` del logo o el subtítulo
+  de la Guía de Juego), al no haber sido pedidas.
 - **Detección automática del idioma del navegador la primera vez que
   se abre el juego**: se añadió `detectBrowserLanguage()` (`storage.js`),
   que lee `navigator.languages`/`navigator.language` y devuelve
