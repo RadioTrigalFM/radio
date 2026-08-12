@@ -280,7 +280,7 @@ function hardRoundTimeUp() {
   state.streak = 0;
   playSFX(SFX.wrong);
   const status = document.getElementById('audio-status');
-  if (status) status.textContent = '⏱️ ¡Tiempo agotado!';
+  if (status) status.textContent = t("quiz.hardTimeUp");
   updateStatsUI();
 
   setTimeout(() => {
